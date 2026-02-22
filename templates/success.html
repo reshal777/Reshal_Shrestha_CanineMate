@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Welcome!</title>
+    <style>
+        body,
+        input {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f2e7dd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .container {
+            width: 420px;
+            max-width: 95%;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #d9b99f;
+            font-size: 2.8rem;
+            font-weight: 700;
+        }
+
+        p {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            width: 80%;
+            padding: 16px;
+            border: none;
+            border-radius: 30px;
+            background: #A75F37;
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: #854c2c;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .logout-link {
+            margin-top: 30px;
+            display: block;
+            color: #A75F37;
+            font-weight: bold;
+            text-decoration: underline;
+            transition: color 0.3s;
+        }
+
+        .logout-link:hover {
+            color: #854c2c;
+        }
+
+        .user-info {
+            margin: 30px 0;
+            padding: 20px;
+            background: #fdf0e6;
+            border-radius: 12px;
+            border-left: 5px solid #A75F37;
+            color: #A75F37;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="{% url 'index' %}"
+            style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; text-decoration: none;">
+            <img src="/static/logo.png" alt="Canine Mate Logo" style="height: 40px;">
+            <span style="font-size: 1.5rem; font-weight: 600; color: #333;">Canine Mate</span>
+        </a>
+        <h1>Welcome!</h1>
+        <p>You have successfully logged in to your account.</p>
+
+        <div class="user-info">
+            <strong>Hello, {{ request.user.username }}!</strong><br>
+            Email: {{ request.user.email }}
+            {% if request.user.phone %}
+            <br>Phone: {{ request.user.phone }}
+            {% endif %}
+        </div>
+
+        <a href="{% url 'dashboard' %}" class="btn">Go to Dashboard</a>
+
+        <a href="{% url 'logout' %}" class="logout-link">Logout</a>
+    </div>
+</body>
+
+</html>

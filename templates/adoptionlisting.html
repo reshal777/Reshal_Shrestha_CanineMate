@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adopt a Dog - Canine Mate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-[#FAFAF7]">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+            <a href="{% url 'index' %}" class="flex items-center gap-2">
+                <img src="/static/logo.png" alt="Canine Mate Logo" class="h-8">
+                <span class="text-xl font-semibold text-[#333333]">Canine Mate</span>
+            </a>
+            <a href="{% url 'dashboard' %}" class="text-[#4FBDBA] hover:underline">Dashboard</a>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <div class="bg-gradient-to-r from-[#4FBDBA] to-[#3da5a2] py-16 px-4">
+        <div class="max-w-7xl mx-auto text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Find Your Perfect Companion</h1>
+            <p class="text-xl text-white/90 mb-8">Give a loving home to dogs in need across Nepal</p>
+            <div class="flex items-center justify-center gap-4">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                <span class="text-white font-medium">6 Dogs Available for Adoption</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Filters -->
+        <div class="bg-white rounded-2xl p-6 shadow-lg mb-8">
+            <div class="flex items-center gap-2 mb-4">
+                <svg class="w-5 h-5 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                <h2 class="font-semibold text-[#333333]">Filter Dogs</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-[#333333] mb-2">Breed</label>
+                    <select
+                        class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]">
+                        <option>All Breeds</option>
+                        <option>Golden Retriever</option>
+                        <option>Labrador</option>
+                        <option>German Shepherd</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-[#333333] mb-2">Age</label>
+                    <select
+                        class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]">
+                        <option>All Ages</option>
+                        <option>Puppy (0-1 year)</option>
+                        <option>Young (1-3 years)</option>
+                        <option>Adult (3+ years)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-[#333333] mb-2">Location</label>
+                    <select
+                        class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]">
+                        <option>All Locations</option>
+                        <option>Kathmandu</option>
+                        <option>Lalitpur</option>
+                        <option>Bhaktapur</option>
+                        <option>Pokhara</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dogs Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dog 1 -->
+            <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all group">
+                <div class="relative h-64 overflow-hidden">
+                    <img src="https://w0.peakpx.com/wallpaper/700/301/HD-wallpaper-german-shepherd-german-dog-dogs-shepherd-police-leaves-thumbnail.jpg"
+                        alt="Rocky - German Shepherd" class="w-full h-full object-cover">
+                    <div
+                        class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+                        Vaccinated</div>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-2">
+                        <div>
+                            <h3 class="text-xl font-semibold text-[#333333]">Rocky</h3>
+                            <p class="text-gray-600">German Shepherd</p>
+                        </div>
+                        <span class="text-sm bg-[#4FBDBA]/10 text-[#4FBDBA] px-3 py-1 rounded-full">Male</span>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span>2 years</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span>Kathmandu</span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Friendly and energetic, great with kids</p>
+                    <button
+                        class="w-full bg-[#4FBDBA] text-white py-2.5 rounded-lg hover:bg-[#3da5a2] transition-all">View
+                        Details</button>
+                </div>
+            </div>
+
+            <!-- Dog 2 -->
+            <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all group">
+                <div class="relative h-64 overflow-hidden">
+                    <img src="https://images7.alphacoders.com/443/443165.jpg" alt="Scotch - Golden Retriever"
+                        class="w-full h-full object-cover">
+                    <div
+                        class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+                        Vaccinated</div>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-2">
+                        <div>
+                            <h3 class="text-xl font-semibold text-[#333333]">Scotch</h3>
+                            <p class="text-gray-600">Golden Retriever</p>
+                        </div>
+                        <span class="text-sm bg-[#4FBDBA]/10 text-[#4FBDBA] px-3 py-1 rounded-full">Male</span>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span>1 year</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span>Pokhara</span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Sweet and gentle, loves to play</p>
+                    <button
+                        class="w-full bg-[#4FBDBA] text-white py-2.5 rounded-lg hover:bg-[#3da5a2] transition-all">View
+                        Details</button>
+                </div>
+            </div>
+
+            <!-- Dog 3 -->
+            <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all group">
+                <div class="relative h-64 overflow-hidden">
+                    <img src="https://iheartdogs.com/wp-content/uploads/2024/08/Labrador-Retriever-Black-scaled.jpg"
+                        alt="Charlie - Labrador" class="w-full h-full object-cover">
+                    <div
+                        class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+                        Vaccinated</div>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-2">
+                        <div>
+                            <h3 class="text-xl font-semibold text-[#333333]">Charlie</h3>
+                            <p class="text-gray-600">Labrador</p>
+                        </div>
+                        <span class="text-sm bg-[#4FBDBA]/10 text-[#4FBDBA] px-3 py-1 rounded-full">Male</span>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span>3 years</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span>Bhaktapur</span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Well-trained, good with other dogs</p>
+                    <button
+                        class="w-full bg-[#4FBDBA] text-white py-2.5 rounded-lg hover:bg-[#3da5a2] transition-all">View
+                        Details</button>
+                </div>
+            </div>
+
+            <!-- Dog 4 -->
+            <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all group">
+                <div class="relative h-64 overflow-hidden">
+                    <img src="https://content.lyka.com.au/f/1016262/1104x676/e36872ce32/beagle.png/m/640x427/smart/filters:format(webp)"
+                        alt="Bella - Beagle" class="w-full h-full object-cover">
+                    <div
+                        class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+                        Vaccinated</div>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-2">
+                        <div>
+                            <h3 class="text-xl font-semibold text-[#333333]">Bella</h3>
+                            <p class="text-gray-600">Beagle</p>
+                        </div>
+                        <span class="text-sm bg-pink-100 text-pink-600 px-3 py-1 rounded-full">Female</span>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span>6 months</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span>Kathmandu</span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Playful puppy looking for a loving home</p>
+                    <button
+                        class="w-full bg-[#4FBDBA] text-white py-2.5 rounded-lg hover:bg-[#3da5a2] transition-all">View
+                        Details</button>
+                </div>
+            </div>
+
+            <!-- Dog 5 -->
+            <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all group">
+                <div class="relative h-64 overflow-hidden">
+                    <img src="https://andreaarden.com/wp-content/uploads/2024/04/wesley-sanchez-cyimMEASu3A-unsplash-scaled.jpg"
+                        alt="Max - Husky" class="w-full h-full object-cover">
+                    <div
+                        class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+                        Vaccinated</div>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-2">
+                        <div>
+                            <h3 class="text-xl font-semibold text-[#333333]">Max</h3>
+                            <p class="text-gray-600">Husky</p>
+                        </div>
+                        <span class="text-sm bg-[#4FBDBA]/10 text-[#4FBDBA] px-3 py-1 rounded-full">Male</span>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span>2 years</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span>Pokhara</span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Active and adventurous, needs space to run</p>
+                    <button
+                        class="w-full bg-[#4FBDBA] text-white py-2.5 rounded-lg hover:bg-[#3da5a2] transition-all">View
+                        Details</button>
+                </div>
+            </div>
+
+            <!-- Dog 6 -->
+            <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all group">
+                <div class="relative h-64 overflow-hidden">
+                    <img src="https://premiumpethouse.com/public/img/dog-breeds/culture-pomeranian/culture-pomeranian9.jpg"
+                        alt="Daisy - Pomeranian" class="w-full h-full object-cover">
+                    <div
+                        class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+                        Vaccinated</div>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-2">
+                        <div>
+                            <h3 class="text-xl font-semibold text-[#333333]">Daisy</h3>
+                            <p class="text-gray-600">Pomeranian</p>
+                        </div>
+                        <span class="text-sm bg-pink-100 text-pink-600 px-3 py-1 rounded-full">Female</span>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span>1 year</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span>Lalitpur</span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Small and adorable, perfect for apartments</p>
+                    <button
+                        class="w-full bg-[#4FBDBA] text-white py-2.5 rounded-lg hover:bg-[#3da5a2] transition-all">View
+                        Details</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Banner -->
+        <div class="mt-12 bg-[#F6E27F] rounded-2xl p-8 text-center">
+            <h3 class="text-2xl font-bold text-[#333333] mb-3">Ready to Adopt?</h3>
+            <p class="text-gray-700 mb-6 max-w-2xl mx-auto">All our dogs are vaccinated, health-checked, and ready for
+                their forever homes.</p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <div class="bg-white rounded-lg px-6 py-3 shadow-md">
+                    <div class="text-2xl font-bold text-[#4FBDBA]">GOOD

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Canine Mate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#FAFAF7]">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+            <a href="{% url 'index' %}" class="flex items-center gap-2">
+                <img src="/static/logo.png" alt="Canine Mate Logo" class="h-8">
+                <span class="text-xl font-semibold text-[#333333]">Canine Mate Admin</span>
+            </a>
+            <div class="flex items-center gap-4">
+                <a href="{% url 'index' %}" class="text-gray-600 hover:text-[#4FBDBA]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                </a>
+                <a href="{% url 'logout' %}" class="text-gray-600 hover:text-red-500 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-[#333333] mb-2">Admin Dashboard</h1>
+            <p class="text-gray-600">Manage Canine Mate platform</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-2xl p-6 shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-[#4FBDBA] rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                    </div>
+                    <span class="text-green-600 text-sm font-medium">+12%</span>
+                </div>
+                <p class="text-2xl font-bold text-[#333333] mb-1">1,248</p>
+                <p class="text-sm text-gray-500">Total Users</p>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-[#F4A261] rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        </svg>
+                    </div>
+                    <span class="text-green-600 text-sm font-medium">+5</span>
+                </div>
+                <p class="text-2xl font-bold text-[#333333] mb-1">36</p>
+                <p class="text-sm text-gray-500">Adoption Listings</p>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-[#4FBDBA] rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                    </div>
+                    <span class="text-green-600 text-sm font-medium">+8</span>
+                </div>
+                <p class="text-2xl font-bold text-[#333333] mb-1">124</p>
+                <p class="text-sm text-gray-500">Products</p>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-[#F4A261] rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                        </svg>
+                    </div>
+                    <span class="text-green-600 text-sm font-medium">+23%</span>
+                </div>
+                <p class="text-2xl font-bold text-[#333333] mb-1">342</p>
+                <p class="text-sm text-gray-500">Orders</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Recent Users -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-[#333333]">Recent Users</h2>
+                    <button class="text-[#4FBDBA] hover:underline text-sm">View All</button>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-all">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] rounded-full flex items-center justify-center">
+                                <span class="text-white font-semibold">R</span>
+                            </div>
+                            <div>
+                                <p class="font-medium text-[#333333]">Ram Sharma</p>
+                                <p class="text-sm text-gray-500">ram@email.com</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-600">2 dogs</p>
+                            <p class="text-xs text-gray-400">Jan 15, 2026</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-all">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-[#F4A261] to-[#F6E27F] rounded-full flex items-center justify-center">
+                                <span class="text-white font-semibold">S</span>
+                            </div>
+                            <div>
+                                <p class="font-medium text-[#333333]">Sita Thapa</p>
+                                <p class="text-sm text-gray-500">sita@email.com</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-600">1 dog</p>
+                            <p class="text-xs text-gray-400">Jan 14, 2026</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-all">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] rounded-full flex items-center justify-center">
+                                <span class="text-white font-semibold">H</span>
+                            </div>
+                            <div>
+                                <p class="font-medium text-[#333333]">Hari Gurung</p>
+                                <p class="text-sm text-gray-500">hari@email.com</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-600">3 dogs</p>
+                            <p class="text-xs text-gray-400">Jan 13, 2026</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Orders -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-[#333333]">Recent Orders</h2>
+                    <button class="text-[#4FBDBA] hover:underline text-sm">View All</button>
+                </div>
+                <div class="space-y-3">
+                    <div class="p-4 rounded-xl border border-gray-200 hover:border-[#4FBDBA] transition-all">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <p class="font-medium text-[#333333]">Premium Dog Food</p>
+                                <p class="text-sm text-gray-500">Ram Sharma</p>
+                            </div>
+                            <span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">Completed</span>
+                        </div>
+                        <p class="text-[#4FBDBA] font-semibold">Rs. 2,500</p>
+                    </div>
+                    <div class="p-4 rounded-xl border border-gray-200 hover:border-[#4FBDBA] transition-all">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <p class="font-medium text-[#333333]">Dog Toy Bundle</p>
+                                <p class="text-sm text-gray-500">Sita Thapa</p>
+                            </div>
+                            <span class="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-700">Pending</span>
+                        </div>
+                        <p class="text-[#4FBDBA] font-semibold">Rs. 1,100</p>
+                    </div>
+                    <div class="p-4 rounded-xl border border-gray-200 hover:border-[#4FBDBA] transition-all">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <p class="font-medium text-[#333333]">Leather Collar</p>
+                                <p class="text-sm text-gray-500">Hari Gurung</p>
+                            </div>
+                            <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">Shipped</span>
+                        </div>
+                        <p class="text-[#4FBDBA] font-semibold">Rs. 1,200</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Adoption Table -->
+        <div class="bg-white rounded-2xl p-6 shadow-lg mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold text-[#333333]">Adoption Listings</h2>
+                <button class="bg-[#4FBDBA] text-white px-4 py-2 rounded-lg hover:bg-[#3da5a2] transition-all">Add New Listing</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">Dog Name</th>
+                            <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">Breed</th>
+                            <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">Status</th>
+                            <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">Applications</th>
+                            <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-4 px-4 font-medium text-[#333333]">Rocky</td>
+                            <td class="py-4 px-4 text-gray-600">German Shepherd</td>
+                            <td class="py-4 px-4"><span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Available</span></td>
+                            <td class="py-4 px-4 text-gray-600">5</td>
+                            <td class="py-4 px-4">
+                                <button class="text-[#4FBDBA] hover:underline text-sm mr-2">Edit</button>
+                                <button class="text-red-500 hover:underline text-sm">Delete</button>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-4 px-4 font-medium text-[#333333]">Luna</td>
+                            <td class="py-4 px-4 text-gray-600">Golden Retriever</td>
+                            <td class="py-4 px-4"><span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Available</span></td>
+                            <td class="py-4 px-4 text-gray-600">8</td>
+                            <td class="py-4 px-4">
+                                <button class="text-[#4FBDBA] hover:underline text-sm mr-2">Edit</button>
+                                <button class="text-red-500 hover:underline text-sm">Delete</button>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-4 px-4 font-medium text-[#333333]">Charlie</td>
+                            <td class="py-4 px-4 text-gray-600">Labrador</td>
+                            <td class="py-4 px-4"><span class="px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">Pending</span></td>
+                            <td class="py-4 px-4 text-gray-600">3</td>
+                            <td class="py-4 px-4">
+                                <button class="text-[#4FBDBA] hover:underline text-sm mr-2">Edit</button>
+                                <button class="text-red-500 hover:underline text-sm">Delete</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <button class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all text-center">
+                <svg class="w-8 h-8 text-[#4FBDBA] mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                <p class="font-semibold text-[#333333]">Manage Users</p>
+            </button>
+            <button class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all text-center">
+                <svg class="w-8 h-8 text-[#F4A261] mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+                <p class="font-semibold text-[#333333]">Manage Products</p>
+            </button>
+            <button class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all text-center">
+                <svg class="w-8 h-8 text-[#4FBDBA] mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                </svg>
+                <p class="font-semibold text-[#333333]">View Orders</p>
+            </button>
+            <button class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all text-center">
+                <svg class="w-8 h-8 text-red-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                </svg>
+                <p class="font-semibold text-[#333333]">Adoptions</p>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+            localStorage.clear();
+            location.href = 'admin-login.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Canine Mate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-[#FAFAF7] min-h-screen flex items-center justify-center p-8">
+    <div class="max-w-md w-full">
+        <!-- Logo -->
+        <a href="{% url 'index' %}" class="flex items-center justify-center gap-2 mb-8">
+            <img src="/static/logo.png" alt="Canine Mate Logo" class="h-10">
+            <span class="text-3xl font-semibold text-[#333333]">Canine Mate</span>
+        </a>
+
+        <!-- Login Card -->
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <div class="mb-8 text-center">
+                <h1 class="text-3xl font-bold text-[#333333] mb-2" id="title">Welcome Back</h1>
+                <p class="text-gray-600" id="desc">Sign in to manage your dog care needs</p>
+            </div>
+
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+                <!-- Email -->
+                <div>
+                    <label class="block text-sm font-medium text-[#333333] mb-2">Email Address</label>
+                    <div class="relative">
+                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        <input type="email" name="email"
+                            class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA] focus:border-transparent"
+                            placeholder="your@email.com" required>
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label class="block text-sm font-medium text-[#333333] mb-2">Password</label>
+                    <div class="relative">
+                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        <input type="password" name="password"
+                            class="w-full pl-12 pr-12 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA] focus:border-transparent"
+                            placeholder="Enter your password" required>
+                        <button type="button" onclick="togglePassword()"
+                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4FBDBA]">
+                            <svg id="eye" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Remember & Forgot -->
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="remember"
+                            class="w-4 h-4 text-[#4FBDBA] rounded focus:ring-[#4FBDBA]">
+                        <span class="text-sm text-gray-600">Remember me</span>
+                    </label>
+                    <a href="#" class="text-sm text-[#4FBDBA] hover:underline">Forgot password?</a>
+                </div>
+
+                {% if messages %}
+                <div class="space-y-2">
+                    {% for message in messages %}
+                    <div class="p-4 rounded-xl bg-red-50 text-red-700 text-sm">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <button type="submit"
+                    class="w-full bg-[#4FBDBA] text-white py-3 rounded-xl hover:bg-[#3da5a2] transition-all font-semibold">Log
+                    In</button>
+            </form>
+
+            <p class="text-center text-gray-600 mt-6">
+                Don't have an account? <a href="/signup/" class="text-[#4FBDBA] font-semibold hover:underline">Sign
+                    Up</a>
+            </p>
+        </div>
+
+        <p class="text-center text-gray-500 mt-6">
+            <a href="{% url 'index' %}" class="hover:text-[#4FBDBA] transition-colors">← Back to Home</a>
+        </p>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const pwd = document.querySelector('input[name="password"]');
+            pwd.type = pwd.type === 'password' ? 'text' : 'password';
+        }
+    </script>
+</body>
+
+</html>

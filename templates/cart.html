@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shopping Cart - Canine Mate Shop</title>
+  <style>
+    /* reset + base */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: sans-serif;
+      background: #FAFAF7;
+      min-height: 100vh;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* header */
+    header {
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      display: flex;
+      align-items: center;
+      height: 64px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #4b5563;
+      display: flex;
+      align-items: center;
+      transition: color .2s;
+    }
+
+    .back-btn:hover {
+      color: #4FBDBA;
+    }
+
+    .back-btn svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .paw-icon {
+      color: #4FBDBA;
+      width: 32px;
+      height: 32px;
+    }
+
+    .page-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    /* page wrapper */
+    .main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    /* cart + summary grid */
+    .cart-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    @media (min-width: 1024px) {
+      .cart-grid {
+        grid-template-columns: 2fr 1fr;
+      }
+    }
+
+    /* cart heading */
+    .cart-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 1.5rem;
+    }
+
+    /* single cart item card */
+    .cart-item {
+      background: #fff;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1rem;
+    }
+
+    .item-row {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .item-img {
+      width: 96px;
+      height: 96px;
+      object-fit: cover;
+      border-radius: .75rem;
+      flex-shrink: 0;
+    }
+
+    .item-body {
+      flex: 1;
+    }
+
+    .item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: .5rem;
+    }
+
+    .item-cat {
+      font-size: .75rem;
+      color: #4FBDBA;
+      font-weight: 500;
+      display: block;
+    }
+
+    .item-name {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    /* trash / delete button */
+    .delete-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #ef4444;
+      transition: color .2s;
+      display: flex;
+      align-items: center;
+    }
+
+    .delete-btn:hover {
+      color: #dc2626;
+    }
+
+    .delete-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* quantity + price row */
+    .item-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 1rem;
+    }
+
+    .qty-row {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+
+    .qty-btn {
+      width: 32px;
+      height: 32px;
+      border: 2px solid #e5e7eb;
+      border-radius: .5rem;
+      background: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color .2s;
+    }
+
+    .qty-btn:hover {
+      border-color: #4FBDBA;
+    }
+
+    .qty-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .qty-num {
+      font-weight: 600;
+      color: #333;
+      width: 32px;
+      text-align: center;
+    }
+
+    .item-price {
+      text-align: right;
+    }
+
+    .item-total {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #4FBDBA;
+    }
+
+    .item-each {
+      font-size: .875rem;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+
+    /* continue shopping link */
+    .continue-link {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      color: #4FBDBA;
+      margin-top: 1rem;
+      font-size: .95rem;
+      transition: text-decoration .2s;
+    }
+
+    .continue-link:hover {
+      text-decoration: underline;
+    }
+
+    .continue-link svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* order summary card */
+    .summary-card {
+      background: #fff;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 88px;
+      height: fit-content;
+    }
+
+    .summary-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 1.5rem;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      color: #4b5563;
+      margin-bottom: 1rem;
+    }
+
+    /* free delivery tip */
+    .delivery-tip {
+      font-size: .75rem;
+      color: #F4A261;
+      background: rgba(244, 162, 97, .1);
+      padding: .75rem;
+      border-radius: .5rem;
+      margin-bottom: 1rem;
+    }
+
+    .summary-divider {
+      border-top: 1px solid #e5e7eb;
+      padding-top: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .total-label {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .total-amount {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #4FBDBA;
+    }
+
+    /* checkout button */
+    .checkout-btn {
+      width: 100%;
+      background: #4FBDBA;
+      color: #fff;
+      padding: .75rem;
+      border-radius: .75rem;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 1rem;
+      transition: background .2s;
+    }
+
+    .checkout-btn:hover {
+      background: #3da5a2;
+    }
+
+    /* trust badges */
+    .trust-list {
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .875rem;
+      color: #4b5563;
+    }
+
+    .trust-check {
+      color: #16a34a;
+    }
+
+    /* empty cart state */
+    .empty-state {
+      text-align: center;
+      padding: 5rem 1rem;
+    }
+
+    .empty-state svg {
+      width: 96px;
+      height: 96px;
+      color: #d1d5db;
+      margin: 0 auto 1.5rem;
+      display: block;
+    }
+
+    .empty-state h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+      color: #4b5563;
+      margin-bottom: 2rem;
+    }
+
+    .shop-now-btn {
+      display: inline-block;
+      background: #4FBDBA;
+      color: #fff;
+      padding: .75rem 2rem;
+      border-radius: .75rem;
+      font-weight: 600;
+      transition: background .2s;
+    }
+
+    .shop-now-btn:hover {
+      background: #3da5a2;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- header -->
+  <header>
+    <div class="header-inner">
+      <div class="header-left">
+        <!-- back to shop -->
+        <button class="back-btn" onclick="history.back()">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="m12 19-7-7 7-7" />
+            <path d="M19 12H5" />
+          </svg>
+        </button>
+        <!-- paw logo -->
+        <img src="/static/logo.png" alt="Canine Mate Logo" style="height: 32px; margin-right: 10px;">
+        <span class="page-title">Shopping Cart</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- main content -->
+  <div class="main" id="app"></div>
+
+  <script>
+    // cart data
+    const cartItems = [
+      { id: 1, name: 'Premium Dog Food', category: 'Food', price: 2500, quantity: 2, image: 'https://img.drz.lazcdn.com/static/np/p/74f70a70a3b250fb5d86816a8d3f2088.jpg_720x720q80.jpg' },
+      { id: 2, name: 'Interactive Dog Toy', category: 'Toys', price: 850, quantity: 1, image: 'https://cdn.shopify.com/s/files/1/2798/4248/files/Colour_toys_best_for_dogs_480x480.jpg?v=1717632650' }
+    ];
+
+    // render the whole page
+    function render() {
+      const app = document.getElementById('app');
+
+      // empty cart state
+      if (cartItems.length === 0) {
+        app.innerHTML = `
+          <div class="empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+            </svg>
+            <h2>Your cart is empty</h2>
+            <p>Add some products to get started!</p>
+            <a href="{% url 'shop' %}" class="shop-now-btn">Shop Now</a>
+          </div>`;
+        return;
+      }
+
+      // calculate totals
+      const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      const delivery = subtotal >= 3000 ? 0 : 150;
+      const total = subtotal + delivery;
+
+      // build cart item cards
+      const itemsHTML = cartItems.map(item => `
+        <div class="cart-item" id="item-${item.id}">
+          <div class="item-row">
+            <img class="item-img" src="${item.image}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/96?text=No+Image'" />
+            <div class="item-body">
+              <div class="item-top">
+                <div>
+                  <span class="item-cat">${item.category}</span>
+                  <h3 class="item-name">${item.name}</h3>
+                </div>
+                <!-- remove item -->
+                <button class="delete-btn" onclick="removeItem(${item.id})">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                </button>
+              </div>
+              <div class="item-bottom">
+                <!-- qty controls -->
+                <div class="qty-row">
+                  <button class="qty-btn" onclick="changeQty(${item.id}, -1)">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </button>
+                  <span class="qty-num">${item.quantity}</span>
+                  <button class="qty-btn" onclick="changeQty(${item.id}, 1)">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </button>
+                </div>
+                <!-- item price -->
+                <div class="item-price">
+                  <p class="item-total">Rs. ${item.price * item.quantity}</p>
+                  <p class="item-each">Rs. ${item.price} each</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // free delivery tip shown only if under 3000
+      const deliveryTip = subtotal < 3000
+        ? `<p class="delivery-tip">Add Rs. ${3000 - subtotal} more to get free delivery!</p>`
+        : '';
+
+      app.innerHTML = `
+        <div class="cart-grid">
+
+          <!-- left: items list -->
+          <div>
+            <h1 class="cart-title">Your Cart (${cartItems.length} items)</h1>
+            ${itemsHTML}
+            <a href="{% url 'shop' %}" class="continue-link">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+              Continue Shopping
+            </a>
+          </div>
+
+          <!-- right: order summary -->
+          <div>
+            <div class="summary-card">
+              <h2 class="summary-title">Order Summary</h2>
+              <div class="summary-row"><span>Subtotal</span><span>Rs. ${subtotal}</span></div>
+              <div class="summary-row"><span>Delivery</span><span>${delivery === 0 ? 'Free' : 'Rs. ' + delivery}</span></div>
+              ${deliveryTip}
+              <div class="summary-divider">
+                <div class="total-row">
+                  <span class="total-label">Total</span>
+                  <span class="total-amount">Rs. ${total}</span>
+                </div>
+              </div>
+              <button class="checkout-btn" onclick="window.location.href='{% url 'checkout' %}'">Proceed to Checkout</button>
+              <!-- trust badges -->
+              <div class="trust-list">
+                <div class="trust-item"><span class="trust-check">✓</span><span>Secure Checkout</span></div>
+                <div class="trust-item"><span class="trust-check">✓</span><span>Quality Guaranteed</span></div>
+                <div class="trust-item"><span class="trust-check">✓</span><span>Fast Delivery</span></div>
+              </div>
+            </div>
+          </div>
+
+        </div>`;
+    }
+
+    // update quantity, min 1
+    function changeQty(id, delta) {
+      const item = cartItems.find(i => i.id === id);
+      if (!item) return;
+      item.quantity = Math.max(1, item.quantity + delta);
+      render();
+    }
+
+    // remove item from cart
+    function removeItem(id) {
+      const idx = cartItems.findIndex(i => i.id === id);
+      if (idx !== -1) cartItems.splice(idx, 1);
+      render();
+    }
+
+    // first render
+    render();
+  </script>
+
+</body>
+
+</html>

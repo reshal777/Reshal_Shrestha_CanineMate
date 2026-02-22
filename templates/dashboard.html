@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Canine Mate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-[#FAFAF7]">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+            <a href="{% url 'index' %}" class="flex items-center gap-2">
+                <img src="/static/logo.png" alt="Canine Mate Logo" class="h-8">
+                <span class="text-xl font-semibold text-[#333333]">Canine Mate</span>
+            </a>
+            <div class="flex items-center gap-4">
+                <a href="{% url 'index' %}" class="text-gray-600 hover:text-[#4FBDBA]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                </a>
+                <button class="relative text-gray-600 hover:text-[#4FBDBA]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    <span
+                        class="absolute -top-1 -right-1 w-4 h-4 bg-[#F4A261] rounded-full text-white text-xs flex items-center justify-center">3</span>
+                </button>
+                <button onclick="logout()" class="text-gray-600 hover:text-red-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-[#333333] mb-2">Welcome back! {{user.username}}👋</h1>
+            <p class="text-gray-600">Here's what's happening with your furry friends today</p>
+        </div>
+
+        <!-- Alerts -->
+        <div class="mb-8 space-y-3">
+            <div class="flex items-start gap-4 p-4 rounded-xl bg-red-50 border border-red-100">
+                <svg class="w-5 h-5 mt-0.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div class="flex-1">
+                    <p class="font-medium text-red-900">Buddy's rabies vaccine due in 3 days</p>
+                    <p class="text-sm mt-1 text-red-600">Jan 20, 2026</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-4 p-4 rounded-xl bg-blue-50 border border-blue-100">
+                <svg class="w-5 h-5 mt-0.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div class="flex-1">
+                    <p class="font-medium text-blue-900">Grooming appointment tomorrow at 2 PM</p>
+                    <p class="text-sm mt-1 text-blue-600">Jan 18, 2026</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Access -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <a href="#" class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all group">
+                <div
+                    class="w-12 h-12 bg-[#4FBDBA]/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#4FBDBA] transition-all">
+                    <svg class="w-6 h-6 text-[#4FBDBA] group-hover:text-white" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-[#333333] mb-1">Add Dog Profile</h3>
+                <p class="text-sm text-gray-500">Register your dog</p>
+            </a>
+            <a href="#" class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all group">
+                <div
+                    class="w-12 h-12 bg-[#F4A261]/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#F4A261] transition-all">
+                    <svg class="w-6 h-6 text-[#F4A261] group-hover:text-white" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-[#333333] mb-1">Book Appointment</h3>
+                <p class="text-sm text-gray-500">Schedule vet visit</p>
+            </a>
+            <a href="#" class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all group">
+                <div
+                    class="w-12 h-12 bg-[#4FBDBA]/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#4FBDBA] transition-all">
+                    <svg class="w-6 h-6 text-[#4FBDBA] group-hover:text-white" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-[#333333] mb-1">Book Grooming</h3>
+                <p class="text-sm text-gray-500">Schedule grooming</p>
+            </a>
+            <a href="#" class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all group">
+                <div
+                    class="w-12 h-12 bg-[#F4A261]/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#F4A261] transition-all">
+                    <svg class="w-6 h-6 text-[#F4A261] group-hover:text-white" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-[#333333] mb-1">View Adoptions</h3>
+                <p class="text-sm text-gray-500">Find a companion</p>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- My Dogs -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-semibold text-[#333333]">My Dogs</h2>
+                        <a href="#" class="text-[#4FBDBA] hover:underline text-sm font-medium">Add New +</a>
+                    </div>
+                    <div class="space-y-4">
+                        <a href="#"
+                            class="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-[#4FBDBA] hover:shadow-md transition-all">
+                            <div
+                                class="w-16 h-16 rounded-full bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] flex items-center justify-center flex-shrink-0">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-[#333333]">Buddy</h3>
+                                <p class="text-sm text-gray-500">Golden Retriever • 3 years</p>
+                            </div>
+                            <svg class="w-5 h-5 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                        <a href="#"
+                            class="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-[#4FBDBA] hover:shadow-md transition-all">
+                            <div
+                                class="w-16 h-16 rounded-full bg-gradient-to-br from-[#F4A261] to-[#F6E27F] flex items-center justify-center flex-shrink-0">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-[#333333]">Max</h3>
+                                <p class="text-sm text-gray-500">Labrador • 2 years</p>
+                            </div>
+                            <svg class="w-5 h-5 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Appointments -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg mt-6">
+                    <h2 class="text-xl font-semibold text-[#333333] mb-6">Upcoming Appointments</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-4 p-4 rounded-xl bg-[#FAFAF7]">
+                            <div
+                                class="w-12 h-12 bg-[#4FBDBA] rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-[#333333]">Vet Checkup</h3>
+                                <p class="text-sm text-gray-600 mt-1">Dog: Buddy</p>
+                                <p class="text-sm text-gray-500 mt-1">Jan 25, 2026 at 10:00 AM</p>
+                                <p class="text-sm text-gray-500">Nepal Vet Clinic, Kathmandu</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <h2 class="text-xl font-semibold text-[#333333] mb-4">Quick Links</h2>
+                    <div class="space-y-3">
+                        <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-[#FAFAF7] transition-all">
+                            <svg class="w-5 h-5 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            <span>Medicine Reminders</span>
+                        </a>
+                        <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-[#FAFAF7] transition-all">
+                            <svg class="w-5 h-5 text-[#F4A261]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                            </svg>
+                            <span>Shop Products</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] rounded-2xl p-6 shadow-lg text-white">
+                    <h3 class="font-semibold mb-2">💡 Tip of the Day</h3>
+                    <p class="text-sm text-white/90">Regular dental care is important! Brush your dog's teeth 2-3 times
+                        a week.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+            localStorage.clear();
+            location.href = 'login.html';
+        }
+    </script>
+</body>
+
+</html>

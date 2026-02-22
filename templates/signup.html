@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Canine Mate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-[#FAFAF7] min-h-screen flex items-center justify-center p-8">
+    <div class="max-w-md w-full">
+        <a href="{% url 'index' %}" class="flex items-center justify-center gap-2 mb-8">
+            <img src="/static/logo.png" alt="Canine Mate Logo" class="h-10">
+            <span class="text-3xl font-semibold text-[#333333]">Canine Mate</span>
+        </a>
+
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <div class="mb-8 text-center">
+                <h1 class="text-3xl font-bold text-[#333333] mb-2">Create Account</h1>
+                <p class="text-gray-600">Start managing your dog's care journey today</p>
+            </div>
+
+            <form method="POST" class="space-y-5">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-sm font-medium text-[#333333] mb-2">Username</label>
+                    <input type="text" name="username"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]"
+                        placeholder="Full Name" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-[#333333] mb-2">Email Address</label>
+                    <input type="email" name="email"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]"
+                        placeholder="your@email.com" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-[#333333] mb-2">Phone (Optional)</label>
+                    <input type="tel" name="phone"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]"
+                        placeholder="+977-XXXXXXXXXX">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-[#333333] mb-2">Password</label>
+                    <input type="password" name="password"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]"
+                        placeholder="Create a password (min 8 characters)" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-[#333333] mb-2">Confirm Password</label>
+                    <input type="password" name="password2"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]"
+                        placeholder="Confirm your password" required>
+                </div>
+
+                <label class="flex items-start gap-2 cursor-pointer">
+                    <input type="checkbox" id="terms" class="w-4 h-4 mt-0.5 rounded" required>
+                    <span class="text-sm text-gray-600">I agree to the <a href="#"
+                            class="text-[#4FBDBA] hover:underline">Terms & Conditions</a></span>
+                </label>
+
+                {% if messages %}
+                <div class="space-y-2">
+                    {% for message in messages %}
+                    <div class="p-4 rounded-xl bg-red-50 text-red-700 text-sm">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <button type="submit"
+                    class="w-full bg-[#4FBDBA] text-white py-3 rounded-xl hover:bg-[#3da5a2] transition-all font-semibold">Create
+                    Account</button>
+            </form>
+
+            <p class="text-center text-gray-600 mt-6">Already have an account? <a href="/login/"
+                    class="text-[#4FBDBA] font-semibold hover:underline">Log In</a></p>
+        </div>
+
+        <p class="text-center text-gray-500 mt-6"><a href="{% url 'index' %}"
+                class="hover:text-[#4FBDBA] transition-colors">← Back to Home</a></p>
+    </div>
+</body>
+
+</html>
