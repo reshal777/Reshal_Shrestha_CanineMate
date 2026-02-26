@@ -1,0 +1,693 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Vet Appointments - Canine Mate{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* header specific items moved to content top */
+  .cal-icon {
+    color: #4FBDBA;
+    width: 32px;
+    height: 32px;
+  }
+
+  .page-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .book-header-btn {
+    background: #4FBDBA;
+    color: #fff;
+    padding: .5rem 1.5rem;
+    border-radius: 9999px;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .9rem;
+    transition: background .2s;
+  }
+
+  .book-header-btn:hover {
+    background: #3da5a2;
+  }
+
+  .book-header-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* page wrapper */
+  .appointment-main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 1.5rem;
+  }
+
+  /* shared card */
+  .card {
+    background: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+
+  /* --- appointments grid --- */
+  .apt-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  @media (min-width: 768px) {
+    .apt-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .apt-card {
+    padding: 1.5rem;
+  }
+
+  .apt-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .apt-type {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: .25rem;
+  }
+
+  .apt-dog {
+    font-size: .875rem;
+    color: #6b7280;
+  }
+
+  /* status badges */
+  .badge {
+    padding: .2rem .75rem;
+    border-radius: 9999px;
+    font-size: .75rem;
+    font-weight: 500;
+  }
+
+  .badge-green {
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  .badge-orange {
+    background: #ffedd5;
+    color: #c2410c;
+  }
+
+  .apt-meta {
+    margin-bottom: 1rem;
+  }
+
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    font-size: .875rem;
+    color: #4b5563;
+    margin-bottom: .65rem;
+  }
+
+  .meta-row svg {
+    width: 16px;
+    height: 16px;
+    color: #4FBDBA;
+    flex-shrink: 0;
+  }
+
+  /* appointment action buttons */
+  .apt-actions {
+    display: flex;
+    gap: .75rem;
+  }
+
+  .reschedule-btn {
+    flex: 1;
+    border: 1px solid #4FBDBA;
+    color: #4FBDBA;
+    background: transparent;
+    padding: .5rem;
+    border-radius: .5rem;
+    transition: background .2s, color .2s;
+  }
+
+  .reschedule-btn:hover {
+    background: #4FBDBA;
+    color: #fff;
+  }
+
+  .cancel-btn {
+    flex: 1;
+    border: 1px solid #fca5a5;
+    color: #ef4444;
+    background: transparent;
+    padding: .5rem;
+    border-radius: .5rem;
+    transition: background .2s;
+  }
+
+  .cancel-btn:hover {
+    background: #fef2f2;
+  }
+
+  /* --- available vets grid --- */
+  .vets-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .vets-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .vets-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .vet-card {
+    padding: 1.5rem;
+    text-align: center;
+    transition: box-shadow .2s;
+  }
+
+  .vet-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  /* vet avatar circle */
+  .vet-avatar {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #4FBDBA, #3da5a2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+  }
+
+  .vet-avatar span {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .vet-name {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: .25rem;
+  }
+
+  .vet-clinic {
+    font-size: .875rem;
+    color: #6b7280;
+    margin-bottom: .25rem;
+  }
+
+  .vet-location {
+    font-size: .875rem;
+    color: #6b7280;
+    margin-bottom: .75rem;
+  }
+
+  .vet-rating {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .25rem;
+    margin-bottom: 1rem;
+  }
+
+  .vet-rating .star {
+    color: #eab308;
+  }
+
+  .vet-rating span {
+    font-size: .875rem;
+    font-weight: 500;
+    color: #4b5563;
+  }
+
+  .vet-book-btn {
+    width: 100%;
+    background: #4FBDBA;
+    color: #fff;
+    border: none;
+    padding: .5rem;
+    border-radius: .5rem;
+    font-size: .875rem;
+    transition: background .2s;
+  }
+
+  .vet-book-btn:hover {
+    background: #3da5a2;
+  }
+
+  /* --- booking modal --- */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .5);
+    z-index: 50;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .modal-overlay.open {
+    display: flex;
+  }
+
+  .modal {
+    background: #fff;
+    border-radius: 1rem;
+    max-width: 672px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  /* sticky modal header with close button */
+  .modal-header {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    transition: color .2s;
+  }
+
+  .close-btn:hover {
+    color: #4b5563;
+  }
+
+  .close-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  /* form fields */
+  .field {
+    margin-bottom: 1.5rem;
+  }
+
+  .field label {
+    display: block;
+    font-size: .875rem;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: .5rem;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    padding: .75rem 1rem;
+    border-radius: .5rem;
+    border: 1px solid #e5e7eb;
+    font-size: 1rem;
+    outline: none;
+    font-family: inherit;
+    transition: box-shadow .2s;
+  }
+
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    box-shadow: 0 0 0 2px #4FBDBA;
+    border-color: #4FBDBA;
+  }
+
+  .field textarea {
+    resize: vertical;
+  }
+
+  /* time slot grid */
+  .time-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .75rem;
+  }
+
+  .time-slot {
+    padding: .75rem;
+    border: 2px solid #e5e7eb;
+    border-radius: .5rem;
+    background: #fff;
+    font-size: .9rem;
+    color: #333;
+    transition: border-color .2s, background .2s, color .2s;
+  }
+
+  .time-slot:hover {
+    border-color: #4FBDBA;
+  }
+
+  .time-slot.selected {
+    border-color: #4FBDBA;
+    background: #4FBDBA;
+    color: #fff;
+  }
+
+  /* confirm button */
+  .confirm-btn {
+    width: 100%;
+    background: #4FBDBA;
+    color: #fff;
+    border: none;
+    padding: .75rem;
+    border-radius: .5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    transition: background .2s;
+  }
+
+  .confirm-btn:hover {
+    background: #3da5a2;
+  }
+
+  .confirm-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="appointment-main">
+  <div class="flex items-center justify-between mb-8">
+    <div class="flex items-center gap-4">
+      <button class="bg-none border-none color-[#4b5563] flex items-center transition-colors hover:text-[#4FBDBA]"
+        onclick="history.back()">
+        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m12 19-7-7 7-7" />
+          <path d="M19 12H5" />
+        </svg>
+      </button>
+      <div class="flex items-center gap-3">
+        <svg class="cal-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
+        </svg>
+        <h1 class="page-title">Vet Appointments</h1>
+      </div>
+    </div>
+    <button class="book-header-btn" onclick="openModal()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
+      </svg>
+      Book Appointment
+    </button>
+  </div>
+
+  <!-- upcoming appointments -->
+  <h2 class="section-title">Upcoming Appointments</h2>
+  <div class="apt-grid">
+
+    <!-- appointment 1 — confirmed -->
+    <div class="card apt-card">
+      <div class="apt-top">
+        <div>
+          <p class="apt-type">Regular Checkup</p>
+          <p class="apt-dog">Dog: Buddy</p>
+        </div>
+        <span class="badge badge-green">Confirmed</span>
+      </div>
+      <div class="apt-meta">
+        <div class="meta-row">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          Jan 25, 2026 at 10:00 AM
+        </div>
+        <div class="meta-row">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          Nepal Vet Clinic, Kathmandu
+        </div>
+        <div class="meta-row">
+          <!-- paw icon for vet name -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+          </svg>
+          Vet: Dr. Sharma
+        </div>
+      </div>
+      <div class="apt-actions">
+        <button class="reschedule-btn">Reschedule</button>
+        <button class="cancel-btn">Cancel</button>
+      </div>
+    </div>
+
+    <!-- appointment 2 — pending -->
+    <div class="card apt-card">
+      <div class="apt-top">
+        <div>
+          <p class="apt-type">Vaccination</p>
+          <p class="apt-dog">Dog: Max</p>
+        </div>
+        <span class="badge badge-orange">Pending</span>
+      </div>
+      <div class="apt-meta">
+        <div class="meta-row">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          Feb 5, 2026 at 2:30 PM
+        </div>
+        <div class="meta-row">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          Pet Care Center, Lalitpur
+        </div>
+        <div class="meta-row">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+          </svg>
+          Vet: Dr. Thapa
+        </div>
+      </div>
+      <div class="apt-actions">
+        <button class="reschedule-btn">Reschedule</button>
+        <button class="cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- available vets -->
+  <h2 class="section-title">Available Veterinarians</h2>
+  <div class="vets-grid">
+    <!-- vet 1 -->
+    <div class="card vet-card">
+      <div class="vet-avatar"><span>S</span></div>
+      <p class="vet-name">Dr. Sharma</p>
+      <p class="vet-clinic">Nepal Vet Clinic</p>
+      <p class="vet-location">Kathmandu</p>
+      <div class="vet-rating"><span class="star">★</span><span>4.8</span></div>
+      <button class="vet-book-btn" onclick="openModal()">Book Appointment</button>
+    </div>
+    <!-- vet 2 -->
+    <div class="card vet-card">
+      <div class="vet-avatar"><span>T</span></div>
+      <p class="vet-name">Dr. Thapa</p>
+      <p class="vet-clinic">Pet Care Center</p>
+      <p class="vet-location">Lalitpur</p>
+      <div class="vet-rating"><span class="star">★</span><span>4.9</span></div>
+      <button class="vet-book-btn" onclick="openModal()">Book Appointment</button>
+    </div>
+    <!-- vet 3 -->
+    <div class="card vet-card">
+      <div class="vet-avatar"><span>G</span></div>
+      <p class="vet-name">Dr. Gurung</p>
+      <p class="vet-clinic">Animal Hospital</p>
+      <p class="vet-location">Bhaktapur</p>
+      <div class="vet-rating"><span class="star">★</span><span>4.7</span></div>
+      <button class="vet-book-btn" onclick="openModal()">Book Appointment</button>
+    </div>
+    <!-- vet 4 -->
+    <div class="card vet-card">
+      <div class="vet-avatar"><span>R</span></div>
+      <p class="vet-name">Dr. Rai</p>
+      <p class="vet-clinic">Vet Wellness</p>
+      <p class="vet-location">Pokhara</p>
+      <div class="vet-rating"><span class="star">★</span><span>4.6</span></div>
+      <button class="vet-book-btn" onclick="openModal()">Book Appointment</button>
+    </div>
+  </div>
+</div>
+
+<!-- booking modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <!-- sticky header with close X -->
+    <div class="modal-header">
+      <h2>Book Appointment</h2>
+      <button class="close-btn" onclick="closeModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="field">
+        <label>Select Dog</label>
+        <select>
+          <option>Buddy</option>
+          <option>Max</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Select Veterinarian</label>
+        <select>
+          <option>Dr. Sharma - Nepal Vet Clinic, Kathmandu</option>
+          <option>Dr. Thapa - Pet Care Center, Lalitpur</option>
+          <option>Dr. Gurung - Animal Hospital, Bhaktapur</option>
+          <option>Dr. Rai - Vet Wellness, Pokhara</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Appointment Type</label>
+        <select>
+          <option>Regular Checkup</option>
+          <option>Vaccination</option>
+          <option>Emergency</option>
+          <option>Follow-up</option>
+          <option>Consultation</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Select Date</label>
+        <input type="date" value="2026-01-25" />
+      </div>
+      <!-- time slots — JS handles selected state -->
+      <div class="field">
+        <label>Select Time Slot</label>
+        <div class="time-grid" id="time-grid">
+          <button class="time-slot" onclick="selectTime(this)">09:00</button>
+          <button class="time-slot selected" onclick="selectTime(this)">10:00</button>
+          <button class="time-slot" onclick="selectTime(this)">11:00</button>
+          <button class="time-slot" onclick="selectTime(this)">14:00</button>
+          <button class="time-slot" onclick="selectTime(this)">15:00</button>
+          <button class="time-slot" onclick="selectTime(this)">16:00</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Additional Notes (Optional)</label>
+        <textarea rows="3" placeholder="Any specific concerns or information for the vet..."></textarea>
+      </div>
+      <!-- confirm booking -->
+      <button class="confirm-btn" onclick="closeModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+        Confirm Appointment
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // open modal
+  function openModal() {
+    document.getElementById('modal').classList.add('open');
+  }
+
+  // close modal
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+  }
+
+  // close when clicking the dark backdrop
+  document.getElementById('modal').addEventListener('click', function (e) {
+    if (e.target === this) closeModal();
+  });
+
+  // highlight the selected time slot
+  function selectTime(btn) {
+    document.querySelectorAll('.time-slot').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+</script>
+{% endblock %}

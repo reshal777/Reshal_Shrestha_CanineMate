@@ -1,120 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base/base.html' %}
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome!</title>
-    <style>
-        body,
-        input {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% block title %}Welcome! - Canine Mate{% endblock %}
 
-        body {
-            min-height: 100vh;
-            background: #f2e7dd;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
+{% block extra_head %}
+<!-- No extra head needed -->
+{% endblock %}
 
-        .container {
-            width: 420px;
-            max-width: 95%;
-            background: #fff;
-            border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
-            padding: 60px 40px;
-            text-align: center;
-        }
-
-        h1 {
-            margin-bottom: 20px;
-            color: #d9b99f;
-            font-size: 2.8rem;
-            font-weight: 700;
-        }
-
-        p {
-            color: #666;
-            font-size: 1.1rem;
-            margin-bottom: 40px;
-            line-height: 1.6;
-        }
-
-        .btn {
-            display: inline-block;
-            width: 80%;
-            padding: 16px;
-            border: none;
-            border-radius: 30px;
-            background: #A75F37;
-            color: #fff;
-            font-weight: bold;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-        }
-
-        .btn:hover {
-            background: #854c2c;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .logout-link {
-            margin-top: 30px;
-            display: block;
-            color: #A75F37;
-            font-weight: bold;
-            text-decoration: underline;
-            transition: color 0.3s;
-        }
-
-        .logout-link:hover {
-            color: #854c2c;
-        }
-
-        .user-info {
-            margin: 30px 0;
-            padding: 20px;
-            background: #fdf0e6;
-            border-radius: 12px;
-            border-left: 5px solid #A75F37;
-            color: #A75F37;
-            font-size: 1.1rem;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <a href="{% url 'index' %}"
-            style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; text-decoration: none;">
-            <img src="/static/logo.png" alt="Canine Mate Logo" style="height: 40px;">
-            <span style="font-size: 1.5rem; font-weight: 600; color: #333;">Canine Mate</span>
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center p-8 bg-[#f2e7dd]">
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-12 text-center">
+        <a href="{% url 'index' %}" class="flex items-center justify-center gap-3 mb-6">
+            <img src="/static/logo.png" alt="Canine Mate Logo" class="h-10">
+            <span class="text-2xl font-bold text-[#333333]">Canine Mate</span>
         </a>
-        <h1>Welcome!</h1>
-        <p>You have successfully logged in to your account.</p>
 
-        <div class="user-info">
-            <strong>Hello, {{ request.user.username }}!</strong><br>
-            Email: {{ request.user.email }}
+        <h1 class="text-4xl font-bold text-[#d9b99f] mb-4">Welcome!</h1>
+        <p class="text-gray-600 text-lg mb-8 leading-relaxed">You have successfully logged in to your account.</p>
+
+        <div class="mb-8 p-6 bg-[#fdf0e6] rounded-xl border-l-4 border-[#A75F37] text-left">
+            <p class="text-[#A75F37] font-bold mb-1">Hello, {{ request.user.username }}!</p>
+            <p class="text-[#A75F37]/80 text-sm">Email: {{ request.user.email }}</p>
             {% if request.user.phone %}
-            <br>Phone: {{ request.user.phone }}
+            <p class="text-[#A75F37]/80 text-sm">Phone: {{ request.user.phone }}</p>
             {% endif %}
         </div>
 
-        <a href="{% url 'dashboard' %}" class="btn">Go to Dashboard</a>
-
-        <a href="{% url 'logout' %}" class="logout-link">Logout</a>
+        <div class="flex flex-col gap-4">
+            <a href="{% url 'dashboard' %}"
+                class="bg-[#A75F37] text-white py-4 rounded-full font-bold text-lg hover:bg-[#854c2c] transition-all transform hover:-translate-y-1 shadow-md hover:shadow-lg">
+                Go to Dashboard
+            </a>
+            <a href="{% url 'logout' %}" class="text-[#A75F37] font-bold text-sm hover:underline mt-2">
+                Logout
+            </a>
+        </div>
     </div>
-</body>
-
-</html>
+</div>
+{% endblock %}

@@ -20,3 +20,15 @@ def product_details_view(request, product_id=None):
 
 def checkout_view(request):
     return render(request, "checkout.html")
+
+def dog_profile_view(request):
+    return render(request, "dogprofile.html")
+
+def medicine_reminder_view(request):
+    return render(request, "medicinereminder.html")
+
+def vet_appointment_view(request):
+    return render(request, "vetappoinment.html")
+
+def grooming_booking_view(request):
+    return render(request, "groomingbooking.html")

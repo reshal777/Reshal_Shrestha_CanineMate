@@ -1,14 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base/base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Canine Mate</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
+{% block title %}Login - Canine Mate{% endblock %}
 
-<body class="bg-[#FAFAF7] min-h-screen flex items-center justify-center p-8">
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center p-8">
     <div class="max-w-md w-full">
         <!-- Logo -->
         <a href="{% url 'index' %}" class="flex items-center justify-center gap-2 mb-8">
@@ -97,13 +92,14 @@
             <a href="{% url 'index' %}" class="hover:text-[#4FBDBA] transition-colors">← Back to Home</a>
         </p>
     </div>
+</div>
+{% endblock %}
 
-    <script>
-        function togglePassword() {
-            const pwd = document.querySelector('input[name="password"]');
-            pwd.type = pwd.type === 'password' ? 'text' : 'password';
-        }
-    </script>
-</body>
-
-</html>
+{% block extra_js %}
+<script>
+    function togglePassword() {
+        const pwd = document.querySelector('input[name="password"]');
+        pwd.type = pwd.type === 'password' ? 'text' : 'password';
+    }
+</script>
+{% endblock %}

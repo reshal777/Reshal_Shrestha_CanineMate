@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Canine Mate{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #4FBDBA 0%, #3da5a2 100%);
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+        }
+
+        .overlay-gradient {
+            background: linear-gradient(90deg, rgba(0, 0, 0, 0.5) 0%, transparent 100%);
+        }
+
+        .nav-blur {
+            backdrop-filter: blur(12px);
+        }
+
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-5px);
+        }
+
+        .hover-scale {
+            transition: transform 0.3s ease;
+        }
+
+        .hover-scale:hover {
+            transform: scale(1.05);
+        }
+
+        .smooth-scroll {
+            scroll-behavior: smooth;
+        }
+
+        .hover-gap-3:hover .arrow-icon {
+            margin-left: 0.75rem;
+        }
+
+        .arrow-icon {
+            transition: margin-left 0.3s ease;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-[#FAFAF7] smooth-scroll">
+    {% include 'base/navbar.html' %}
+
+    <main class="pt-20">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include 'base/footer.html' %}
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

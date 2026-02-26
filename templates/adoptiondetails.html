@@ -1,0 +1,712 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Adoption Details - Canine Mate{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* header specific items moved to content top */
+  .paw-icon {
+    color: #4FBDBA;
+    width: 32px;
+    height: 32px;
+  }
+
+  .page-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  /* page wrapper */
+  .detail-main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  /* main + sidebar grid */
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  @media (min-width: 1024px) {
+    .detail-grid {
+      grid-template-columns: 2fr 1fr;
+    }
+  }
+
+  /* shared card */
+  .card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+  }
+
+  .card h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+  }
+
+  /* dog photo with heart button */
+  .photo-card {
+    background: #fff;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+  }
+
+  .photo-wrap {
+    position: relative;
+    height: 384px;
+  }
+
+  .photo-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .heart-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 48px;
+    height: 48px;
+    background: #fff;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s;
+  }
+
+  .heart-btn:hover {
+    background: #fff0f0;
+  }
+
+  .heart-btn svg {
+    width: 24px;
+    height: 24px;
+    color: #ef4444;
+  }
+
+  /* description */
+  .about-text {
+    color: #4b5563;
+    line-height: 1.7;
+  }
+
+  /* personality traits pills */
+  .trait-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+
+  .trait-pill {
+    padding: .4rem 1rem;
+    background: rgba(79, 189, 186, .1);
+    color: #4FBDBA;
+    border-radius: 9999px;
+    font-size: .9rem;
+  }
+
+  /* good with / requirements rows */
+  .check-row {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: .75rem;
+  }
+
+  .check-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .check-circle svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .circle-green {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+
+  .circle-orange {
+    background: rgba(244, 162, 97, .2);
+    color: #F4A261;
+    font-size: .9rem;
+  }
+
+  .check-row span {
+    color: #374151;
+  }
+
+  /* --- sidebar --- */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* info rows in quick info card */
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .5rem 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-row .label {
+    color: #4b5563;
+  }
+
+  .info-row .value {
+    font-weight: 500;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+  }
+
+  .info-row .value svg {
+    width: 16px;
+    height: 16px;
+    color: #4FBDBA;
+  }
+
+  /* health status box */
+  .health-box {
+    background: #f0fdf4;
+    border-radius: .75rem;
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+
+  .health-box h3 {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: .75rem;
+  }
+
+  .health-item {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .5rem;
+    font-size: .875rem;
+    color: #374151;
+  }
+
+  .health-item svg {
+    width: 16px;
+    height: 16px;
+    color: #16a34a;
+    flex-shrink: 0;
+  }
+
+  /* adopt button */
+  .adopt-btn {
+    width: 100%;
+    background: #4FBDBA;
+    color: #fff;
+    padding: .75rem;
+    border-radius: .75rem;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background .2s;
+  }
+
+  .adopt-btn:hover {
+    background: #3da5a2;
+  }
+
+  /* contact shelter */
+  .contact-org {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: .75rem;
+  }
+
+  .contact-meta {
+    font-size: .75rem;
+    color: #6b7280;
+    margin-bottom: .25rem;
+  }
+
+  .contact-row {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    color: #4b5563;
+    font-size: .875rem;
+    margin-bottom: .5rem;
+    transition: color .2s;
+  }
+
+  .contact-row:hover {
+    color: #4FBDBA;
+  }
+
+  .contact-row svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  /* share card */
+  .share-card {
+    background: linear-gradient(135deg, #F6E27F, #F4A261);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .share-card h3 {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: .5rem;
+  }
+
+  .share-card p {
+    font-size: .875rem;
+    color: #4b5563;
+    margin-bottom: 1rem;
+  }
+
+  .share-btn {
+    background: #fff;
+    color: #F4A261;
+    padding: .5rem 1.5rem;
+    border-radius: .5rem;
+    border: none;
+    font-weight: 500;
+    transition: background .2s;
+  }
+
+  .share-btn:hover {
+    background: #f9fafb;
+  }
+
+  /* --- modal overlay --- */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .5);
+    z-index: 50;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .modal-overlay.open {
+    display: flex;
+  }
+
+  .modal {
+    background: #fff;
+    border-radius: 1rem;
+    max-width: 672px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  /* sticky modal header */
+  .modal-header {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1.5rem;
+  }
+
+  .modal-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+  }
+
+  .modal-header p {
+    color: #4b5563;
+    margin-top: .25rem;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  /* form fields in modal */
+  .field {
+    margin-bottom: 1rem;
+  }
+
+  .field label {
+    display: block;
+    font-size: .875rem;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: .5rem;
+  }
+
+  .field input,
+  .field textarea,
+  .field select {
+    width: 100%;
+    padding: .75rem 1rem;
+    border-radius: .5rem;
+    border: 1px solid #e5e7eb;
+    font-size: 1rem;
+    outline: none;
+    font-family: inherit;
+    transition: box-shadow .2s;
+  }
+
+  .field input:focus,
+  .field textarea:focus,
+  .field select:focus {
+    box-shadow: 0 0 0 2px #4FBDBA;
+    border-color: #4FBDBA;
+  }
+
+  .field textarea {
+    resize: vertical;
+  }
+
+  /* modal action buttons */
+  .modal-actions {
+    display: flex;
+    gap: .75rem;
+    padding-top: 1rem;
+  }
+
+  .modal-cancel-btn {
+    flex: 1;
+    border: 1px solid #d1d5db;
+    color: #374151;
+    background: #fff;
+    padding: .75rem;
+    border-radius: .5rem;
+    font-size: 1rem;
+    transition: background .2s;
+  }
+
+  .modal-cancel-btn:hover {
+    background: #f9fafb;
+  }
+
+  .submit-btn {
+    flex: 1;
+    background: #4FBDBA;
+    color: #fff;
+    padding: .75rem;
+    border-radius: .5rem;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background .2s;
+  }
+
+  .submit-btn:hover {
+    background: #3da5a2;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-main">
+  <div class="flex items-center gap-4 mb-8">
+    <button class="bg-none border-none text-[#4b5563] flex items-center transition-colors hover:text-[#4FBDBA]"
+      onclick="history.back()">
+      <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m12 19-7-7 7-7" />
+        <path d="M19 12H5" />
+      </svg>
+    </button>
+    <div class="flex items-center gap-3">
+      <svg class="paw-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+      </svg>
+      <h1 class="page-title">Adoption Details</h1>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <!-- left: main content -->
+    <div>
+      <!-- dog photo + heart button -->
+      <div class="photo-card">
+        <div class="photo-wrap">
+          <img src="https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?w=800&auto=format&fit=crop" alt="Rocky"
+            onerror="this.src='https://via.placeholder.com/800x384?text=No+Image'" />
+          <!-- save to favourites -->
+          <button class="heart-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- about section -->
+      <div class="card">
+        <h2>About Rocky</h2>
+        <p class="about-text">
+          Rocky is a friendly and energetic German Shepherd who loves to play and is great with kids.
+          He has been with us for 3 months and is looking for an active family who can give him the love
+          and exercise he needs. Rocky is house-trained and knows basic commands like sit, stay, and come.
+        </p>
+      </div>
+
+      <!-- personality traits -->
+      <div class="card">
+        <h2>Personality Traits</h2>
+        <div class="trait-list">
+          <span class="trait-pill">Friendly</span>
+          <span class="trait-pill">Energetic</span>
+          <span class="trait-pill">Loyal</span>
+          <span class="trait-pill">Playful</span>
+        </div>
+      </div>
+
+      <!-- good with -->
+      <div class="card">
+        <h2>Good With</h2>
+        <div class="check-row">
+          <div class="check-circle circle-green">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          <span>Kids</span>
+        </div>
+        <div class="check-row">
+          <div class="check-circle circle-green">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          <span>Other Dogs</span>
+        </div>
+        <div class="check-row">
+          <div class="check-circle circle-green">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          <span>Active Families</span>
+        </div>
+      </div>
+
+      <!-- requirements -->
+      <div class="card">
+        <h2>Requirements</h2>
+        <div class="check-row">
+          <div class="check-circle circle-orange">•</div>
+          <span>Daily Exercise</span>
+        </div>
+        <div class="check-row">
+          <div class="check-circle circle-orange">•</div>
+          <span>Secure Yard</span>
+        </div>
+        <div class="check-row">
+          <div class="check-circle circle-orange">•</div>
+          <span>Active Lifestyle</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- right: sidebar -->
+    <div class="sidebar">
+      <!-- quick info card -->
+      <div class="card">
+        <h2 style="font-size:1.5rem; font-weight:700;">Rocky</h2>
+        <div style="margin-bottom: 0;">
+          <div class="info-row"><span class="label">Breed</span><span class="value">German Shepherd</span></div>
+          <div class="info-row"><span class="label">Age</span><span class="value">2 years</span></div>
+          <div class="info-row"><span class="label">Gender</span><span class="value">Male</span></div>
+          <div class="info-row"><span class="label">Weight</span><span class="value">28 kg</span></div>
+          <div class="info-row"><span class="label">Color</span><span class="value">Black &amp; Tan</span></div>
+          <div class="info-row">
+            <span class="label">Location</span>
+            <span class="value">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              Kathmandu
+            </span>
+          </div>
+        </div>
+
+        <!-- health status -->
+        <div class="health-box">
+          <h3>Health Status</h3>
+          <div class="health-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            Fully Vaccinated
+          </div>
+          <div class="health-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            Neutered
+          </div>
+          <div class="health-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            Health: Excellent
+          </div>
+        </div>
+
+        <!-- opens the adoption modal -->
+        <button class="adopt-btn" onclick="openModal()">Apply to Adopt</button>
+      </div>
+
+      <!-- contact shelter -->
+      <div class="card">
+        <h3 style="font-weight:600; color:#333; margin-bottom:1rem;">Contact Shelter</h3>
+        <p class="contact-meta">Organization</p>
+        <p class="contact-org">Nepal Animal Shelter</p>
+        <div class="contact-row">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.38 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l.77-.77a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+          </svg>
+          +977 1234567890
+        </div>
+        <div class="contact-row">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <polyline points="22,6 12,13 2,6" />
+          </svg>
+          adopt@nepalshelter.org
+        </div>
+      </div>
+
+      <!-- share card -->
+      <div class="share-card">
+        <h3>Help Rocky Find a Home!</h3>
+        <p>Share this profile with friends and family</p>
+        <button class="share-btn">Share Profile</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- adoption application modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Adoption Application</h2>
+      <p>Apply to adopt Rocky</p>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" placeholder="Your full name" />
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" placeholder="your@email.com" />
+      </div>
+      <div class="field">
+        <label>Phone</label>
+        <input type="tel" placeholder="+977 9876543210" />
+      </div>
+      <div class="field">
+        <label>Address</label>
+        <textarea rows="2" placeholder="Your complete address"></textarea>
+      </div>
+      <div class="field">
+        <label>Why do you want to adopt Rocky?</label>
+        <textarea rows="4" placeholder="Tell us about your motivation and experience with dogs..."></textarea>
+      </div>
+      <div class="field">
+        <label>Living Situation</label>
+        <select>
+          <option>House with Yard</option>
+          <option>Apartment</option>
+          <option>House without Yard</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Do you have other pets?</label>
+        <select>
+          <option>No</option>
+          <option>Yes - Dogs</option>
+          <option>Yes - Cats</option>
+          <option>Yes - Other</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-cancel-btn" onclick="closeModal()">Cancel</button>
+        <button class="submit-btn" onclick="closeModal()">Submit Application</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // open adoption modal
+  function openModal() {
+    document.getElementById('modal').classList.add('open');
+  }
+
+  // close modal
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+  }
+
+  // close modal if clicking outside the box
+  document.getElementById('modal').addEventListener('click', function (e) {
+    if (e.target === this) closeModal();
+  });
+</script>
+{% endblock %}

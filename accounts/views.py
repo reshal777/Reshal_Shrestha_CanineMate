@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import login_required
 
 
 def login_view(request):
+    if request.user.is_authenticated:
+        return redirect("dashboard")
     if request.method == "POST":
         email = request.POST.get("email").strip().lower()
         password = request.POST.get("password")
@@ -53,6 +55,8 @@ def admin_dashboard_view(request):
 
 
 def signup_view(request):
+    if request.user.is_authenticated:
+        return redirect("dashboard")
     if request.method == "POST":
         username = request.POST.get("username").strip()
         email = request.POST.get("email").strip().lower()

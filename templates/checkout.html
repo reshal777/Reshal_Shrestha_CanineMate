@@ -1,490 +1,396 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base/base.html' %}
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Checkout - Canine Mate Shop</title>
-  <style>
-    /* reset + base */
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+{% block title %}Checkout - Canine Mate Shop{% endblock %}
 
-    body {
-      font-family: sans-serif;
-      background: #FAFAF7;
-      min-height: 100vh;
-    }
+{% block extra_head %}
+<style>
+  /* page wrapper */
+  .checkout-main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
 
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
+  /* two-column layout */
+  .checkout-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
 
-    /* header */
-    header {
-      background: #fff;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .header-inner {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 0 1rem;
-      display: flex;
-      align-items: center;
-      height: 64px;
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .back-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #4b5563;
-      display: flex;
-      align-items: center;
-      transition: color .2s;
-    }
-
-    .back-btn:hover {
-      color: #4FBDBA;
-    }
-
-    .back-btn svg {
-      width: 24px;
-      height: 24px;
-    }
-
-    .paw-icon {
-      color: #4FBDBA;
-      width: 32px;
-      height: 32px;
-    }
-
-    .page-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #333;
-    }
-
-    /* page wrapper */
-    .main {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 2rem 1rem;
-    }
-
-    /* two-column layout */
+  @media (min-width: 1024px) {
     .checkout-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 2rem;
+      grid-template-columns: 2fr 1fr;
     }
+  }
 
-    @media (min-width: 1024px) {
-      .checkout-grid {
-        grid-template-columns: 2fr 1fr;
-      }
-    }
+  /* card used for both sections */
+  .card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+  }
 
-    /* card used for both sections */
-    .card {
-      background: #fff;
-      border-radius: 1rem;
-      padding: 1.5rem;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-      margin-bottom: 1.5rem;
-    }
+  .card h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1.5rem;
+  }
 
-    .card h2 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 1.5rem;
-    }
+  /* form fields */
+  .field {
+    margin-bottom: 1rem;
+  }
 
-    /* form fields */
-    .field {
-      margin-bottom: 1rem;
-    }
+  .field label {
+    display: block;
+    font-size: .875rem;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: .5rem;
+  }
 
-    .field label {
-      display: block;
-      font-size: .875rem;
-      font-weight: 500;
-      color: #333;
-      margin-bottom: .5rem;
-    }
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    padding: .75rem 1rem;
+    border-radius: .5rem;
+    border: 1px solid #e5e7eb;
+    font-size: 1rem;
+    outline: none;
+    transition: box-shadow .2s;
+    font-family: inherit;
+  }
 
-    .field input,
-    .field select,
-    .field textarea {
-      width: 100%;
-      padding: .75rem 1rem;
-      border-radius: .5rem;
-      border: 1px solid #e5e7eb;
-      font-size: 1rem;
-      outline: none;
-      transition: box-shadow .2s;
-      font-family: inherit;
-    }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    box-shadow: 0 0 0 2px #4FBDBA;
+    border-color: #4FBDBA;
+  }
 
-    .field input:focus,
-    .field select:focus,
-    .field textarea:focus {
-      box-shadow: 0 0 0 2px #4FBDBA;
-      border-color: #4FBDBA;
-    }
+  .field textarea {
+    resize: vertical;
+  }
 
-    .field textarea {
-      resize: vertical;
-    }
+  /* two inputs side by side */
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
 
-    /* two inputs side by side */
-    .field-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
+  /* payment option labels */
+  .payment-option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: .75rem;
+    border: 2px solid #e5e7eb;
+    cursor: pointer;
+    margin-bottom: .75rem;
+    transition: border-color .2s, background .2s;
+  }
 
-    /* payment option labels */
-    .payment-option {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1rem;
-      border-radius: .75rem;
-      border: 2px solid #e5e7eb;
-      cursor: pointer;
-      margin-bottom: .75rem;
-      transition: border-color .2s, background .2s;
-    }
+  .payment-option.active {
+    border-color: #4FBDBA;
+    background: rgba(79, 189, 186, .05);
+  }
 
-    .payment-option.active {
-      border-color: #4FBDBA;
-      background: rgba(79, 189, 186, .05);
-    }
+  .payment-option input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #4FBDBA;
+    flex-shrink: 0;
+  }
 
-    .payment-option input[type="radio"] {
-      width: 20px;
-      height: 20px;
-      accent-color: #4FBDBA;
-      flex-shrink: 0;
-    }
+  .payment-label strong {
+    display: block;
+    font-weight: 600;
+    color: #333;
+  }
 
-    .payment-label strong {
-      display: block;
-      font-weight: 600;
-      color: #333;
-    }
+  .payment-label span {
+    font-size: .875rem;
+    color: #6b7280;
+  }
 
-    .payment-label span {
-      font-size: .875rem;
-      color: #6b7280;
-    }
+  /* order summary (right column) */
+  .summary-card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 100px;
+  }
 
-    /* order summary (right column) */
-    .summary-card {
-      background: #fff;
-      border-radius: 1rem;
-      padding: 1.5rem;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-      position: sticky;
-      top: 88px;
-    }
+  .summary-card h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1.5rem;
+  }
 
-    .summary-card h2 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 1.5rem;
-    }
+  /* individual items in summary */
+  .summary-items {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
 
-    /* individual items in summary */
-    .summary-items {
-      margin-bottom: 1.5rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid #e5e7eb;
-    }
+  .summary-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: .875rem;
+    margin-bottom: .75rem;
+  }
 
-    .summary-item {
-      display: flex;
-      justify-content: space-between;
-      font-size: .875rem;
-      margin-bottom: .75rem;
-    }
+  .summary-item span:first-child {
+    color: #4b5563;
+  }
 
-    .summary-item span:first-child {
-      color: #4b5563;
-    }
+  .summary-item span:last-child {
+    font-weight: 500;
+    color: #333;
+  }
 
-    .summary-item span:last-child {
-      font-weight: 500;
-      color: #333;
-    }
+  /* subtotal / delivery / total rows */
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    color: #4b5563;
+    margin-bottom: .75rem;
+  }
 
-    /* subtotal / delivery / total rows */
-    .summary-row {
-      display: flex;
-      justify-content: space-between;
-      color: #4b5563;
-      margin-bottom: .75rem;
-    }
+  .free-delivery {
+    color: #16a34a;
+    font-weight: 500;
+  }
 
-    .free-delivery {
-      color: #16a34a;
-      font-weight: 500;
-    }
+  .summary-divider {
+    border-top: 1px solid #e5e7eb;
+    padding-top: .75rem;
+    margin: .75rem 0 1.5rem;
+  }
 
-    .summary-divider {
-      border-top: 1px solid #e5e7eb;
-      padding-top: .75rem;
-      margin: .75rem 0 1.5rem;
-    }
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-    .total-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+  .total-label {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #333;
+  }
 
-    .total-label {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: #333;
-    }
+  .total-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #4FBDBA;
+  }
 
-    .total-amount {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #4FBDBA;
-    }
+  /* place order button */
+  .place-order-btn {
+    width: 100%;
+    background: #4FBDBA;
+    color: #fff;
+    padding: .75rem;
+    border-radius: .75rem;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    margin-bottom: 1rem;
+    transition: background .2s;
+  }
 
-    /* place order button */
-    .place-order-btn {
-      width: 100%;
-      background: #4FBDBA;
-      color: #fff;
-      padding: .75rem;
-      border-radius: .75rem;
-      border: none;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: .5rem;
-      margin-bottom: 1rem;
-      transition: background .2s;
-    }
+  .place-order-btn:hover {
+    background: #3da5a2;
+  }
 
-    .place-order-btn:hover {
-      background: #3da5a2;
-    }
+  .place-order-btn svg {
+    width: 20px;
+    height: 20px;
+  }
 
-    .place-order-btn svg {
-      width: 20px;
-      height: 20px;
-    }
+  /* terms note */
+  .terms-note {
+    font-size: .75rem;
+    color: #9ca3af;
+    text-align: center;
+  }
+</style>
+{% endblock %}
 
-    /* terms note */
-    .terms-note {
-      font-size: .75rem;
-      color: #9ca3af;
-      text-align: center;
-    }
-  </style>
-</head>
-
-<body>
-
-  <!-- header -->
-  <header>
-    <div class="header-inner">
-      <div class="header-left">
-        <!-- back to cart -->
-        <button class="back-btn" onclick="history.back()">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="m12 19-7-7 7-7" />
-            <path d="M19 12H5" />
-          </svg>
-        </button>
-        <!-- paw logo -->
-        <img src="/static/logo.png" alt="Canine Mate Logo" style="height: 32px; margin-right: 10px;">
-        <span class="page-title">Checkout</span>
-      </div>
-    </div>
-  </header>
-
-  <!-- main content -->
-  <div class="main">
-    <div class="checkout-grid">
-
-      <!-- left: delivery info + payment -->
-      <div>
-
-        <!-- delivery info form -->
-        <div class="card">
-          <h2>Delivery Information</h2>
-
-          <!-- first + last name -->
-          <div class="field-row">
-            <div class="field">
-              <label>First Name</label>
-              <input type="text" placeholder="First Name" />
-            </div>
-            <div class="field">
-              <label>Last Name</label>
-              <input type="text" placeholder="Last Name" />
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Phone Number</label>
-            <input type="tel" placeholder="+977 9876543210" />
-          </div>
-
-          <div class="field">
-            <label>Email Address</label>
-            <input type="email" placeholder="your@email.com" />
-          </div>
-
-          <div class="field">
-            <label>Street Address</label>
-            <input type="text" placeholder="House no., Street name" />
-          </div>
-
-          <!-- city + postal code -->
-          <div class="field-row">
-            <div class="field">
-              <label>City</label>
-              <select>
-                <option>Kathmandu</option>
-                <option>Lalitpur</option>
-                <option>Bhaktapur</option>
-                <option>Pokhara</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Postal Code</label>
-              <input type="text" placeholder="44600" />
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Delivery Notes (Optional)</label>
-            <textarea rows="3" placeholder="Any special instructions for delivery..."></textarea>
-          </div>
-        </div>
-
-        <!-- payment method -->
-        <div class="card">
-          <h2>Payment Method</h2>
-
-          <!-- cash on delivery -->
-          <label class="payment-option active" id="opt-cod" onclick="selectPayment('cod')">
-            <input type="radio" name="payment" value="cod" checked />
-            <div class="payment-label">
-              <strong>Cash on Delivery</strong>
-              <span>Pay when you receive your order</span>
-            </div>
-          </label>
-
-          <!-- eSewa -->
-          <label class="payment-option" id="opt-esewa" onclick="selectPayment('esewa')">
-            <input type="radio" name="payment" value="esewa" />
-            <div class="payment-label">
-              <strong>eSewa</strong>
-              <span>Pay securely with eSewa</span>
-            </div>
-          </label>
-
-          <!-- Khalti -->
-          <label class="payment-option" id="opt-khalti" onclick="selectPayment('khalti')">
-            <input type="radio" name="payment" value="khalti" />
-            <div class="payment-label">
-              <strong>Khalti</strong>
-              <span>Pay securely with Khalti</span>
-            </div>
-          </label>
-        </div>
-
-      </div>
-
-      <!-- right: order summary -->
-      <div>
-        <div class="summary-card">
-          <h2>Order Summary</h2>
-
-          <!-- item list -->
-          <div class="summary-items">
-            <div class="summary-item">
-              <span>Premium Dog Food x 2</span>
-              <span>Rs. 5000</span>
-            </div>
-            <div class="summary-item">
-              <span>Interactive Dog Toy x 1</span>
-              <span>Rs. 850</span>
-            </div>
-          </div>
-
-          <!-- totals -->
-          <div class="summary-row"><span>Subtotal</span><span>Rs. 5850</span></div>
-          <div class="summary-row"><span>Delivery</span><span class="free-delivery">Free</span></div>
-          <div class="summary-divider">
-            <div class="total-row">
-              <span class="total-label">Total</span>
-              <span class="total-amount">Rs. 5850</span>
-            </div>
-          </div>
-
-          <!-- place order -->
-          <button class="place-order-btn" onclick="placeOrder()">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-            Place Order
-          </button>
-
-          <p class="terms-note">By placing this order, you agree to our Terms &amp; Conditions and Privacy Policy</p>
-        </div>
-      </div>
-
+{% block content %}
+<div class="checkout-main">
+  <div class="flex items-center gap-4 mb-8">
+    <button class="bg-none border-none text-[#4b5563] flex items-center transition-colors hover:text-[#4FBDBA]"
+      onclick="history.back()">
+      <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m12 19-7-7 7-7" />
+        <path d="M19 12H5" />
+      </svg>
+    </button>
+    <div class="flex items-center gap-3">
+      <svg class="paw-icon w-8 h-8 text-[#4FBDBA]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+      </svg>
+      <h1 class="page-title">Checkout</h1>
     </div>
   </div>
 
-  <script>
-    // highlight the selected payment option
-    function selectPayment(method) {
-      const options = ['cod', 'esewa', 'khalti'];
-      options.forEach(opt => {
-        const el = document.getElementById('opt-' + opt);
-        el.classList.toggle('active', opt === method);
-        el.querySelector('input').checked = opt === method;
-      });
-    }
+  <div class="checkout-grid">
+    <!-- left: delivery info + payment -->
+    <div>
+      <!-- delivery info form -->
+      <div class="card">
+        <h2>Delivery Information</h2>
+        <!-- first + last name -->
+        <div class="field-row">
+          <div class="field">
+            <label>First Name</label>
+            <input type="text" placeholder="First Name" />
+          </div>
+          <div class="field">
+            <label>Last Name</label>
+            <input type="text" placeholder="Last Name" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Phone Number</label>
+          <input type="tel" placeholder="+977 9876543210" />
+        </div>
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" placeholder="your@email.com" />
+        </div>
+        <div class="field">
+          <label>Street Address</label>
+          <input type="text" placeholder="House no., Street name" />
+        </div>
+        <!-- city + postal code -->
+        <div class="field-row">
+          <div class="field">
+            <label>City</label>
+            <select>
+              <option>Kathmandu</option>
+              <option>Lalitpur</option>
+              <option>Bhaktapur</option>
+              <option>Pokhara</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Postal Code</label>
+            <input type="text" placeholder="44600" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Delivery Notes (Optional)</label>
+          <textarea rows="3" placeholder="Any special instructions for delivery..."></textarea>
+        </div>
+      </div>
 
-    // place order confirmation
-    function placeOrder() {
-      alert('Order placed successfully! You will receive a confirmation email shortly.');
-      window.location.href = '{% url 'dashboard' %}';
-    }
-  </script>
+      <!-- payment method -->
+      <div class="card">
+        <h2>Payment Method</h2>
+        <!-- cash on delivery -->
+        <label class="payment-option active" id="opt-cod" onclick="selectCheckoutPayment('cod')">
+          <input type="radio" name="payment" value="cod" checked />
+          <div class="payment-label">
+            <strong>Cash on Delivery</strong>
+            <span>Pay when you receive your order</span>
+          </div>
+        </label>
+        <!-- eSewa -->
+        <label class="payment-option" id="opt-esewa" onclick="selectCheckoutPayment('esewa')">
+          <input type="radio" name="payment" value="esewa" />
+          <div class="payment-label">
+            <strong>eSewa</strong>
+            <span>Pay securely with eSewa</span>
+          </div>
+        </label>
+        <!-- Khalti -->
+        <label class="payment-option" id="opt-khalti" onclick="selectCheckoutPayment('khalti')">
+          <input type="radio" name="payment" value="khalti" />
+          <div class="payment-label">
+            <strong>Khalti</strong>
+            <span>Pay securely with Khalti</span>
+          </div>
+        </label>
+      </div>
+    </div>
 
-</body>
+    <!-- right: order summary -->
+    <div>
+      <div class="summary-card">
+        <h2>Order Summary</h2>
+        <!-- item list -->
+        <div class="summary-items">
+          <div class="summary-item">
+            <span>Premium Dog Food x 2</span>
+            <span>Rs. 5000</span>
+          </div>
+          <div class="summary-item">
+            <span>Interactive Dog Toy x 1</span>
+            <span>Rs. 850</span>
+          </div>
+        </div>
+        <!-- totals -->
+        <div class="summary-row"><span>Subtotal</span><span>Rs. 5850</span></div>
+        <div class="summary-row"><span>Delivery</span><span class="free-delivery">Free</span></div>
+        <div class="summary-divider">
+          <div class="total-row">
+            <span class="total-label">Total</span>
+            <span class="total-amount">Rs. 5850</span>
+          </div>
+        </div>
+        <!-- place order -->
+        <button class="place-order-btn" onclick="confirmPlaceOrder()">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          Place Order
+        </button>
+        <p class="terms-note">By placing this order, you agree to our Terms &amp; Conditions and Privacy Policy</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
 
-</html>
+{% block extra_js %}
+<script>
+  // highlight the selected payment option
+  function selectCheckoutPayment(method) {
+    const options = ['cod', 'esewa', 'khalti'];
+    options.forEach(opt => {
+      const el = document.getElementById('opt-' + opt);
+      el.classList.toggle('active', opt === method);
+      el.querySelector('input').checked = opt === method;
+    });
+  }
+
+  // place order confirmation
+  function confirmPlaceOrder() {
+    alert('Order placed successfully! You will receive a confirmation email shortly.');
+    window.location.href = '{% url 'dashboard' %}';
+  }
+</script>
+{% endblock %}

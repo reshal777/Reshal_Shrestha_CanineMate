@@ -1,0 +1,871 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Grooming Services - Canine Mate{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* header specific items moved to content top */
+    .back-btn {
+        background: none;
+        border: none;
+        color: #4b5563;
+        display: flex;
+        align-items: center;
+        transition: color .2s;
+    }
+
+    .back-btn:hover {
+        color: #4FBDBA;
+    }
+
+    .back-btn svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .scissors-icon {
+        color: #4FBDBA;
+        width: 32px;
+        height: 32px;
+    }
+
+    .page-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #333;
+    }
+
+    /* page wrapper */
+    .grooming-main {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 1.5rem;
+    }
+
+    /* shared card */
+    .card {
+        background: #fff;
+        border-radius: 1rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ---- salon hero card ---- */
+    .salon-card {
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .salon-img-wrap {
+        position: relative;
+        height: 280px;
+    }
+
+    .salon-img-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    /* rating pill on top of image */
+    .rating-pill {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: #fff;
+        padding: .3rem .75rem;
+        border-radius: 9999px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        gap: .3rem;
+    }
+
+    .rating-pill svg {
+        width: 16px;
+        height: 16px;
+        fill: #eab308;
+        color: #eab308;
+    }
+
+    .rating-pill span {
+        font-size: .875rem;
+        font-weight: 600;
+    }
+
+    .salon-body {
+        padding: 1.5rem;
+    }
+
+    .salon-top {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+        .salon-top {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+    }
+
+    .salon-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: .5rem;
+    }
+
+    .salon-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: .4rem;
+        font-size: .875rem;
+        color: #4b5563;
+    }
+
+    .meta-item svg {
+        width: 16px;
+        height: 16px;
+        color: #4FBDBA;
+    }
+
+    .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem;
+    }
+
+    .tag {
+        font-size: .75rem;
+        background: rgba(79, 189, 186, .1);
+        color: #4FBDBA;
+        padding: .25rem .7rem;
+        border-radius: 9999px;
+    }
+
+    /* book now button */
+    .book-now-btn {
+        background: #4FBDBA;
+        color: #fff;
+        padding: .75rem 2rem;
+        border-radius: .75rem;
+        border: none;
+        font-size: 1rem;
+        font-weight: 600;
+        white-space: nowrap;
+        transition: background .2s;
+        align-self: flex-start;
+    }
+
+    .book-now-btn:hover {
+        background: #3da5a2;
+    }
+
+    /* ---- available services ---- */
+    .services-card {
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .services-card h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1.5rem;
+    }
+
+    .services-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    @media (min-width: 640px) {
+        .services-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .services-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    .service-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 1rem;
+        border: 1px solid #e5e7eb;
+        border-radius: .75rem;
+        transition: border-color .2s;
+    }
+
+    .service-item:hover {
+        border-color: #4FBDBA;
+    }
+
+    .service-name {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .service-duration {
+        font-size: .875rem;
+        color: #6b7280;
+        margin-top: .2rem;
+    }
+
+    .service-price {
+        font-weight: 600;
+        color: #4FBDBA;
+        flex-shrink: 0;
+    }
+
+    /* ---- my bookings ---- */
+    .bookings-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+        .bookings-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .booking-card {
+        padding: 1.5rem;
+    }
+
+    .booking-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .booking-service {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: .25rem;
+    }
+
+    .booking-dog {
+        font-size: .875rem;
+        color: #6b7280;
+    }
+
+    .badge {
+        padding: .2rem .75rem;
+        border-radius: 9999px;
+        font-size: .75rem;
+        font-weight: 500;
+    }
+
+    .badge-green {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .badge-orange {
+        background: #ffedd5;
+        color: #c2410c;
+    }
+
+    .booking-meta {
+        margin-bottom: 1rem;
+    }
+
+    .meta-row {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        font-size: .875rem;
+        color: #4b5563;
+        margin-bottom: .5rem;
+    }
+
+    .meta-row svg {
+        width: 16px;
+        height: 16px;
+        color: #4FBDBA;
+        flex-shrink: 0;
+    }
+
+    .booking-actions {
+        display: flex;
+        gap: .75rem;
+    }
+
+    .reschedule-btn {
+        flex: 1;
+        padding: .5rem;
+        border: 1px solid #4FBDBA;
+        color: #4FBDBA;
+        background: transparent;
+        border-radius: .5rem;
+        font-size: .875rem;
+        transition: background .2s, color .2s;
+    }
+
+    .reschedule-btn:hover {
+        background: #4FBDBA;
+        color: #fff;
+    }
+
+    .cancel-booking-btn {
+        flex: 1;
+        padding: .5rem;
+        border: 1px solid #fca5a5;
+        color: #ef4444;
+        background: transparent;
+        border-radius: .5rem;
+        font-size: .875rem;
+        transition: background .2s;
+    }
+
+    .cancel-booking-btn:hover {
+        background: #fef2f2;
+    }
+
+    /* ---- booking modal ---- */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, .5);
+        z-index: 50;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .modal-overlay.open {
+        display: flex;
+    }
+
+    .modal {
+        background: #fff;
+        border-radius: 1rem;
+        max-width: 672px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        position: sticky;
+        top: 0;
+        background: #fff;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1.5rem;
+    }
+
+    .modal-header h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+    }
+
+    .modal-header p {
+        color: #4b5563;
+        margin-top: .25rem;
+        font-size: .875rem;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    /* form fields */
+    .field {
+        margin-bottom: 1.5rem;
+    }
+
+    .field label {
+        display: block;
+        font-size: .875rem;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: .5rem;
+    }
+
+    .field input,
+    .field select {
+        width: 100%;
+        padding: .75rem 1rem;
+        border-radius: .5rem;
+        border: 1px solid #e5e7eb;
+        font-size: 1rem;
+        outline: none;
+        font-family: inherit;
+        transition: box-shadow .2s;
+    }
+
+    .field input:focus,
+    .field select:focus {
+        box-shadow: 0 0 0 2px #4FBDBA;
+        border-color: #4FBDBA;
+    }
+
+    /* service checkbox rows */
+    .service-checkbox {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: .5rem;
+        cursor: pointer;
+        margin-bottom: .5rem;
+        transition: border-color .2s, background .2s;
+    }
+
+    .service-checkbox.checked {
+        border-color: #4FBDBA;
+        background: rgba(79, 189, 186, .05);
+    }
+
+    .service-checkbox:hover {
+        border-color: rgba(79, 189, 186, .5);
+    }
+
+    .service-checkbox-left {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+    }
+
+    .service-checkbox input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: #4FBDBA;
+    }
+
+    .svc-name {
+        font-weight: 500;
+        color: #333;
+    }
+
+    .svc-dur {
+        font-size: .875rem;
+        color: #6b7280;
+        margin-left: .4rem;
+    }
+
+    .svc-price {
+        font-weight: 600;
+        color: #4FBDBA;
+        flex-shrink: 0;
+    }
+
+    /* modal buttons */
+    .modal-actions {
+        display: flex;
+        gap: .75rem;
+        padding-top: 1rem;
+    }
+
+    .modal-cancel {
+        flex: 1;
+        border: 1px solid #d1d5db;
+        color: #374151;
+        background: #fff;
+        padding: .75rem;
+        border-radius: .5rem;
+        font-size: 1rem;
+        transition: background .2s;
+    }
+
+    .modal-cancel:hover {
+        background: #f9fafb;
+    }
+
+    .modal-confirm {
+        flex: 1;
+        background: #4FBDBA;
+        color: #fff;
+        border: none;
+        padding: .75rem;
+        border-radius: .5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+        transition: background .2s;
+    }
+
+    .modal-confirm:hover {
+        background: #3da5a2;
+    }
+
+    .modal-confirm svg {
+        width: 20px;
+        height: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="grooming-main">
+
+    <!-- Title / Breadcrumb Row -->
+    <div class="flex items-center gap-4 mb-8">
+        <button class="back-btn" onclick="history.back()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12 19-7-7 7-7" />
+                <path d="M19 12H5" />
+            </svg>
+        </button>
+        <div class="flex items-center gap-3">
+            <svg class="scissors-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="6" cy="6" r="3" />
+                <circle cx="6" cy="18" r="3" />
+                <line x1="20" y1="4" x2="8.12" y2="15.88" />
+                <line x1="14.47" y1="14.48" x2="20" y2="20" />
+                <line x1="8.12" y1="8.12" x2="12" y2="12" />
+            </svg>
+            <h1 class="page-title">Grooming Services</h1>
+        </div>
+    </div>
+
+    <!-- single salon hero card -->
+    <h2 class="section-title">Our Grooming Center</h2>
+    <div class="card salon-card">
+        <div class="salon-img-wrap">
+            <img src=""
+                alt="Canine Mate Grooming Salon"
+                onerror="this.src='https://via.placeholder.com/1200x280?text=Canine+Mate+Grooming'" />
+            <!-- rating overlay -->
+            <div class="rating-pill">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <polygon
+                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+                <span>4.9</span>
+            </div>
+        </div>
+
+        <div class="salon-body">
+            <div class="salon-top">
+                <div>
+                    <h2 class="salon-name">Canine Mate Grooming Salon</h2>
+                    <div class="salon-meta">
+                        <!-- location -->
+                        <div class="meta-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                <circle cx="12" cy="10" r="3" />
+                            </svg>
+                            Kathmandu, Nepal
+                        </div>
+                        <!-- phone -->
+                        <div class="meta-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.38 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.083.84.236 1.67.46 2.48a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l.77-.77a2 2 0 0 1 2.11-.45c.81.224 1.64.377 2.48.46A2 2 0 0 1 22 16.92z" />
+                            </svg>
+                            +977 1234567890
+                        </div>
+                        <!-- customer count -->
+                        <div class="meta-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                            </svg>
+                            348 happy customers
+                        </div>
+                    </div>
+                </div>
+                <!-- book now button on the salon card -->
+                <button class="book-now-btn" onclick="openModal()">Book Now</button>
+            </div>
+
+            <!-- service tags -->
+            <div class="tag-list">
+                <span class="tag">Full Bath</span>
+                <span class="tag">Haircut &amp; Styling</span>
+                <span class="tag">Nail Trimming</span>
+                <span class="tag">Ear Cleaning</span>
+                <span class="tag">Teeth Cleaning</span>
+                <span class="tag">Full Grooming Package</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- all services overview -->
+    <div class="card services-card">
+        <h2>Available Services</h2>
+        <div class="services-grid">
+            <div class="service-item">
+                <div>
+                    <p class="service-name">Full Bath</p>
+                    <p class="service-duration">45 min</p>
+                </div>
+                <span class="service-price">Rs. 800</span>
+            </div>
+            <div class="service-item">
+                <div>
+                    <p class="service-name">Haircut &amp; Styling</p>
+                    <p class="service-duration">60 min</p>
+                </div>
+                <span class="service-price">Rs. 1,500</span>
+            </div>
+            <div class="service-item">
+                <div>
+                    <p class="service-name">Nail Trimming</p>
+                    <p class="service-duration">15 min</p>
+                </div>
+                <span class="service-price">Rs. 300</span>
+            </div>
+            <div class="service-item">
+                <div>
+                    <p class="service-name">Ear Cleaning</p>
+                    <p class="service-duration">20 min</p>
+                </div>
+                <span class="service-price">Rs. 400</span>
+            </div>
+            <div class="service-item">
+                <div>
+                    <p class="service-name">Teeth Cleaning</p>
+                    <p class="service-duration">30 min</p>
+                </div>
+                <span class="service-price">Rs. 600</span>
+            </div>
+            <div class="service-item">
+                <div>
+                    <p class="service-name">Full Grooming Package</p>
+                    <p class="service-duration">120 min</p>
+                </div>
+                <span class="service-price">Rs. 2,500</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- my bookings -->
+    <h2 class="section-title">My Grooming Bookings</h2>
+    <div class="bookings-grid">
+
+        <!-- confirmed -->
+        <div class="card booking-card">
+            <div class="booking-top">
+                <div>
+                    <p class="booking-service">Full Grooming</p>
+                    <p class="booking-dog">Dog: Buddy</p>
+                </div>
+                <span class="badge badge-green">Confirmed</span>
+            </div>
+            <div class="booking-meta">
+                <div class="meta-row">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    Canine Mate Grooming Salon
+                </div>
+                <div class="meta-row">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    Jan 18, 2026 at 2:00 PM
+                </div>
+            </div>
+            <div class="booking-actions">
+                <button class="reschedule-btn">Reschedule</button>
+                <button class="cancel-booking-btn">Cancel</button>
+            </div>
+        </div>
+
+        <!-- pending -->
+        <div class="card booking-card">
+            <div class="booking-top">
+                <div>
+                    <p class="booking-service">Bath &amp; Nail Trim</p>
+                    <p class="booking-dog">Dog: Max</p>
+                </div>
+                <span class="badge badge-orange">Pending</span>
+            </div>
+            <div class="booking-meta">
+                <div class="meta-row">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    Canine Mate Grooming Salon
+                </div>
+                <div class="meta-row">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    Jan 22, 2026 at 11:00 AM
+                </div>
+            </div>
+            <div class="booking-actions">
+                <button class="reschedule-btn">Reschedule</button>
+                <button class="cancel-booking-btn">Cancel</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- booking modal — no center selector, always Canine Mate -->
+<div class="modal-overlay" id="modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Book Grooming Service</h2>
+            <p>Canine Mate Grooming Salon — Kathmandu, Nepal</p>
+        </div>
+        <div class="modal-body">
+
+            <div class="field">
+                <label>Select Dog</label>
+                <select>
+                    <option>Buddy</option>
+                    <option>Max</option>
+                </select>
+            </div>
+
+            <!-- service checkboxes -->
+            <div class="field">
+                <label>Select Services</label>
+                <label class="service-checkbox" onclick="toggleService(this)">
+                    <div class="service-checkbox-left">
+                        <input type="checkbox" />
+                        <div><span class="svc-name">Full Bath</span><span class="svc-dur">(45 min)</span></div>
+                    </div>
+                    <span class="svc-price">Rs. 800</span>
+                </label>
+                <label class="service-checkbox" onclick="toggleService(this)">
+                    <div class="service-checkbox-left">
+                        <input type="checkbox" />
+                        <div><span class="svc-name">Haircut &amp; Styling</span><span class="svc-dur">(60
+                                min)</span></div>
+                    </div>
+                    <span class="svc-price">Rs. 1,500</span>
+                </label>
+                <label class="service-checkbox" onclick="toggleService(this)">
+                    <div class="service-checkbox-left">
+                        <input type="checkbox" />
+                        <div><span class="svc-name">Nail Trimming</span><span class="svc-dur">(15 min)</span></div>
+                    </div>
+                    <span class="svc-price">Rs. 300</span>
+                </label>
+                <label class="service-checkbox" onclick="toggleService(this)">
+                    <div class="service-checkbox-left">
+                        <input type="checkbox" />
+                        <div><span class="svc-name">Ear Cleaning</span><span class="svc-dur">(20 min)</span></div>
+                    </div>
+                    <span class="svc-price">Rs. 400</span>
+                </label>
+                <label class="service-checkbox" onclick="toggleService(this)">
+                    <div class="service-checkbox-left">
+                        <input type="checkbox" />
+                        <div><span class="svc-name">Teeth Cleaning</span><span class="svc-dur">(30 min)</span></div>
+                    </div>
+                    <span class="svc-price">Rs. 600</span>
+                </label>
+                <label class="service-checkbox" onclick="toggleService(this)">
+                    <div class="service-checkbox-left">
+                        <input type="checkbox" />
+                        <div><span class="svc-name">Full Grooming Package</span><span class="svc-dur">(120
+                                min)</span></div>
+                    </div>
+                    <span class="svc-price">Rs. 2,500</span>
+                </label>
+            </div>
+
+            <div class="field">
+                <label>Date</label>
+                <input type="date" />
+            </div>
+
+            <div class="field">
+                <label>Time</label>
+                <select>
+                    <option>09:00 AM</option>
+                    <option>10:00 AM</option>
+                    <option>11:00 AM</option>
+                    <option>02:00 PM</option>
+                    <option>03:00 PM</option>
+                    <option>04:00 PM</option>
+                </select>
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+                <button class="modal-confirm" onclick="closeModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Confirm Booking
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // open modal
+    function openModal() {
+        document.getElementById('modal').classList.add('open');
+    }
+
+    // close modal
+    function closeModal() {
+        document.getElementById('modal').classList.remove('open');
+    }
+
+    // close when clicking the dark overlay
+    document.getElementById('modal').addEventListener('click', function (e) {
+        if (e.target === this) closeModal();
+    });
+
+    // toggle teal border on selected service rows
+    function toggleService(label) {
+        const checkbox = label.querySelector('input[type="checkbox"]');
+        setTimeout(() => {
+            label.classList.toggle('checked', checkbox.checked);
+        }, 0);
+    }
+</script>
+{% endblock %}
