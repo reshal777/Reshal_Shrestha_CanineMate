@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doctor Profile - Canine Mate</title>
+  <style>
+    /* reset + base */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #FAFAF7; min-height: 100vh; }
+    a { text-decoration: none; color: inherit; }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* top sub-header bar */
+    .top-bar { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .top-bar-inner {
+      max-width: 1280px; margin: 0 auto; padding: 1.25rem 1rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .back-link { display: flex; align-items: center; gap: .5rem; color: #4b5563; font-size: .9rem; transition: color .2s; }
+    .back-link:hover { color: #4FBDBA; }
+    .back-link svg { width: 20px; height: 20px; }
+    .top-actions { display: flex; gap: .75rem; }
+    .icon-btn {
+      width: 36px; height: 36px; border: 1px solid #e5e7eb;
+      border-radius: .5rem; background: #fff; display: flex;
+      align-items: center; justify-content: center; transition: background .2s;
+    }
+    .icon-btn:hover { background: #f9fafb; }
+    .icon-btn svg { width: 20px; height: 20px; color: #4b5563; }
+
+    /* page wrapper */
+    .main { max-width: 1280px; margin: 0 auto; padding: 2rem 1rem; }
+
+    /* 2-col layout */
+    .layout { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+    @media (min-width: 1024px) { .layout { grid-template-columns: 2fr 1fr; } }
+
+    .content-col { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* shared card */
+    .card { background: #fff; border-radius: 1rem; padding: 2rem; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+
+    /* --- profile card --- */
+    .profile-top { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+
+    /* avatar circle with online dot */
+    .avatar-wrap { position: relative; flex-shrink: 0; }
+    .avatar {
+      width: 128px; height: 128px; border-radius: 50%; overflow: hidden;
+      background: linear-gradient(135deg, #4FBDBA, #3da5a2);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .avatar svg { width: 64px; height: 64px; color: #fff; }
+    .online-dot {
+      position: absolute; bottom: 8px; right: 8px;
+      width: 20px; height: 20px;
+      background: #22c55e; border-radius: 50%;
+      border: 4px solid #fff;
+    }
+
+    .profile-info { flex: 1; min-width: 200px; }
+    .doc-name { font-size: 1.75rem; font-weight: 700; color: #333; margin-bottom: .4rem; }
+    .doc-specialty { font-size: 1.1rem; color: #4FBDBA; font-weight: 500; margin-bottom: .75rem; }
+
+    .profile-meta { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
+    .meta-item { display: flex; align-items: center; gap: .4rem; font-size: .875rem; color: #4b5563; }
+    .meta-item svg { width: 16px; height: 16px; }
+    .meta-teal { color: #4FBDBA; }
+    .meta-orange { color: #F4A261; }
+
+    /* star rating */
+    .stars { display: flex; gap: 2px; }
+    .star-filled { color: #F6E27F; fill: #F6E27F; width: 16px; height: 16px; }
+
+    .emergency-badge {
+      display: inline-block;
+      background: #dcfce7; color: #15803d;
+      padding: .25rem .75rem; border-radius: 9999px;
+      font-size: .8rem; font-weight: 600;
+    }
+
+    /* quick action buttons */
+    .action-grid { display: grid; grid-template-columns: 1fr; gap: .75rem; }
+    @media (min-width: 640px) { .action-grid { grid-template-columns: repeat(3, 1fr); } }
+
+    .btn-primary {
+      background: #4FBDBA; color: #fff; border: none;
+      padding: .75rem 1rem; border-radius: .5rem; font-size: .9rem; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      transition: background .2s;
+    }
+    .btn-primary:hover { background: #3da5a2; }
+    .btn-outline-teal {
+      border: 2px solid #4FBDBA; color: #4FBDBA; background: transparent;
+      padding: .75rem 1rem; border-radius: .5rem; font-size: .9rem; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      transition: background .2s, color .2s;
+    }
+    .btn-outline-teal:hover { background: #4FBDBA; color: #fff; }
+    .btn-outline-gray {
+      border: 2px solid #e5e7eb; color: #4b5563; background: transparent;
+      padding: .75rem 1rem; border-radius: .5rem; font-size: .9rem; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      transition: background .2s;
+    }
+    .btn-outline-gray:hover { background: #f9fafb; }
+    .btn-primary svg, .btn-outline-teal svg, .btn-outline-gray svg { width: 20px; height: 20px; }
+
+    /* section headings */
+    .sec-title { font-size: 1.25rem; font-weight: 700; color: #333; margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem; }
+    .sec-title svg { width: 22px; height: 22px; }
+    .sec-title-lg { font-size: 1.5rem; font-weight: 700; color: #333; margin-bottom: 1rem; }
+
+    /* about text */
+    .about-text { color: #4b5563; line-height: 1.7; }
+
+    /* specializations grid */
+    .spec-grid { display: grid; grid-template-columns: 1fr; gap: .75rem; }
+    @media (min-width: 640px) { .spec-grid { grid-template-columns: repeat(2, 1fr); } }
+    .spec-item {
+      display: flex; align-items: center; gap: .75rem;
+      background: #FAFAF7; padding: 1rem; border-radius: .5rem;
+    }
+    .dot-teal { width: 8px; height: 8px; background: #4FBDBA; border-radius: 50%; flex-shrink: 0; }
+    .dot-orange { width: 8px; height: 8px; background: #F4A261; border-radius: 50%; flex-shrink: 0; }
+    .spec-item span { color: #374151; font-size: .9rem; }
+
+    /* edu + achievements 2-col */
+    .two-col { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+    @media (min-width: 640px) { .two-col { grid-template-columns: repeat(2, 1fr); } }
+
+    .bullet-list { display: flex; flex-direction: column; gap: 1rem; }
+    .bullet-item { display: flex; gap: .75rem; }
+    .bullet-item p { color: #4b5563; font-size: .875rem; line-height: 1.5; }
+
+    /* patient reviews */
+    .review-item { border-bottom: 1px solid #f3f4f6; padding-bottom: 1.5rem; margin-bottom: 1.5rem; }
+    .review-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .review-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: .5rem; }
+    .reviewer-name { font-weight: 600; color: #333; }
+    .reviewer-dog { font-size: .8rem; color: #6b7280; }
+    .review-date { font-size: .8rem; color: #6b7280; }
+    .review-text { color: #4b5563; font-size: .875rem; line-height: 1.6; margin-top: .5rem; }
+    .helpful-btn {
+      display: flex; align-items: center; gap: .3rem;
+      background: none; border: none; color: #4FBDBA;
+      font-size: .8rem; margin-top: .5rem; transition: color .2s;
+    }
+    .helpful-btn:hover { color: #3da5a2; }
+    .helpful-btn svg { width: 14px; height: 14px; }
+
+    /* --- sidebar sticky card --- */
+    .sidebar-card { background: #fff; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+    @media (min-width: 1024px) { .sidebar-card { position: sticky; top: 1.5rem; } }
+
+    .sidebar-title { font-weight: 700; color: #333; margin-bottom: 1.5rem; }
+
+    /* contact rows with icon boxes */
+    .contact-row { display: flex; align-items: flex-start; gap: .75rem; margin-bottom: 1rem; }
+    .icon-box {
+      width: 40px; height: 40px; border-radius: .5rem; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .icon-box svg { width: 20px; height: 20px; }
+    .ib-teal { background: rgba(79,189,186,.1); color: #4FBDBA; }
+    .ib-orange { background: rgba(244,162,97,.1); color: #F4A261; }
+    .contact-label { font-size: .8rem; font-weight: 500; color: #333; margin-bottom: .2rem; }
+    .contact-val { font-size: .8rem; color: #4b5563; }
+
+    .divider { border: none; border-top: 1px solid #f3f4f6; margin: 1.25rem 0; }
+
+    .fee-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; }
+    .fee-label { font-size: .875rem; color: #4b5563; }
+    .fee-value { font-weight: 700; color: #4FBDBA; }
+    .lang-row { font-size: .875rem; color: #4b5563; }
+    .lang-row span { font-weight: 500; }
+
+    /* availability schedule */
+    .avail-title { font-weight: 600; color: #333; margin-bottom: .75rem; display: flex; align-items: center; gap: .4rem; }
+    .avail-title svg { width: 18px; height: 18px; color: #4FBDBA; }
+    .avail-row { display: flex; justify-content: space-between; font-size: .8rem; margin-bottom: .4rem; }
+    .avail-day { color: #4b5563; text-transform: capitalize; }
+    .avail-hours { font-weight: 500; color: #374151; }
+    .avail-closed { font-weight: 500; color: #ef4444; }
+
+    .book-now-btn {
+      display: block; width: 100%; text-align: center;
+      background: #4FBDBA; color: #fff; border: none;
+      padding: .75rem; border-radius: .5rem; font-size: 1rem; font-weight: 600;
+      margin-top: 1.5rem; transition: background .2s;
+    }
+    .book-now-btn:hover { background: #3da5a2; }
+  </style>
+</head>
+<body>
+
+  <!-- top sub-header bar -->
+  <div class="top-bar">
+    <div class="top-bar-inner">
+      <a href="/appointments" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        Back to Appointments
+      </a>
+      <div class="top-actions">
+        <!-- share -->
+        <button class="icon-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </button>
+        <!-- favourite -->
+        <button class="icon-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="layout">
+
+      <!-- left: doctor info -->
+      <div class="content-col">
+
+        <!-- profile card -->
+        <div class="card">
+          <div class="profile-top">
+            <!-- avatar with green online dot (emergency available) -->
+            <div class="avatar-wrap">
+              <div class="avatar">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <div class="online-dot"></div>
+            </div>
+
+            <div class="profile-info">
+              <h1 class="doc-name">Dr. Rajesh Kumar Sharma</h1>
+              <p class="doc-specialty">General Veterinary Medicine</p>
+
+              <!-- rating + experience -->
+              <div class="profile-meta">
+                <div class="meta-item">
+                  <!-- filled stars -->
+                  <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <strong>4.8</strong>
+                  <span style="color:#9ca3af; font-size:.8rem;">(256 reviews)</span>
+                </div>
+                <div class="meta-item">
+                  <!-- briefcase -->
+                  <svg class="meta-orange" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                  15 years Experience
+                </div>
+                <div class="meta-item">
+                  <!-- map pin -->
+                  <svg class="meta-teal" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  Nepal Vet Clinic, Kathmandu
+                </div>
+              </div>
+
+              <span class="emergency-badge">Emergency Services Available</span>
+            </div>
+          </div>
+
+          <!-- quick action buttons -->
+          <div class="action-grid">
+            <a href="/appointments" class="btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Book Appointment
+            </a>
+            <button class="btn-outline-teal">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+              Video Call
+            </button>
+            <button class="btn-outline-gray">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Message
+            </button>
+          </div>
+        </div>
+
+        <!-- about -->
+        <div class="card">
+          <p class="sec-title-lg">About Dr. Sharma</p>
+          <p class="about-text">Dr. Rajesh Sharma is one of Nepal's most experienced veterinarians with over 15 years of dedicated service to animal health. He completed his Doctor of Veterinary Medicine degree from Tribhuvan University and has since treated thousands of dogs across Nepal. Dr. Sharma is particularly passionate about emergency care and has saved countless lives through his quick thinking and expert surgical skills. He believes in preventive care and works closely with pet owners to ensure their dogs live long, healthy lives.</p>
+        </div>
+
+        <!-- areas of expertise -->
+        <div class="card">
+          <h2 class="sec-title">
+            <svg class="meta-teal" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+            Areas of Expertise
+          </h2>
+          <div class="spec-grid">
+            <div class="spec-item"><div class="dot-teal"></div><span>Emergency Care &amp; Critical Treatment</span></div>
+            <div class="spec-item"><div class="dot-teal"></div><span>Orthopedic &amp; Soft Tissue Surgery</span></div>
+            <div class="spec-item"><div class="dot-teal"></div><span>Preventive Medicine &amp; Vaccination</span></div>
+            <div class="spec-item"><div class="dot-teal"></div><span>Dental Care &amp; Oral Surgery</span></div>
+            <div class="spec-item"><div class="dot-teal"></div><span>Internal Medicine</span></div>
+          </div>
+        </div>
+
+        <!-- education + achievements -->
+        <div class="two-col">
+          <!-- education -->
+          <div class="card">
+            <h2 class="sec-title">
+              <svg class="meta-orange" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+              Education
+            </h2>
+            <div class="bullet-list">
+              <div class="bullet-item"><div class="dot-orange"></div><p>DVM - Doctor of Veterinary Medicine, Tribhuvan University (2008)</p></div>
+              <div class="bullet-item"><div class="dot-orange"></div><p>Advanced Certification in Canine Surgery, India (2012)</p></div>
+              <div class="bullet-item"><div class="dot-orange"></div><p>Continuing Education in Emergency Care (2020)</p></div>
+            </div>
+          </div>
+          <!-- achievements -->
+          <div class="card">
+            <h2 class="sec-title">
+              <svg class="meta-teal" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+              Achievements
+            </h2>
+            <div class="bullet-list">
+              <div class="bullet-item"><div class="dot-teal"></div><p>Performed over 2,000 successful surgeries</p></div>
+              <div class="bullet-item"><div class="dot-teal"></div><p>Pioneered emergency veterinary services in Kathmandu</p></div>
+              <div class="bullet-item"><div class="dot-teal"></div><p>Published 5 research papers on canine health</p></div>
+              <div class="bullet-item"><div class="dot-teal"></div><p>Award for Excellence in Veterinary Medicine (2022)</p></div>
+              <div class="bullet-item"><div class="dot-teal"></div><p>Trained 20+ junior veterinarians</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- patient reviews -->
+        <div class="card">
+          <p class="sec-title-lg">Patient Reviews</p>
+
+          <!-- review 1 -->
+          <div class="review-item">
+            <div class="review-top">
+              <div>
+                <p class="reviewer-name">Ramesh Shrestha</p>
+                <p class="reviewer-dog">Dog: Bruno</p>
+              </div>
+              <span class="review-date">Feb 15, 2026</span>
+            </div>
+            <div class="stars">
+              <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <p class="review-text">Dr. Sharma is absolutely amazing! He treated my dog Bruno with such care and expertise. Bruno had a serious leg injury and Dr. Sharma performed surgery that saved his mobility. Highly recommend!</p>
+            <button class="helpful-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+              Helpful
+            </button>
+          </div>
+
+          <!-- review 2 -->
+          <div class="review-item">
+            <div class="review-top">
+              <div>
+                <p class="reviewer-name">Sita Lama</p>
+                <p class="reviewer-dog">Dog: Lucy</p>
+              </div>
+              <span class="review-date">Jan 28, 2026</span>
+            </div>
+            <div class="stars">
+              <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <p class="review-text">Very professional and knowledgeable. Explained everything clearly and Lucy felt comfortable throughout the examination.</p>
+            <button class="helpful-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+              Helpful
+            </button>
+          </div>
+
+          <!-- review 3 — 4 stars -->
+          <div class="review-item">
+            <div class="review-top">
+              <div>
+                <p class="reviewer-name">Prakash Tamang</p>
+                <p class="reviewer-dog">Dog: Rocky</p>
+              </div>
+              <span class="review-date">Jan 10, 2026</span>
+            </div>
+            <div class="stars">
+              <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <p class="review-text">Great doctor with excellent skills. The clinic is well-equipped and the staff is very helpful.</p>
+            <button class="helpful-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+              Helpful
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /content-col -->
+
+      <!-- right: sticky sidebar -->
+      <div>
+        <div class="sidebar-card">
+          <p class="sidebar-title">Contact Information</p>
+
+          <!-- clinic address -->
+          <div class="contact-row">
+            <div class="icon-box ib-teal">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div>
+              <p class="contact-label">Clinic Address</p>
+              <p class="contact-val">Thamel Road, Kathmandu 44600</p>
+            </div>
+          </div>
+
+          <!-- phone -->
+          <div class="contact-row">
+            <div class="icon-box ib-orange">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.38 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.083.84.236 1.67.46 2.48a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l.77-.77a2 2 0 0 1 2.11-.45c.81.224 1.64.377 2.48.46A2 2 0 0 1 22 16.92z"/></svg>
+            </div>
+            <div>
+              <p class="contact-label">Phone</p>
+              <p class="contact-val">+977 9801234567</p>
+            </div>
+          </div>
+
+          <!-- email -->
+          <div class="contact-row">
+            <div class="icon-box ib-teal">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <div>
+              <p class="contact-label">Email</p>
+              <p class="contact-val">rajesh.sharma@nepalvet.com</p>
+            </div>
+          </div>
+
+          <hr class="divider" />
+
+          <!-- fee + languages -->
+          <div class="fee-row">
+            <span class="fee-label">Consultation Fee</span>
+            <span class="fee-value">Rs. 1,500</span>
+          </div>
+          <p class="lang-row">Languages: <span>Nepali, English, Hindi</span></p>
+
+          <hr class="divider" />
+
+          <!-- availability schedule -->
+          <div class="avail-title">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Availability
+          </div>
+          <div class="avail-row"><span class="avail-day">Monday</span><span class="avail-hours">9:00 AM - 6:00 PM</span></div>
+          <div class="avail-row"><span class="avail-day">Tuesday</span><span class="avail-hours">9:00 AM - 6:00 PM</span></div>
+          <div class="avail-row"><span class="avail-day">Wednesday</span><span class="avail-hours">9:00 AM - 6:00 PM</span></div>
+          <div class="avail-row"><span class="avail-day">Thursday</span><span class="avail-hours">9:00 AM - 6:00 PM</span></div>
+          <div class="avail-row"><span class="avail-day">Friday</span><span class="avail-hours">9:00 AM - 6:00 PM</span></div>
+          <div class="avail-row"><span class="avail-day">Saturday</span><span class="avail-hours">10:00 AM - 4:00 PM</span></div>
+          <div class="avail-row"><span class="avail-day">Sunday</span><span class="avail-closed">Closed</span></div>
+
+          <!-- book appointment CTA -->
+          <a href="/appointments" class="book-now-btn">Book Appointment Now</a>
+        </div>
+      </div>
+
+    </div><!-- /layout -->
+  </div><!-- /main -->
+
+</body>
+</html>

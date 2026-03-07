@@ -289,7 +289,7 @@
           <div class="field">
             <label>City</label>
             <select>
-              <option>Kathmandu</option>
+              <option>Pokhara Lakeside</option>
               <option>Lalitpur</option>
               <option>Bhaktapur</option>
               <option>Pokhara</option>
@@ -390,7 +390,7 @@
   // place order confirmation
   function confirmPlaceOrder() {
     alert('Order placed successfully! You will receive a confirmation email shortly.');
-    window.location.href = '{% url 'dashboard' %}';
+    window.location.href = "{% url 'dashboard' %}";
   }
 </script>
 {% endblock %}

@@ -461,15 +461,15 @@
   <!-- upcoming appointments -->
   <h2 class="section-title">Upcoming Appointments</h2>
   <div class="apt-grid">
-
-    <!-- appointment 1 — confirmed -->
+    {% for appointment in appointments %}
+    <!-- appointment card — confirmed -->
     <div class="card apt-card">
       <div class="apt-top">
         <div>
-          <p class="apt-type">Regular Checkup</p>
-          <p class="apt-dog">Dog: Buddy</p>
+          <p class="apt-type">{{ appointment.service_type }}</p>
+          <p class="apt-dog">Dog: {{ appointment.dog.name }}</p>
         </div>
-        <span class="badge badge-green">Confirmed</span>
+        <span class="badge badge-green">{{ appointment.status }}</span>
       </div>
       <div class="apt-meta">
         <div class="meta-row">
@@ -480,7 +480,7 @@
             <line x1="8" y1="2" x2="8" y2="6" />
             <line x1="3" y1="10" x2="21" y2="10" />
           </svg>
-          Jan 25, 2026 at 10:00 AM
+          {{ appointment.appointment_date|date:"M d, Y" }} at {{ appointment.appointment_time|time:"g:i A" }}
         </div>
         <div class="meta-row">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -488,51 +488,7 @@
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
             <circle cx="12" cy="10" r="3" />
           </svg>
-          Nepal Vet Clinic, Kathmandu
-        </div>
-        <div class="meta-row">
-          <!-- paw icon for vet name -->
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
-            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
-          </svg>
-          Vet: Dr. Sharma
-        </div>
-      </div>
-      <div class="apt-actions">
-        <button class="reschedule-btn">Reschedule</button>
-        <button class="cancel-btn">Cancel</button>
-      </div>
-    </div>
-
-    <!-- appointment 2 — pending -->
-    <div class="card apt-card">
-      <div class="apt-top">
-        <div>
-          <p class="apt-type">Vaccination</p>
-          <p class="apt-dog">Dog: Max</p>
-        </div>
-        <span class="badge badge-orange">Pending</span>
-      </div>
-      <div class="apt-meta">
-        <div class="meta-row">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-            <line x1="16" y1="2" x2="16" y2="6" />
-            <line x1="8" y1="2" x2="8" y2="6" />
-            <line x1="3" y1="10" x2="21" y2="10" />
-          </svg>
-          Feb 5, 2026 at 2:30 PM
-        </div>
-        <div class="meta-row">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-            <circle cx="12" cy="10" r="3" />
-          </svg>
-          Pet Care Center, Lalitpur
+          {{ appointment.veterinarian.clinic.name }}, {{ appointment.veterinarian.clinic.location }}
         </div>
         <div class="meta-row">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -540,64 +496,50 @@
             <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
             <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
           </svg>
-          Vet: Dr. Thapa
+          Vet: {{ appointment.veterinarian.name }}
         </div>
       </div>
       <div class="apt-actions">
-        <button class="reschedule-btn">Reschedule</button>
-        <button class="cancel-btn">Cancel</button>
+        <button class="reschedule-btn"
+          onclick="openRescheduleModal('{{ appointment.id }}', '{{ appointment.appointment_date|date:'Y-m-d' }}', '{{ appointment.appointment_time|time:'H:i' }}')">Reschedule</button>
+        <form action="{% url 'cancel_appointment' appointment.id %}" method="POST" style="flex: 1; display: flex;">
+          {% csrf_token %}
+          <button type="submit" class="cancel-btn" style="width: 100%;">Cancel</button>
+        </form>
       </div>
     </div>
+    {% empty %}
+    <p style="color: #6b7280; font-size: 1rem;">No upcoming confirmed appointments.</p>
+    {% endfor %}
   </div>
 
   <!-- available vets -->
   <h2 class="section-title">Available Veterinarians</h2>
   <div class="vets-grid">
-    <!-- vet 1 -->
+    {% for vet in veterinarians %}
+    <!-- vet card -->
     <div class="card vet-card">
-      <div class="vet-avatar"><span>S</span></div>
-      <p class="vet-name">Dr. Sharma</p>
-      <p class="vet-clinic">Nepal Vet Clinic</p>
-      <p class="vet-location">Kathmandu</p>
-      <div class="vet-rating"><span class="star">★</span><span>4.8</span></div>
-      <button class="vet-book-btn" onclick="openModal()">Book Appointment</button>
+      <div class="vet-avatar"><span>{{ vet.initial }}</span></div>
+      <p class="vet-name">{{ vet.name }}</p>
+      <p class="vet-clinic">{{ vet.clinic.name }}</p>
+      <p class="vet-location">{{ vet.clinic.location }}</p>
+      <div class="vet-rating"><span class="star">★</span><span>{{ vet.rating }}</span></div>
+      <button class="vet-book-btn" onclick="openModalWithVet('{{ vet.id }}')">Book Appointment</button>
     </div>
-    <!-- vet 2 -->
-    <div class="card vet-card">
-      <div class="vet-avatar"><span>T</span></div>
-      <p class="vet-name">Dr. Thapa</p>
-      <p class="vet-clinic">Pet Care Center</p>
-      <p class="vet-location">Lalitpur</p>
-      <div class="vet-rating"><span class="star">★</span><span>4.9</span></div>
-      <button class="vet-book-btn" onclick="openModal()">Book Appointment</button>
+    {% empty %}
+    <div
+      style="grid-column: 1 / -1; text-align: center; padding: 2rem; background: #f9fafb; border-radius: 1rem; color: #6b7280;">
+      <p>No veterinarians available right now.</p>
     </div>
-    <!-- vet 3 -->
-    <div class="card vet-card">
-      <div class="vet-avatar"><span>G</span></div>
-      <p class="vet-name">Dr. Gurung</p>
-      <p class="vet-clinic">Animal Hospital</p>
-      <p class="vet-location">Bhaktapur</p>
-      <div class="vet-rating"><span class="star">★</span><span>4.7</span></div>
-      <button class="vet-book-btn" onclick="openModal()">Book Appointment</button>
-    </div>
-    <!-- vet 4 -->
-    <div class="card vet-card">
-      <div class="vet-avatar"><span>R</span></div>
-      <p class="vet-name">Dr. Rai</p>
-      <p class="vet-clinic">Vet Wellness</p>
-      <p class="vet-location">Pokhara</p>
-      <div class="vet-rating"><span class="star">★</span><span>4.6</span></div>
-      <button class="vet-book-btn" onclick="openModal()">Book Appointment</button>
-    </div>
+    {% endfor %}
   </div>
 </div>
 
 <!-- booking modal -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
-    <!-- sticky header with close X -->
     <div class="modal-header">
-      <h2>Book Appointment</h2>
+      <h2 id="modal-title">Book Appointment</h2>
       <button class="close-btn" onclick="closeModal()">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
@@ -608,60 +550,69 @@
     </div>
 
     <div class="modal-body">
-      <div class="field">
-        <label>Select Dog</label>
-        <select>
-          <option>Buddy</option>
-          <option>Max</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Select Veterinarian</label>
-        <select>
-          <option>Dr. Sharma - Nepal Vet Clinic, Kathmandu</option>
-          <option>Dr. Thapa - Pet Care Center, Lalitpur</option>
-          <option>Dr. Gurung - Animal Hospital, Bhaktapur</option>
-          <option>Dr. Rai - Vet Wellness, Pokhara</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Appointment Type</label>
-        <select>
-          <option>Regular Checkup</option>
-          <option>Vaccination</option>
-          <option>Emergency</option>
-          <option>Follow-up</option>
-          <option>Consultation</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Select Date</label>
-        <input type="date" value="2026-01-25" />
-      </div>
-      <!-- time slots — JS handles selected state -->
-      <div class="field">
-        <label>Select Time Slot</label>
-        <div class="time-grid" id="time-grid">
-          <button class="time-slot" onclick="selectTime(this)">09:00</button>
-          <button class="time-slot selected" onclick="selectTime(this)">10:00</button>
-          <button class="time-slot" onclick="selectTime(this)">11:00</button>
-          <button class="time-slot" onclick="selectTime(this)">14:00</button>
-          <button class="time-slot" onclick="selectTime(this)">15:00</button>
-          <button class="time-slot" onclick="selectTime(this)">16:00</button>
+      <form id="booking-form" method="POST" action="{% url 'vetappointment' %}">
+        {% csrf_token %}
+        <input type="hidden" name="time" id="selected-time" value="10:00">
+
+        <div class="field" id="dog-selection-field">
+          <label>Select Dog</label>
+          <select name="dog" required>
+            {% for dog in dogs %}
+            <option value="{{ dog.id }}">{{ dog.name }}</option>
+            {% endfor %}
+          </select>
         </div>
-      </div>
-      <div class="field">
-        <label>Additional Notes (Optional)</label>
-        <textarea rows="3" placeholder="Any specific concerns or information for the vet..."></textarea>
-      </div>
-      <!-- confirm booking -->
-      <button class="confirm-btn" onclick="closeModal()">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-        Confirm Appointment
-      </button>
+
+        <div class="field" id="vet-selection-field">
+          <label>Select Veterinarian</label>
+          <select name="vet" id="vet-select" required>
+            {% for vet in veterinarians %}
+            <option value="{{ vet.id }}">{{ vet.name }} - {{ vet.clinic.name }}, {{ vet.clinic.location }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field" id="type-selection-field">
+          <label>Appointment Type</label>
+          <select name="service_type" required>
+            <option value="Regular Checkup">Regular Checkup</option>
+            <option value="Vaccination">Vaccination</option>
+            <option value="Emergency">Emergency</option>
+            <option value="Follow-up">Follow-up</option>
+            <option value="Consultation">Consultation</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Select Date</label>
+          <input type="date" name="date" id="appointment-date" required />
+        </div>
+
+        <div class="field">
+          <label>Select Time Slot</label>
+          <div class="time-grid" id="time-grid">
+            <button type="button" class="time-slot" onclick="selectTime(this, '09:00')">09:00</button>
+            <button type="button" class="time-slot selected" onclick="selectTime(this, '10:00')">10:00</button>
+            <button type="button" class="time-slot" onclick="selectTime(this, '11:00')">11:00</button>
+            <button type="button" class="time-slot" onclick="selectTime(this, '14:00')">14:00</button>
+            <button type="button" class="time-slot" onclick="selectTime(this, '15:00')">15:00</button>
+            <button type="button" class="time-slot" onclick="selectTime(this, '16:00')">16:00</button>
+          </div>
+        </div>
+
+        <div class="field" id="notes-selection-field">
+          <label>Additional Notes (Optional)</label>
+          <textarea name="notes" rows="3" placeholder="Any specific concerns or information for the vet..."></textarea>
+        </div>
+
+        <button type="submit" class="confirm-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          <span id="confirm-btn-text">Confirm Appointment</span>
+        </button>
+      </form>
     </div>
   </div>
 </div>
@@ -669,8 +620,55 @@
 
 {% block extra_js %}
 <script>
-  // open modal
+  // open modal for new booking
   function openModal() {
+    document.getElementById('modal-title').innerText = "Book Appointment";
+    document.getElementById('confirm-btn-text').innerText = "Confirm Appointment";
+    document.getElementById('booking-form').action = "{% url 'vetappointment' %}";
+
+    // show all fields for new booking
+    document.getElementById('dog-selection-field').style.display = "block";
+    document.getElementById('vet-selection-field').style.display = "block";
+    document.getElementById('type-selection-field').style.display = "block";
+    document.getElementById('notes-selection-field').style.display = "block";
+
+    document.getElementById('modal').classList.add('open');
+
+    // default date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('appointment-date').value = today;
+  }
+
+  function openModalWithVet(vetId) {
+    openModal();
+    document.getElementById('vet-select').value = vetId;
+  }
+
+  function openRescheduleModal(aptId, date, time) {
+    document.getElementById('modal-title').innerText = "Reschedule Appointment";
+    document.getElementById('confirm-btn-text').innerText = "Save Changes";
+
+    // Correctly construct the URL for rescheduling
+    const rescheduleUrl = "/home/reschedule-appointment/" + aptId + "/";
+    document.getElementById('booking-form').action = rescheduleUrl;
+
+    // hide unnecessary fields for reschedule
+    document.getElementById('dog-selection-field').style.display = "none";
+    document.getElementById('vet-selection-field').style.display = "none";
+    document.getElementById('type-selection-field').style.display = "none";
+    document.getElementById('notes-selection-field').style.display = "none";
+
+    document.getElementById('appointment-date').value = date;
+
+    // select correct time slot
+    document.querySelectorAll('.time-slot').forEach(btn => {
+      btn.classList.remove('selected');
+      if (btn.innerText === time) {
+        btn.classList.add('selected');
+        document.getElementById('selected-time').value = time;
+      }
+    });
+
     document.getElementById('modal').classList.add('open');
   }
 
@@ -685,9 +683,10 @@
   });
 
   // highlight the selected time slot
-  function selectTime(btn) {
+  function selectTime(btn, time) {
     document.querySelectorAll('.time-slot').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
+    document.getElementById('selected-time').value = time;
   }
 </script>
 {% endblock %}
