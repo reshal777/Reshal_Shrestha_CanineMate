@@ -380,81 +380,32 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-            <!-- Team Member 1 -->
-            <div class="text-center group">
+            {% for vet in vets %}
+            <!-- Team Member -->
+            <a href="{% url 'doctorprofile' vet.id %}" class="text-center group block">
                 <div class="relative mb-6">
                     <div
                         class="w-48 h-48 mx-auto rounded-full overflow-hidden shadow-lg group-hover:shadow-xl transition-all">
                         <div
                             class="w-full h-full bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] flex items-center justify-center">
-                            <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            {% if vet.image %}
+                            <img src="{{ vet.image.url }}" alt="{{ vet.name }}"
+                                class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                            {% else %}
+                            <svg class="w-20 h-20 text-white group-hover:scale-110 transition-transform" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-                <h3 class="text-xl font-semibold text-[#333333] mb-2">Dr. Rajesh Sharma</h3>
-                <p class="text-[#4FBDBA] font-medium mb-2">Chief Veterinarian</p>
-                <p class="text-sm text-gray-600">15+ years of experience in veterinary medicine</p>
-            </div>
-
-            <!-- Team Member 2 -->
-            <div class="text-center group">
-                <div class="relative mb-6">
-                    <div
-                        class="w-48 h-48 mx-auto rounded-full overflow-hidden shadow-lg group-hover:shadow-xl transition-all">
-                        <div
-                            class="w-full h-full bg-gradient-to-br from-[#F4A261] to-[#F6E27F] flex items-center justify-center">
-                            <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                <h3 class="text-xl font-semibold text-[#333333] mb-2">Sita Thapa</h3>
-                <p class="text-[#4FBDBA] font-medium mb-2">Head Groomer</p>
-                <p class="text-sm text-gray-600">Certified pet groomer with 10 years experience</p>
-            </div>
-
-            <!-- Team Member 3 -->
-            <div class="text-center group">
-                <div class="relative mb-6">
-                    <div
-                        class="w-48 h-48 mx-auto rounded-full overflow-hidden shadow-lg group-hover:shadow-xl transition-all">
-                        <div
-                            class="w-full h-full bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] flex items-center justify-center">
-                            <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                <h3 class="text-xl font-semibold text-[#333333] mb-2">Hari Gurung</h3>
-                <p class="text-[#4FBDBA] font-medium mb-2">Adoption Coordinator</p>
-                <p class="text-sm text-gray-600">Passionate about finding homes for rescue dogs</p>
-            </div>
-
-            <!-- Team Member 4 -->
-            <div class="text-center group">
-                <div class="relative mb-6">
-                    <div
-                        class="w-48 h-48 mx-auto rounded-full overflow-hidden shadow-lg group-hover:shadow-xl transition-all">
-                        <div
-                            class="w-full h-full bg-gradient-to-br from-[#F4A261] to-[#F6E27F] flex items-center justify-center">
-                            <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                <h3 class="text-xl font-semibold text-[#333333] mb-2">Maya Rai</h3>
-                <p class="text-[#4FBDBA] font-medium mb-2">Customer Support Lead</p>
-                <p class="text-sm text-gray-600">Here to help with all your pet care needs</p>
-            </div>
+                <h3 class="text-xl font-semibold text-[#333333] mb-2">{{ vet.name }}</h3>
+                <p class="text-[#4FBDBA] font-medium mb-2">{{ vet.specialty }}</p>
+                <p class="text-sm text-gray-600">{{ vet.experience_years }}+ years experience</p>
+            </a>
+            {% endfor %}
         </div>
     </div>
 </section>

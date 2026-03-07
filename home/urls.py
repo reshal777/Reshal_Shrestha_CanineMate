@@ -24,4 +24,7 @@ urlpatterns = [
     path('grooming-booking/', views.grooming_booking_view, name='groomingbooking'),
     path('reschedule-grooming/<int:booking_id>/', views.reschedule_grooming, name='reschedule_grooming'),
     path('cancel-grooming/<int:booking_id>/', views.cancel_grooming, name='cancel_grooming'),
+    path('doctor-profile/<int:vet_id>/', views.doctor_profile_view, name='doctorprofile'),
+    path('chat/<int:user_id>/', views.chat_room_view, name='chat'),
+    path('chats/', views.chat_list_view, name='chat_list'),
 ]

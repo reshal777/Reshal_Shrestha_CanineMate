@@ -1,11 +1,20 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Veterinarian, Dog, Appointment, Clinic, GroomingSalon, GroomingService, GroomingBooking, Vaccination, HealthRecord, Medication
+from .models import Veterinarian, Dog, Appointment, Clinic, GroomingSalon, GroomingService, GroomingBooking, Vaccination, HealthRecord, Medication, ChatMessage
 from django.contrib import messages
+from django.db.models import Q
+from accounts.models import User
 from datetime import datetime
 
 def index_view(request):
-    return render(request, "index.html")
+    vets = Veterinarian.objects.all()[:4]
+    if not vets.exists():
+        clinic = Clinic.objects.create(name="Canine Mate Clinic", location="Kathmandu")
+        v1 = Veterinarian.objects.create(name="Dr. Rajesh Sharma", clinic=clinic, experience_years=15, specialty="Chief Veterinarian", about="Expert in general veterinary medicine and emergency care.")
+        v2 = Veterinarian.objects.create(name="Sita Thapa", clinic=clinic, experience_years=10, specialty="Head Groomer", about="Certified pet groomer.")
+        v3 = Veterinarian.objects.create(name="Hari Gurung", clinic=clinic, experience_years=5, specialty="Adoption Coordinator", about="Passionate rescuer.")
+        vets = Veterinarian.objects.all()[:4]
+    return render(request, "index.html", {'vets': vets})
 
 def adoption_listing_view(request):
     return render(request, "adoptionlisting.html")
@@ -24,6 +33,12 @@ def product_details_view(request, product_id=None):
 
 def checkout_view(request):
     return render(request, "checkout.html")
+
+@login_required
+def doctor_profile_view(request, vet_id):
+    vet = get_object_or_404(Veterinarian, id=vet_id)
+    dogs = Dog.objects.filter(owner=request.user)
+    return render(request, "doctorprofile.html", {"vet": vet, "dogs": dogs})
 
 @login_required
 def dog_profile_view(request, dog_id=None):
@@ -297,3 +312,27 @@ def cancel_grooming(request, booking_id):
     booking.save()
     messages.success(request, "Grooming booking cancelled successfully!")
     return redirect('groomingbooking')
+
+@login_required
+def chat_room_view(request, user_id):
+    other_user = get_object_or_404(User, user_id=user_id)
+    # Get all messages between current user and other user
+    chat_messages = ChatMessage.objects.filter(
+        (Q(sender=request.user) & Q(receiver=other_user)) |
+        (Q(sender=other_user) & Q(receiver=request.user))
+    ).order_by('timestamp')
+    
+    context = {
+        'other_user': other_user,
+        'chat_messages': chat_messages,
+    }
+    return render(request, "chat.html", context)
+
+@login_required
+def chat_list_view(request):
+    # Get all unique users the current user has chatted with
+    sent_to = ChatMessage.objects.filter(sender=request.user).values_list('receiver', flat=True)
+    received_from = ChatMessage.objects.filter(receiver=request.user).values_list('sender', flat=True)
+    user_ids = set(list(sent_to) + list(received_from))
+    chat_users = User.objects.filter(user_id__in=user_ids)
+    return render(request, "chat_list.html", {'chat_users': chat_users})
