@@ -27,4 +27,8 @@ urlpatterns = [
     path('doctor-profile/<int:vet_id>/', views.doctor_profile_view, name='doctorprofile'),
     path('chat/<int:user_id>/', views.chat_room_view, name='chat'),
     path('chats/', views.chat_list_view, name='chat_list'),
+    path('chatbot/', views.chatbot_proxy, name='chatbot_proxy'),
+    path('profile/', views.user_profile_view, name='user_profile'),
+    path('api/profile/', views.get_user_profile_api, name='get_user_profile_api'),
+    path('api/profile/update/', views.update_user_profile_api, name='update_user_profile_api'),
 ]

@@ -1,0 +1,609 @@
+{% extends 'base/base.html' %}
+
+{% block title %}My Profile - Canine Mate{% endblock %}
+
+{% block extra_head %}
+<style>
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 0;
+        background: #FAFAF7;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 30px 20px;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
+    }
+
+    .card {
+        background: white;
+        border-radius: 18px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 25px;
+    }
+
+    .cover {
+        height: 130px;
+        background: linear-gradient(to right, #4FBDBA, #3da5a2);
+        border-radius: 18px 18px 0 0;
+    }
+
+    .profile-content {
+        padding: 25px;
+        margin-top: -50px;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 20px;
+        background: linear-gradient(to right, #4FBDBA, #3da5a2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 50px;
+        border: 4px solid white;
+    }
+
+    .profile-info h2 {
+        margin: 0;
+    }
+
+    .role {
+        color: #4FBDBA;
+        font-weight: 500;
+    }
+
+    .member {
+        font-size: 13px;
+        color: gray;
+    }
+
+    button {
+        border: none;
+        cursor: pointer;
+        padding: 10px 18px;
+        border-radius: 8px;
+    }
+
+    .edit {
+        background: #4FBDBA;
+        color: white;
+    }
+
+    .save {
+        background: #16a34a;
+        color: white;
+    }
+
+    .cancel {
+        background: #e5e7eb;
+    }
+
+    textarea,
+    input {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        box-sizing: border-box;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .dog-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        padding: 20px;
+    }
+
+    .dog {
+        display: flex;
+        gap: 10px;
+        border: 1px solid #eee;
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    .dog img {
+        width: 70px;
+        height: 70px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .activity {
+        padding: 20px;
+    }
+
+    .activity-item {
+        display: flex;
+        gap: 10px;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .stats-card {
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .stat-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+    }
+
+    .quick {
+        display: block;
+        background: #f5f5f5;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        text-decoration: none;
+        color: black;
+    }
+
+    .quick:hover {
+        background: #4FBDBA22;
+    }
+
+    .dashboard {
+        background: #4FBDBA;
+        color: white;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #4FBDBA;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .grid {
+            grid-template-columns: 1fr;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .dog-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" <div class="grid">
+
+    <!-- LEFT SIDE -->
+
+    <div>
+
+        <div class="card">
+
+            <div class="cover"></div>
+
+            <div class="profile-content">
+
+                <div class="profile-header">
+
+                    <div class="avatar">👤</div>
+
+                    <div class="profile-info">
+                        <h2 id="nameText">Loading...</h2>
+                        <p class="role">Dog Parent</p>
+                        <p class="member" id="joinDate">Loading...</p>
+                    </div>
+
+                    <button id="editBtn" class="edit">Edit Profile</button>
+
+                    <div id="editActions" class="hidden">
+                        <button id="saveBtn" class="save">Save</button>
+                        <button id="cancelBtn" class="cancel">Cancel</button>
+                    </div>
+
+                </div>
+
+                <br>
+
+                <label>Bio</label>
+                <p id="bioText" style="margin: 5px 0;">Loading...</p>
+                <textarea id="bioInput" class="hidden" placeholder="Write a short bio about yourself"></textarea>
+
+                <div class="info-grid">
+
+                    <div>
+                        <label>Email</label>
+                        <p id="emailText" style="margin: 5px 0;">Loading...</p>
+                        <input id="emailInput" class="hidden" readonly>
+                    </div>
+
+                    <div>
+                        <label>Phone</label>
+                        <p id="phoneText" style="margin: 5px 0;">Loading...</p>
+                        <input id="phoneInput" class="hidden" placeholder="Enter your phone number">
+                    </div>
+
+                    <div>
+                        <label>Location</label>
+                        <p id="locationText" style="margin: 5px 0;">Loading...</p>
+                        <input id="locationInput" class="hidden" placeholder="Enter your location">
+                    </div>
+
+                    <div>
+                        <label>Full Name</label>
+                        <p id="nameDisplay" style="margin: 5px 0;">Loading...</p>
+                        <input id="nameInput" class="hidden" placeholder="Enter your full name">
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="padding:20px">My Dogs</h3>
+            <div id="dogsList" class="dog-grid">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="padding:20px">Recent Activity</h3>
+            <div id="activityList" class="activity">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RIGHT SIDE -->
+
+    <div>
+
+        <div id="statsList"></div>
+
+        <div class="card" style="padding:20px">
+            <h3>Quick Actions</h3>
+
+            <a href="{% url 'dogprofile' %}" class="quick">Manage Dogs →</a>
+            <a href="{% url 'vetappointment' %}" class="quick">Book Appointment →</a>
+            <a href="{% url 'shop' %}" class="quick">Shop Products →</a>
+            <a href="{% url 'dashboard' %}" class="quick dashboard">← Back to Dashboard</a>
+
+        </div>
+
+    </div>
+
+</div>
+</div>
+
+<script>
+
+    // Store original data for cancel
+    let originalProfileData = {};
+    let profileData = {};
+
+    // Add placeholder text
+    const tooltips = {
+        nameInput: "Enter your full name",
+        phoneInput: "Enter your phone number",
+        locationInput: "Enter your location (e.g., 'Kathmandu, Nepal')",
+        bioInput: "Write a short bio about yourself"
+    };
+
+    // Fetch profile data from API
+    async function loadProfileData() {
+        try {
+            const response = await fetch('{% url "get_user_profile_api" %}', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+
+            if (!response.ok) throw new Error('Failed to load profile');
+
+            const data = await response.json();
+            profileData = JSON.parse(JSON.stringify(data)); // Deep clone
+            originalProfileData = JSON.parse(JSON.stringify(data)); // Deep clone for cancel
+
+            renderProfile();
+            renderDogs();
+            renderStats();
+            renderActivity();
+
+        } catch (error) {
+            console.error('Error loading profile:', error);
+            document.getElementById('nameText').innerText = 'Error loading profile';
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function renderProfile() {
+        const fullName = profileData.name || 'Dog Parent';
+
+        document.getElementById('nameText').innerText = fullName;
+        document.getElementById('nameDisplay').innerText = fullName;
+        document.getElementById('nameInput').value = fullName;
+
+        document.getElementById('emailText').innerText = profileData.email || 'N/A';
+        document.getElementById('emailInput').value = profileData.email || '';
+
+        document.getElementById('phoneText').innerText = profileData.phone || 'Not provided';
+        document.getElementById('phoneInput').value = profileData.phone || '';
+
+        document.getElementById('locationText').innerText = profileData.location || 'Not provided';
+        document.getElementById('locationInput').value = profileData.location || '';
+
+        document.getElementById('bioText').innerText = profileData.bio || 'No bio yet';
+        document.getElementById('bioInput').value = profileData.bio || '';
+
+        document.getElementById('joinDate').innerText = 'Member since ' + (profileData.joinedDate || 'N/A');
+    }
+
+    function renderDogs() {
+        const dogs = profileData.dogs || [];
+        let html = "";
+
+        if (dogs.length === 0) {
+            html = '<p style="padding: 20px; text-align: center;">No dogs added yet. <a href="{% url "add_dog" %}">Add your first dog</a></p>';
+        } else {
+            dogs.forEach(d => {
+                html += `
+<div class="dog">
+    <img src="${d.image}" alt="${d.name}" onerror="this.src='https://via.placeholder.com/70x70?text=No+Image'">
+    <div>
+        <b>${d.name}</b>
+        <p style="color:#F4A261; margin: 5px 0;">${d.breed}</p>
+        <small>${d.age}</small>
+    </div>
+</div>
+`;
+            });
+        }
+
+        document.getElementById('dogsList').innerHTML = html;
+    }
+
+    function renderActivity() {
+        const activities = [
+            { action: "Profile updated", date: "Today" },
+            { action: "Account created", date: "Today" }
+        ];
+
+        let html = "";
+
+        activities.forEach(a => {
+            html += `
+<div class="activity-item">
+    <div>📅</div>
+    <div>
+        <p>${a.action}</p>
+        <small style="color:gray">${a.date}</small>
+    </div>
+</div>
+`;
+        });
+
+        document.getElementById('activityList').innerHTML = html;
+    }
+
+    function renderStats() {
+        const stats = [
+            { label: "My Dogs", value: profileData.stats?.dogs || "0", color: "#4FBDBA" },
+            { label: "Appointments", value: profileData.stats?.appointments || "0", color: "#F4A261" },
+            { label: "Orders", value: profileData.stats?.orders || "0", color: "#4FBDBA" },
+            { label: "Bookings", value: profileData.stats?.bookings || "0", color: "#ef4444" }
+        ];
+
+        let html = "";
+
+        stats.forEach(s => {
+            html += `
+<div class="card stats-card">
+    <div>
+        <p style="color:gray">${s.label}</p>
+        <h2>${s.value}</h2>
+    </div>
+    <div class="stat-icon" style="background:${s.color}">★</div>
+</div>
+`;
+        });
+
+        document.getElementById('statsList').innerHTML = html;
+    }
+
+    // Edit button click
+    document.getElementById('editBtn').addEventListener('click', function () {
+        document.getElementById('editBtn').classList.add("hidden");
+        document.getElementById('editActions').classList.remove("hidden");
+
+        // Show inputs and hide text displays
+        document.getElementById('bioText').classList.add("hidden");
+        document.getElementById('bioInput').classList.remove("hidden");
+
+        document.getElementById('phoneText').classList.add("hidden");
+        document.getElementById('phoneInput').classList.remove("hidden");
+
+        document.getElementById('locationText').classList.add("hidden");
+        document.getElementById('locationInput').classList.remove("hidden");
+
+        document.getElementById('nameDisplay').classList.add("hidden");
+        document.getElementById('nameInput').classList.remove("hidden");
+    });
+
+    // Save button click
+    document.getElementById('saveBtn').addEventListener('click', async function () {
+        const fullName = document.getElementById('nameInput').value;
+        const phone = document.getElementById('phoneInput').value;
+        const location = document.getElementById('locationInput').value;
+        const bio = document.getElementById('bioInput').value;
+
+        try {
+            const response = await fetch('{% url "update_user_profile_api" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    first_name: fullName.split(' ')[0] || '',
+                    last_name: fullName.split(' ').slice(1).join(' ') || '',
+                    phone: phone,
+                    location: location,
+                    bio: bio
+                })
+            });
+
+            if (!response.ok) throw new Error('Failed to update profile');
+
+            const result = await response.json();
+
+            // Update profile data
+            profileData.name = result.user.name;
+            profileData.phone = result.user.phone;
+            profileData.location = result.user.location;
+            profileData.bio = result.user.bio;
+
+            // Reset edit mode
+            document.getElementById('editBtn').classList.remove("hidden");
+            document.getElementById('editActions').classList.add("hidden");
+
+            // Hide inputs and show text displays
+            document.getElementById('bioText').classList.remove("hidden");
+            document.getElementById('bioInput').classList.add("hidden");
+
+            document.getElementById('phoneText').classList.remove("hidden");
+            document.getElementById('phoneInput').classList.add("hidden");
+
+            document.getElementById('locationText').classList.remove("hidden");
+            document.getElementById('locationInput').classList.add("hidden");
+
+            document.getElementById('nameDisplay').classList.remove("hidden");
+            document.getElementById('nameInput').classList.add("hidden");
+
+            renderProfile();
+
+            // Show success message
+            alert('Profile updated successfully!');
+
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            alert('Error updating profile: ' + error.message);
+        }
+    });
+
+    // Cancel button click
+    document.getElementById('cancelBtn').addEventListener('click', function () {
+        // Restore original data
+        profileData = JSON.parse(JSON.stringify(originalProfileData));
+
+        document.getElementById('editBtn').classList.remove("hidden");
+        document.getElementById('editActions').classList.add("hidden");
+
+        // Hide inputs and show text displays
+        document.getElementById('bioText').classList.remove("hidden");
+        document.getElementById('bioInput').classList.add("hidden");
+
+        document.getElementById('phoneText').classList.remove("hidden");
+        document.getElementById('phoneInput').classList.add("hidden");
+
+        document.getElementById('locationText').classList.remove("hidden");
+        document.getElementById('locationInput').classList.add("hidden");
+
+        document.getElementById('nameDisplay').classList.remove("hidden");
+        document.getElementById('nameInput').classList.add("hidden");
+
+        renderProfile();
+    });
+
+    // Load data on page load
+    loadProfileData();
+
+</script>
+
+{% endblock %}

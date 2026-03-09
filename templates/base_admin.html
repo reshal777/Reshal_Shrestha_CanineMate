@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - Canine Mate</title>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: sans-serif;
+            background: #FAFAF7;
+            min-height: 100vh;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        button {
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        /* ── sticky header ── */
+        header {
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+
+        .header-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .brand svg {
+            width: 32px;
+            height: 32px;
+            color: #4FBDBA;
+        }
+
+        .brand-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .home-link {
+            color: #4b5563;
+            display: flex;
+            transition: color .2s;
+        }
+
+        .home-link:hover {
+            color: #4FBDBA;
+        }
+
+        .home-link svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* profile dropdown trigger */
+        .profile-trigger {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .4rem .75rem;
+            border-radius: .5rem;
+            background: none;
+            border: none;
+            transition: background .2s;
+        }
+
+        .profile-trigger:hover {
+            background: #f3f4f6;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4FBDBA, #3da5a2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar svg {
+            width: 18px;
+            height: 18px;
+            color: #fff;
+        }
+
+        .profile-name {
+            font-size: .875rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .chevron-icon {
+            width: 16px;
+            height: 16px;
+            color: #6b7280;
+            transition: transform .2s;
+        }
+
+        .profile-trigger.open .chevron-icon {
+            transform: rotate(180deg);
+        }
+
+        /* dropdown menu */
+        .dropdown-wrap {
+            position: relative;
+        }
+
+        .dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            width: 224px;
+            background: #fff;
+            border-radius: .75rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+            border: 1px solid #f3f4f6;
+            padding: .5rem 0;
+            z-index: 50;
+        }
+
+        .dropdown.open {
+            display: block;
+        }
+
+        .dd-header {
+            padding: .75rem 1rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .dd-name {
+            font-size: .875rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .dd-email {
+            font-size: .75rem;
+            color: #6b7280;
+        }
+
+        .dd-link {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .5rem 1rem;
+            color: #374151;
+            font-size: .875rem;
+            transition: background .2s;
+        }
+
+        .dd-link:hover {
+            background: #f9fafb;
+        }
+
+        .dd-link svg {
+            width: 16px;
+            height: 16px;
+            color: #4b5563;
+        }
+
+        .dd-divider {
+            border-top: 1px solid #f3f4f6;
+            margin: .5rem 0;
+        }
+
+        .dd-logout {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .5rem 1rem;
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            font-size: .875rem;
+            color: #ef4444;
+            transition: background .2s;
+            font-family: inherit;
+        }
+
+        .dd-logout:hover {
+            background: #fef2f2;
+        }
+
+        .dd-logout svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* ── page body ── */
+        .main {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* welcome */
+        .welcome {
+            margin-bottom: 2rem;
+        }
+
+        .welcome h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: .5rem;
+        }
+
+        .welcome p {
+            color: #4b5563;
+        }
+
+        /* stats grid */
+        .stats-grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            grid-template-columns: repeat(1, 1fr);
+        }
+
+        @media(min-width:768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media(min-width:1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .stat-card {
+            background: #fff;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .08);
+        }
+
+        .stat-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: .75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-icon svg {
+            width: 24px;
+            height: 24px;
+            color: #fff;
+        }
+
+        .bg-teal {
+            background: #4FBDBA;
+        }
+
+        .bg-orange {
+            background: #F4A261;
+        }
+
+        .stat-change {
+            display: flex;
+            align-items: center;
+            gap: .25rem;
+            font-size: .875rem;
+            font-weight: 500;
+            color: #16a34a;
+        }
+
+        .stat-change svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: .25rem;
+        }
+
+        .stat-label {
+            font-size: .875rem;
+            color: #6b7280;
+        }
+
+        /* 2-col panels */
+        .panels-grid {
+            display: grid;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            grid-template-columns: 1fr;
+        }
+
+        @media(min-width:1024px) {
+            .panels-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .panel {
+            background: #fff;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .08);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .panel-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .view-all {
+            font-size: .875rem;
+            color: #4FBDBA;
+            background: none;
+            border: none;
+        }
+
+        .view-all:hover {
+            text-decoration: underline;
+        }
+
+        /* user rows */
+        .user-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-radius: .75rem;
+            transition: background .2s;
+            margin-bottom: .5rem;
+        }
+
+        .user-row:hover {
+            background: #f9fafb;
+        }
+
+        .user-left {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4FBDBA, #3da5a2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #fff;
+            font-size: .9rem;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: #333;
+            font-size: .9rem;
+        }
+
+        .user-email {
+            font-size: .8rem;
+            color: #6b7280;
+        }
+
+        .user-right {
+            text-align: right;
+        }
+
+        .user-dogs {
+            font-size: .875rem;
+            color: #4b5563;
+        }
+
+        .user-joined {
+            font-size: .75rem;
+            color: #9ca3af;
+        }
+
+        /* order rows */
+        .order-row {
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: .75rem;
+            transition: border-color .2s;
+            margin-bottom: .5rem;
+        }
+
+        .order-row:hover {
+            border-color: #4FBDBA;
+        }
+
+        .order-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: .5rem;
+        }
+
+        .order-product {
+            font-weight: 500;
+            color: #333;
+            font-size: .9rem;
+        }
+
+        .order-user {
+            font-size: .8rem;
+            color: #6b7280;
+        }
+
+        .order-amount {
+            color: #4FBDBA;
+            font-weight: 600;
+            font-size: .9rem;
+        }
+
+        .badge {
+            font-size: .75rem;
+            padding: .2rem .6rem;
+            border-radius: 9999px;
+            font-weight: 500;
+        }
+
+        .badge-green {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .badge-blue {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .badge-orange {
+            background: #ffedd5;
+            color: #c2410c;
+        }
+
+        /* adoption table */
+        .adoption-panel {
+            background: #fff;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .08);
+            margin-bottom: 2rem;
+        }
+
+        .adoption-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-add {
+            background: #4FBDBA;
+            color: #fff;
+            border: none;
+            padding: .5rem 1rem;
+            border-radius: .5rem;
+            font-size: .875rem;
+            transition: background .2s;
+        }
+
+        .btn-add:hover {
+            background: #3da5a2;
+        }
+
+        .tbl-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead tr {
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            text-align: left;
+            padding: .75rem 1rem;
+            font-size: .875rem;
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f3f4f6;
+            transition: background .2s;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        td {
+            padding: 1rem;
+            font-size: .9rem;
+            color: #4b5563;
+        }
+
+        td.dog-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .tbl-actions {
+            display: flex;
+            gap: .75rem;
+        }
+
+        .tbl-edit {
+            font-size: .875rem;
+            color: #4FBDBA;
+            background: none;
+            border: none;
+        }
+
+        .tbl-edit:hover {
+            text-decoration: underline;
+        }
+
+        .tbl-del {
+            font-size: .875rem;
+            color: #ef4444;
+            background: none;
+            border: none;
+        }
+
+        .tbl-del:hover {
+            text-decoration: underline;
+        }
+
+        /* quick actions */
+        .quick-grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(1, 1fr);
+        }
+
+        @media(min-width:768px) {
+            .quick-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .quick-card {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .08);
+            text-align: center;
+            display: block;
+            transition: box-shadow .2s;
+        }
+
+        .quick-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .14);
+        }
+
+        .quick-card svg {
+            width: 32px;
+            height: 32px;
+            margin: 0 auto .75rem;
+            display: block;
+        }
+
+        .quick-label {
+            font-weight: 600;
+            color: #333;
+            font-size: .9rem;
+        }
+
+        .c-teal {
+            color: #4FBDBA;
+        }
+
+        .c-orange {
+            color: #F4A261;
+        }
+
+        .c-red {
+            color: #ef4444;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ═══ HEADER ═══ -->
+    <header>
+        <div class="header-inner">
+            <!-- brand -->
+            <a href="/" class="brand">
+                <img src="/static/logo.png" alt="Canine Mate Logo" style="width:32px;height:32px;object-fit:contain;">
+                <span class="brand-name">Canine Mate Admin</span>
+            </a>
+
+            <div class="header-right">
+                <!-- home link -->
+                <a href="/" class="home-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                </a>
+
+                <!-- profile dropdown -->
+                <div class="dropdown-wrap">
+                    <button class="profile-trigger" id="profile-btn" onclick="toggleDropdown()">
+                        <div class="avatar">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                        </div>
+                        <span class="profile-name">{{ request.user.username|default:"Admin" }}</span>
+                        <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </button>
+
+                    <div class="dropdown" id="profile-dropdown">
+                        <div class="dd-header">
+                            <p class="dd-name">Administrator</p>
+                            <p class="dd-email">{{ request.user.email }}</p>
+                        </div>
+                        <a href="#" class="dd-link" onclick="closeDropdown()">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                            My Profile
+                        </a>
+                        <a href="#" class="dd-link" onclick="closeDropdown()">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="3" />
+                                <path
+                                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                            </svg>
+                            Settings
+                        </a>
+                        <div class="dd-divider"></div>
+                        <a href="{% url 'admin_logout' %}" class="dd-logout">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                                <polyline points="16 17 21 12 16 7" />
+                                <line x1="21" y1="12" x2="9" y2="12" />
+                            </svg>
+                            Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══ MAIN ═══ -->
+    <div class="main">
+        {% if messages %}
+        <div style="margin-bottom: 1rem; font-weight: bold;">
+            {% for message in messages %}
+            <div
+                class="p-3 rounded text-sm {% if message.tags == 'error' %}text-red-700{% else %}text-green-700{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </div><!-- /main -->
+
+
+    <script>
+        /* profile dropdown toggle */
+        function toggleDropdown() {
+            const btn = document.getElementById('profile-btn');
+            const dd = document.getElementById('profile-dropdown');
+            btn.classList.toggle('open');
+            dd.classList.toggle('open');
+        }
+        function closeDropdown() {
+            document.getElementById('profile-btn').classList.remove('open');
+            document.getElementById('profile-dropdown').classList.remove('open');
+        }
+
+        // close when clicking outside
+        document.addEventListener('click', e => {
+            const wrap = document.querySelector('.dropdown-wrap');
+            if (!wrap.contains(e.target)) closeDropdown();
+        });
+    </script>
+
+</body>
+
+</html>

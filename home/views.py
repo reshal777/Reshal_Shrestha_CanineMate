@@ -5,8 +5,17 @@ from django.contrib import messages
 from django.db.models import Q
 from accounts.models import User
 from datetime import datetime
+import json
+import requests
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 def index_view(request):
+    if request.user.is_authenticated:
+        if request.user.is_staff:
+            return redirect('admin_dashboard')
+        return redirect('dashboard')
+        
     vets = Veterinarian.objects.all()[:4]
     if not vets.exists():
         clinic = Clinic.objects.create(name="Canine Mate Clinic", location="Kathmandu")
@@ -336,3 +345,160 @@ def chat_list_view(request):
     user_ids = set(list(sent_to) + list(received_from))
     chat_users = User.objects.filter(user_id__in=user_ids)
     return render(request, "chat_list.html", {'chat_users': chat_users})
+
+@login_required
+def user_profile_view(request):
+    """Display user profile page"""
+    user = request.user
+    dogs = Dog.objects.filter(owner=user)
+    appointments = Appointment.objects.filter(user=user, status='Confirmed').order_by('-appointment_date')[:5]
+    grooming_bookings = GroomingBooking.objects.filter(user=user, status='Confirmed').order_by('-booking_date')[:5]
+    
+    # Calculate recent activities
+    activities = []
+    for appt in appointments[:3]:
+        activities.append({
+            'action': f"Booked appointment with {appt.veterinarian.name}",
+            'date': appt.appointment_date.strftime('%b %d, %Y') if appt.appointment_date else 'N/A'
+        })
+    
+    context = {
+        'user': user,
+        'dogs': dogs,
+        'dogs_count': dogs.count(),
+        'appointments_count': appointments.count(),
+        'activities': activities,
+    }
+    return render(request, "userprofile.html", context)
+
+@login_required
+@csrf_exempt
+def get_user_profile_api(request):
+    """API endpoint to get user profile data"""
+    if request.method == "GET":
+        user = request.user
+        dogs = Dog.objects.filter(owner=user)
+        appointments = Appointment.objects.filter(user=user, status='Confirmed').count()
+        grooming_bookings = GroomingBooking.objects.filter(user=user, status='Confirmed').count()
+        
+        from payment.models import Order
+        try:
+            orders = Order.objects.filter(user=user).count()
+        except:
+            orders = 0
+        
+        profile_data = {
+            'name': user.get_full_name() or user.username,
+            'email': user.email,
+            'phone': user.phone or '',
+            'location': user.location or '',
+            'bio': user.bio or '',
+            'joinedDate': user.date_joined.strftime('%B %d, %Y') if user.date_joined else 'N/A',
+            'dogs': [
+                {
+                    'id': dog.id,
+                    'name': dog.name,
+                    'breed': dog.breed or 'Unknown',
+                    'age': dog.age or 'N/A',
+                    'image': dog.image.url if dog.image else 'https://via.placeholder.com/300x300?text=No+Image'
+                }
+                for dog in dogs
+            ],
+            'stats': {
+                'dogs': dogs.count(),
+                'appointments': appointments,
+                'orders': orders,
+                'bookings': grooming_bookings,
+            }
+        }
+        return JsonResponse(profile_data)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+@login_required
+@csrf_exempt
+def update_user_profile_api(request):
+    """API endpoint to update user profile"""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            user = request.user
+            
+            # Update user fields
+            if 'first_name' in data:
+                user.first_name = data.get('first_name', user.first_name)
+            if 'last_name' in data:
+                user.last_name = data.get('last_name', user.last_name)
+            if 'phone' in data:
+                user.phone = data.get('phone', user.phone)
+            if 'location' in data:
+                user.location = data.get('location', user.location)
+            if 'bio' in data:
+                user.bio = data.get('bio', user.bio)
+            
+            user.save()
+            messages.success(request, "Profile updated successfully!")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Profile updated successfully',
+                'user': {
+                    'name': user.get_full_name() or user.username,
+                    'email': user.email,
+                    'phone': user.phone or '',
+                    'location': user.location or '',
+                    'bio': user.bio or '',
+                }
+            })
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+@csrf_exempt
+def chatbot_proxy(request):
+    import os
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            user_message = data.get("message")
+            
+            # Groq API Configuration
+            # Update this key with your active API key or set GROQ_API_KEY environment variable
+            api_key = os.environ.get("GROQ_API_KEY", "gsk_VPhf8Xl8PzPr0W4X7XlWWGdyb3FY0RnU")
+            
+            url = "https://api.groq.com/openai/v1/chat/completions"
+            
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            payload = {
+                "model": "llama-3.3-70b-versatile",
+                "messages": [
+                    {
+                        "role": "system", 
+                        "content": "You are CanineMate Assistant, a helpful AI focused on dog care, health, and services in Nepal. You are friendly, knowledgeable, and sometimes use dog-themed puns like 'ruff', 'paws-itive', etc. Keep answers concise and helpful."
+                    },
+                    {"role": "user", "content": user_message}
+                ],
+                "temperature": 0.7,
+                "max_tokens": 500
+            }
+            
+            response = requests.post(url, headers=headers, json=payload, timeout=30)
+            
+            if response.status_code == 200:
+                result = response.json()
+                bot_response = result['choices'][0]['message']['content']
+                return JsonResponse({"response": bot_response})
+            elif response.status_code == 401 or response.status_code == 403:
+                return JsonResponse({"error": "I couldn't connect because the Groq API Key is missing or invalid! Please update `api_key` in `views.py` with your active key. 🐾"}, status=401)
+            else:
+                return JsonResponse({"error": f"API Error: {response.text}"}, status=response.status_code)
+                
+        except requests.exceptions.Timeout:
+            return JsonResponse({"error": "The connection timed out. Please try again in a moment! 🐾"}, status=504)
+        except Exception as e:
+            return JsonResponse({"error": f"An unexpected error occurred: {str(e)} 🐾"}, status=500)
+            
+    return JsonResponse({"error": "Invalid request"}, status=400)

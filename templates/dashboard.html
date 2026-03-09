@@ -14,30 +14,6 @@
         <p class="text-gray-600">Here's what's happening with your furry friends today</p>
     </div>
 
-    <!-- Alerts -->
-    <div class="mb-8 space-y-3">
-        <div class="flex items-start gap-4 p-4 rounded-xl bg-red-50 border border-red-100">
-            <svg class="w-5 h-5 mt-0.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <div class="flex-1">
-                <p class="font-medium text-red-900">Buddy's rabies vaccine due in 3 days</p>
-                <p class="text-sm mt-1 text-red-600">Jan 20, 2026</p>
-            </div>
-        </div>
-        <div class="flex items-start gap-4 p-4 rounded-xl bg-blue-50 border border-blue-100">
-            <svg class="w-5 h-5 mt-0.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <div class="flex-1">
-                <p class="font-medium text-blue-900">Grooming appointment tomorrow at 2 PM</p>
-                <p class="text-sm mt-1 text-blue-600">Jan 18, 2026</p>
-            </div>
-        </div>
-    </div>
-
     <!-- Quick Access -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <a href="{% url 'dogprofile' %}"
@@ -93,72 +69,119 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- My Dogs -->
-        <div class="lg:col-span-2">
+        <!-- Main column -->
+        <div class="lg:col-span-2 space-y-6">
+
+            <!-- My Dogs -->
             <div class="bg-white rounded-2xl p-6 shadow-lg">
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex justify-between items-center mb-5">
                     <h2 class="text-xl font-semibold text-[#333333]">My Dogs</h2>
                     <a href="{% url 'dogprofile' %}" class="text-[#4FBDBA] hover:underline text-sm font-medium">Add New
                         +</a>
                 </div>
-                <div class="space-y-4">
+                <div class="space-y-3">
+                    {% for dog in dogs %}
                     <a href="{% url 'dogprofile' %}"
-                        class="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-[#4FBDBA] hover:shadow-md transition-all">
-                        <div
-                            class="w-16 h-16 rounded-full bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] flex items-center justify-center flex-shrink-0">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
-                            </svg>
+                        class="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 hover:border-[#4FBDBA]/40 hover:shadow-sm transition-all bg-white">
+                        <!-- Circular dog photo -->
+                        <div class="w-14 h-14 rounded-full flex-shrink-0 overflow-hidden border-2 border-gray-100">
+                            {% if dog.image %}
+                            <img src="{{ dog.image.url }}" alt="{{ dog.name }}" class="w-full h-full object-cover">
+                            {% else %}
+                            <div
+                                class="w-full h-full bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] flex items-center justify-center">
+                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4" />
+                                </svg>
+                            </div>
+                            {% endif %}
                         </div>
-                        <div class="flex-1">
-                            <h3 class="font-semibold text-[#333333]">Buddy</h3>
-                            <p class="text-sm text-gray-500">Golden Retriever • 3 years</p>
+                        <!-- Name & breed -->
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-semibold text-[#333333] text-[15px]">{{ dog.name }}</h3>
+                            <p class="text-sm text-gray-500">{{ dog.breed|default:"Mixed Breed" }} &bull; {{
+                                dog.age|default:"Unknown age" }}</p>
                         </div>
-                        <svg class="w-5 h-5 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        <!-- Paw icon on right -->
+                        <svg class="w-6 h-6 text-[#4FBDBA] flex-shrink-0" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="7.5" cy="6.5" r="1.5" />
+                            <circle cx="16.5" cy="6.5" r="1.5" />
+                            <circle cx="4.5" cy="12" r="1.5" />
+                            <circle cx="19.5" cy="12" r="1.5" />
+                            <path
+                                d="M12 20c-3.5 0-6-1.5-6-3.5 0-1.5 1-2.5 2.5-3.5 1-.5 2.5-.5 3.5-.5s2.5 0 3.5.5C17 14 18 15 18 16.5c0 2-2.5 3.5-6 3.5z" />
                         </svg>
                     </a>
-                    <a href="{% url 'dogprofile' %}"
-                        class="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-[#4FBDBA] hover:shadow-md transition-all">
-                        <div
-                            class="w-16 h-16 rounded-full bg-gradient-to-br from-[#F4A261] to-[#F6E27F] flex items-center justify-center flex-shrink-0">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
-                            </svg>
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="font-semibold text-[#333333]">Max</h3>
-                            <p class="text-sm text-gray-500">Labrador • 2 years</p>
-                        </div>
-                        <svg class="w-5 h-5 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
+                    {% empty %}
+                    <p class="text-sm text-gray-500 py-4">You haven't added any dogs yet.
+                        <a href="{% url 'dogprofile' %}" class="text-[#4FBDBA] font-medium">Add a dog profile</a> to get
+                        started!
+                    </p>
+                    {% endfor %}
                 </div>
             </div>
 
-            <!-- Appointments -->
-            <div class="bg-white rounded-2xl p-6 shadow-lg mt-6">
-                <h2 class="text-xl font-semibold text-[#333333] mb-6">Upcoming Appointments</h2>
-                <div class="space-y-4">
-                    <div class="flex items-start gap-4 p-4 rounded-xl bg-[#FAFAF7]">
+            <!-- Upcoming Appointments -->
+            <div>
+                <h2 class="text-xl font-semibold text-[#333333] mb-4">Upcoming Appointments</h2>
+                <div class="space-y-3">
+
+                    {% for appt in appointments %}
+                    <div
+                        class="flex items-start gap-4 p-4 rounded-2xl bg-[#F8FFFE] border border-gray-100 hover:border-[#4FBDBA]/30 transition-all">
                         <div class="w-12 h-12 bg-[#4FBDBA] rounded-xl flex items-center justify-center flex-shrink-0">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
-                        <div class="flex-1">
-                            <h3 class="font-semibold text-[#333333]">Vet Checkup</h3>
-                            <p class="text-sm text-gray-600 mt-1">Dog: Buddy</p>
-                            <p class="text-sm text-gray-500 mt-1">Jan 25, 2026 at 10:00 AM</p>
-                            <p class="text-sm text-gray-500">Nepal Vet Clinic, Pokhara Lakeside</p>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-semibold text-[#333333] text-[15px]">{{ appt.service_type }}</h3>
+                            <p class="text-sm text-gray-500 mt-0.5">Dog: {{ appt.dog.name }}</p>
+                            <p class="text-sm text-gray-500 mt-0.5">{{ appt.appointment_date|date:"M d, Y" }} at {{
+                                appt.appointment_time|time:"g:i A" }}</p>
+                            <p class="text-sm text-[#4FBDBA] mt-0.5">{{ appt.veterinarian.clinic.name }}</p>
                         </div>
+                        <a href="{% url 'vetappointment' %}"
+                            class="text-[#4FBDBA] text-sm font-semibold hover:underline flex-shrink-0 mt-1">View</a>
                     </div>
+                    {% endfor %}
+
+                    {% for book in groomings %}
+                    <div
+                        class="flex items-start gap-4 p-4 rounded-2xl bg-[#F8FFFE] border border-gray-100 hover:border-[#4FBDBA]/30 transition-all">
+                        <div class="w-12 h-12 bg-[#4FBDBA] rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-semibold text-[#333333] text-[15px]">{{ book.service.name }}</h3>
+                            <p class="text-sm text-gray-500 mt-0.5">Dog: {{ book.dog.name }}</p>
+                            <p class="text-sm text-gray-500 mt-0.5">{{ book.booking_date|date:"M d, Y" }} at {{
+                                book.booking_time|time:"g:i A" }}</p>
+                            <p class="text-sm text-[#4FBDBA] mt-0.5">{{ book.salon.name }}</p>
+                        </div>
+                        <a href="{% url 'groomingbooking' %}"
+                            class="text-[#4FBDBA] text-sm font-semibold hover:underline flex-shrink-0 mt-1">View</a>
+                    </div>
+                    {% endfor %}
+
+                    {% if not appointments and not groomings %}
+                    <p class="text-sm text-gray-500 py-4">No upcoming appointments booked.</p>
+                    {% endif %}
+
+                </div>
+                <!-- View All button -->
+                <div class="text-center mt-5">
+                    <a href="{% url 'vetappointment' %}"
+                        class="text-[#4FBDBA] text-sm font-semibold hover:underline">View All Appointments</a>
                 </div>
             </div>
+
         </div>
 
         <!-- Sidebar -->
@@ -166,6 +189,14 @@
             <div class="bg-white rounded-2xl p-6 shadow-lg">
                 <h2 class="text-xl font-semibold text-[#333333] mb-4">Quick Links</h2>
                 <div class="space-y-3">
+                    <a href="{% url 'user_profile' %}"
+                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-[#FAFAF7] transition-all">
+                        <svg class="w-5 h-5 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span>My Profile</span>
+                    </a>
                     <a href="{% url 'medicinereminder' %}"
                         class="flex items-center gap-3 p-3 rounded-lg hover:bg-[#FAFAF7] transition-all">
                         <svg class="w-5 h-5 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -195,8 +226,9 @@
 
             <div class="bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] rounded-2xl p-6 shadow-lg text-white">
                 <h3 class="font-semibold mb-2">💡 Tip of the Day</h3>
-                <p class="text-sm text-white/90">Regular dental care is important! Brush your dog's teeth 2-3 times
-                    a week.</p>
+                <p class="text-sm text-white/90">Regular dental care is important! Brush your dog's teeth 2-3 times a
+                    week.</p>
+                    
             </div>
         </div>
     </div>

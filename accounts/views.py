@@ -37,15 +37,42 @@ def login_view(request):
     return render(request, "login.html")
 
 
+from home.models import Dog, Appointment, GroomingBooking
+from django.utils import timezone
+from datetime import timedelta
+from django.views.decorators.cache import never_cache
+
 @login_required
+@never_cache
 def dashboard_view(request):
     # Prevent admin users from accessing regular dashboard
     if request.user.is_staff:
         return redirect("admin_dashboard")
-    return render(request, "dashboard.html")
-
+        
+    user_dogs = Dog.objects.filter(owner=request.user)
+    now = timezone.now()
+    today = now.date()
+    
+    upcoming_appointments = Appointment.objects.filter(
+        user=request.user,
+        appointment_date__gte=today
+    ).order_by('appointment_date', 'appointment_time')
+    
+    upcoming_groomings = GroomingBooking.objects.filter(
+        user=request.user,
+        booking_date__gte=today
+    ).order_by('booking_date', 'booking_time')
+    
+    context = {
+        'dogs': user_dogs,
+        'appointments': upcoming_appointments,
+        'groomings': upcoming_groomings,
+    }
+    
+    return render(request, "dashboard.html", context)
 
 @login_required
+@never_cache
 def admin_dashboard_view(request):
     # Only allow admin/staff users to access admin dashboard
     if not request.user.is_staff:
