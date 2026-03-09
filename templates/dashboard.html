@@ -81,7 +81,7 @@
                 </div>
                 <div class="space-y-3">
                     {% for dog in dogs %}
-                    <a href="{% url 'dogprofile' %}"
+                    <a href="{% url 'dogprofile' dog.id %}"
                         class="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 hover:border-[#4FBDBA]/40 hover:shadow-sm transition-all bg-white">
                         <!-- Circular dog photo -->
                         <div class="w-14 h-14 rounded-full flex-shrink-0 overflow-hidden border-2 border-gray-100">
@@ -228,7 +228,7 @@
                 <h3 class="font-semibold mb-2">💡 Tip of the Day</h3>
                 <p class="text-sm text-white/90">Regular dental care is important! Brush your dog's teeth 2-3 times a
                     week.</p>
-                    
+
             </div>
         </div>
     </div>
