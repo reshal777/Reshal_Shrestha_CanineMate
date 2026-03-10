@@ -88,6 +88,33 @@
             height: 20px;
         }
 
+        /* admin navigation */
+        .admin-nav {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .admin-nav {
+                display: flex;
+            }
+        }
+
+        .admin-nav-link {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #4b5563;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .admin-nav-link:hover {
+            color: #4FBDBA;
+            background: #f3f4f6;
+        }
+
         /* profile dropdown trigger */
         .profile-trigger {
             display: flex;
@@ -658,8 +685,16 @@
             </a>
 
             <div class="header-right">
+                <!-- admin nav -->
+                <nav class="admin-nav">
+                    <a href="{% url 'admin_dashboard' %}" class="admin-nav-link">Dashboard</a>
+                    <a href="{% url 'admin_users' %}" class="admin-nav-link">Users</a>
+                    <a href="{% url 'admin_products' %}" class="admin-nav-link">Products</a>
+                    <a href="{% url 'admin_orders' %}" class="admin-nav-link">Orders</a>
+                </nav>
+
                 <!-- home link -->
-                <a href="/" class="home-link">
+                <a href="/" class="home-link" title="Visit User Site">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
