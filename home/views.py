@@ -18,7 +18,7 @@ def index_view(request):
         
     vets = Veterinarian.objects.all()[:4]
     if not vets.exists():
-        clinic = Clinic.objects.create(name="Canine Mate Clinic", location="Kathmandu")
+        clinic = Clinic.objects.create(name="CanineMate Pet Centre", location="Kathmandu")
         v1 = Veterinarian.objects.create(name="Dr. Rajesh Sharma", clinic=clinic, experience_years=15, specialty="Chief Veterinarian", about="Expert in general veterinary medicine and emergency care.")
         v2 = Veterinarian.objects.create(name="Sita Thapa", clinic=clinic, experience_years=10, specialty="Head Groomer", about="Certified pet groomer.")
         v3 = Veterinarian.objects.create(name="Hari Gurung", clinic=clinic, experience_years=5, specialty="Adoption Coordinator", about="Passionate rescuer.")

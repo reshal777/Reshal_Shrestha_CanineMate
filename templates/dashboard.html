@@ -100,8 +100,7 @@
                         <!-- Name & breed -->
                         <div class="flex-1 min-w-0">
                             <h3 class="font-semibold text-[#333333] text-[15px]">{{ dog.name }}</h3>
-                            <p class="text-sm text-gray-500">{{ dog.breed|default:"Mixed Breed" }} &bull; {{
-                                dog.age|default:"Unknown age" }}</p>
+                            <p class="text-sm text-gray-500">{{ dog.breed|default:"Mixed Breed" }}</p>
                         </div>
                         <!-- Paw icon on right -->
                         <svg class="w-6 h-6 text-[#4FBDBA] flex-shrink-0" viewBox="0 0 24 24" fill="none"
@@ -161,8 +160,7 @@
                         <div class="flex-1 min-w-0">
                             <h3 class="font-semibold text-[#333333] text-[15px]">{{ book.service.name }}</h3>
                             <p class="text-sm text-gray-500 mt-0.5">Dog: {{ book.dog.name }}</p>
-                            <p class="text-sm text-gray-500 mt-0.5">{{ book.booking_date|date:"M d, Y" }} at {{
-                                book.booking_time|time:"g:i A" }}</p>
+                            <p class="text-sm text-gray-500 mt-0.5">{{ book.booking_date|date:"M d, Y" }}</p>
                             <p class="text-sm text-[#4FBDBA] mt-0.5">{{ book.salon.name }}</p>
                         </div>
                         <a href="{% url 'groomingbooking' %}"

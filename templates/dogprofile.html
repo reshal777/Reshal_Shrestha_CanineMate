@@ -680,10 +680,7 @@
 
                     <!-- age / gender / weight / color -->
                     <div class="info-grid">
-                        <div class="info-box">
-                            <p class="info-label">Age</p>
-                            <p class="info-value">{{ dog.age|default:"N/A" }}</p>
-                        </div>
+
                         <div class="info-box">
                             <p class="info-label">Gender</p>
                             <p class="info-value">{{ dog.gender }}</p>
@@ -909,10 +906,7 @@
                     <label>Breed</label>
                     <input type="text" name="breed">
                 </div>
-                <div class="form-group">
-                    <label>Age</label>
-                    <input type="text" name="age" placeholder="e.g. 3 years">
-                </div>
+
                 <div class="form-group">
                     <label>Gender</label>
                     <select name="gender">
@@ -952,10 +946,7 @@
                     <label>Breed</label>
                     <input type="text" name="breed" value="{{ dog.breed|default:'' }}">
                 </div>
-                <div class="form-group">
-                    <label>Age</label>
-                    <input type="text" name="age" value="{{ dog.age|default:'' }}">
-                </div>
+
                 <div class="form-group">
                     <label>Gender</label>
                     <select name="gender">

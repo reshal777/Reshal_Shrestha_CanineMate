@@ -8,7 +8,7 @@ from home.models import GroomingSalon, GroomingService
 
 def seed_grooming():
     salon, created = GroomingSalon.objects.update_or_create(
-        name="Luv My Pet Grooming Salon",
+        name="CanineMate Pet grooming",
         defaults={
             'location': 'Pokhara Lakeside',
             'contact': '+977-9801234567',

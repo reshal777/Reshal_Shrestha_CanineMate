@@ -8,10 +8,10 @@ from home.models import Clinic, Veterinarian
 
 def seed():
     clinics = [
-        {'name': 'Canine Mate', 'location': 'Pokhara Lakeside'},
-        {'name': 'Canine Mate', 'location': 'Pokhara Lakeside'},
-        {'name': 'Canine Mate', 'location': 'Pokhara Lakeside'},
-        {'name': 'Canine Mate', 'location': 'Pokhara Lakeside'},
+        {'name': 'CanineMate Pet Centre', 'location': 'Pokhara Lakeside'},
+        {'name': 'CanineMate Pet Centre', 'location': 'Pokhara Lakeside'},
+        {'name': 'CanineMate Pet Centre', 'location': 'Pokhara Lakeside'},
+        {'name': 'CanineMate Pet Centre', 'location': 'Pokhara Lakeside'},
     ]
 
     for c_data in clinics:
@@ -20,10 +20,10 @@ def seed():
             print(f"Created clinic {clinic}")
 
     vets = [
-        {'name': 'Dr. Karki', 'clinic_name': 'Canine Mate', 'rating': 4.8},
-        {'name': 'Dr. Thapa', 'clinic_name': 'Canine Mate', 'rating': 4.9},
-        {'name': 'Dr. Gurung', 'clinic_name': 'Canine Mate', 'rating': 4.7},
-        {'name': 'Dr. Das', 'clinic_name': 'Canine Mate', 'rating': 4.6},
+        {'name': 'Dr. Karki', 'clinic_name': 'CanineMate Pet Centre', 'rating': 4.8},
+        {'name': 'Dr. Thapa', 'clinic_name': 'CanineMate Pet Centre', 'rating': 4.9},
+        {'name': 'Dr. Gurung', 'clinic_name': 'CanineMate Pet Centre', 'rating': 4.7},
+        {'name': 'Dr. Das', 'clinic_name': 'CanineMate Pet Centre', 'rating': 4.6},
     ]
 
     for v_data in vets:
