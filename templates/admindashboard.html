@@ -110,45 +110,23 @@
             <h2 class="panel-title">Recent Users</h2>
             <a href="{% url 'admin_users' %}" class="view-all">View All</a>
         </div>
+        {% for user in recent_users %}
         <div class="user-row">
             <div class="user-left">
-                <div class="user-avatar">R</div>
+                <div class="user-avatar">{{ user.username|first|upper }}</div>
                 <div>
-                    <p class="user-name">Ram Sharma</p>
-                    <p class="user-email">ram@email.com</p>
+                    <p class="user-name">{{ user.get_full_name|default:user.username }}</p>
+                    <p class="user-email">{{ user.email }}</p>
                 </div>
             </div>
             <div class="user-right">
-                <p class="user-dogs">2 dogs</p>
-                <p class="user-joined">Jan 15, 2026</p>
+                <p class="user-dogs">{{ user.dog_count }} dogs</p>
+                <p class="user-joined">{{ user.date_joined|date:"M d, Y" }}</p>
             </div>
         </div>
-        <div class="user-row">
-            <div class="user-left">
-                <div class="user-avatar">S</div>
-                <div>
-                    <p class="user-name">Sita Thapa</p>
-                    <p class="user-email">sita@email.com</p>
-                </div>
-            </div>
-            <div class="user-right">
-                <p class="user-dogs">1 dog</p>
-                <p class="user-joined">Jan 14, 2026</p>
-            </div>
-        </div>
-        <div class="user-row">
-            <div class="user-left">
-                <div class="user-avatar">H</div>
-                <div>
-                    <p class="user-name">Hari Gurung</p>
-                    <p class="user-email">hari@email.com</p>
-                </div>
-            </div>
-            <div class="user-right">
-                <p class="user-dogs">3 dogs</p>
-                <p class="user-joined">Jan 13, 2026</p>
-            </div>
-        </div>
+        {% empty %}
+        <p style="text-align: center; color: #6b7280; padding: 1rem;">No recent users.</p>
+        {% endfor %}
     </div>
 
     <!-- Recent Orders -->
@@ -157,36 +135,23 @@
             <h2 class="panel-title">Recent Orders</h2>
             <a href="{% url 'admin_orders' %}" class="view-all">View All</a>
         </div>
+        {% for order in recent_orders %}
         <div class="order-row">
             <div class="order-top">
                 <div>
-                    <p class="order-product">Premium Dog Food</p>
-                    <p class="order-user">Ram Sharma</p>
+                    <p class="order-product">{{ order.order_id }}</p>
+                    <p class="order-user">{{ order.user.get_full_name|default:order.user.username }}</p>
                 </div>
-                <span class="badge badge-green">Completed</span>
+                <span
+                    class="badge {% if order.status == 'Delivered' %}badge-green{% elif order.status == 'Pending' %}badge-orange{% else %}badge-blue{% endif %}">
+                    {{ order.status }}
+                </span>
             </div>
-            <p class="order-amount">Rs. 2500</p>
+            <p class="order-amount">Rs. {{ order.amount }}</p>
         </div>
-        <div class="order-row">
-            <div class="order-top">
-                <div>
-                    <p class="order-product">Dog Toy Bundle</p>
-                    <p class="order-user">Sita Thapa</p>
-                </div>
-                <span class="badge badge-orange">Pending</span>
-            </div>
-            <p class="order-amount">Rs. 1100</p>
-        </div>
-        <div class="order-row">
-            <div class="order-top">
-                <div>
-                    <p class="order-product">Leather Collar</p>
-                    <p class="order-user">Hari Gurung</p>
-                </div>
-                <span class="badge badge-blue">Shipped</span>
-            </div>
-            <p class="order-amount">Rs. 1200</p>
-        </div>
+        {% empty %}
+        <p style="text-align: center; color: #6b7280; padding: 1rem;">No recent orders.</p>
+        {% endfor %}
     </div>
 </div>
 

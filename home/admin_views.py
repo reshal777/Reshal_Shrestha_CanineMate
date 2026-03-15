@@ -55,22 +55,135 @@ def admin_logout_view(request):
     auth_logout(request)
     return redirect('login')
 
+from django.core.paginator import Paginator
+from django.db.models import Q, Count
+
 @admin_required
 def admin_dashboard_view(request):
     product_count = Product.objects.count()
     user_count = User.objects.count()
     order_count = Order.objects.count()
     
+    # Fetch 5 most recent users with their dog counts
+    recent_users = User.objects.annotate(dog_count=Count('dogs')).order_by('-date_joined')[:5]
+    
+    # Fetch 5 most recent orders
+    recent_orders = Order.objects.select_related('user').order_by('-date')[:5]
+    
     return render(request, 'admindashboard.html', {
         'product_count': product_count,
         'user_count': user_count,
-        'order_count': order_count
+        'order_count': order_count,
+        'recent_users': recent_users,
+        'recent_orders': recent_orders
     })
 
 @admin_required
 def admin_users_view(request):
-    users = User.objects.all().order_by('-date_joined') if hasattr(User, 'date_joined') else User.objects.all().order_by('-user_id')
-    return render(request, 'adminusers.html', {'users': users})
+    search_query = request.GET.get('search', '')
+    status_filter = request.GET.get('status', '')
+    sort_by = request.GET.get('sort', '-date_joined')
+    
+    users_list = User.objects.annotate(dog_count=Count('dogs'))
+    
+    if search_query:
+        users_list = users_list.filter(
+            Q(first_name__icontains=search_query) | 
+            Q(last_name__icontains=search_query) | 
+            Q(email__icontains=search_query) |
+            Q(username__icontains=search_query)
+        )
+        
+    if status_filter == 'active':
+        users_list = users_list.filter(is_active=True)
+    elif status_filter == 'inactive':
+        users_list = users_list.filter(is_active=False)
+        
+    users_list = users_list.order_by(sort_by)
+    
+    paginator = Paginator(users_list, 10) # 10 users per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'adminusers.html', {
+        'users': page_obj,
+        'search_query': search_query,
+        'status_filter': status_filter,
+        'sort_by': sort_by
+    })
+
+@admin_required
+def admin_user_create_view(request):
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        is_staff = request.POST.get('is_staff') == 'on'
+        is_active = request.POST.get('is_active') == 'on'
+        
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Email already exists.")
+        elif User.objects.filter(username=username).exists():
+            messages.error(request, "Username already exists.")
+        else:
+            try:
+                User.objects.create_user(
+                    email=email,
+                    username=username,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name,
+                    is_staff=is_staff,
+                    is_active=is_active
+                )
+                messages.success(request, f"User {username} created successfully.")
+                return redirect('admin_users')
+            except Exception as e:
+                messages.error(request, f"Error creating user: {str(e)}")
+                
+    return render(request, 'admin_user_form.html', {'title': 'Create User'})
+
+@admin_required
+def admin_user_edit_view(request, user_id):
+    user = get_object_or_404(User, user_id=user_id)
+    if request.method == 'POST':
+        user.first_name = request.POST.get('first_name')
+        user.last_name = request.POST.get('last_name')
+        user.email = request.POST.get('email')
+        user.username = request.POST.get('username')
+        user.is_staff = request.POST.get('is_staff') == 'on'
+        user.is_active = request.POST.get('is_active') == 'on'
+        
+        new_password = request.POST.get('password')
+        if new_password:
+            user.set_password(new_password)
+            
+        try:
+            user.save()
+            messages.success(request, f"User {user.username} updated successfully.")
+            return redirect('admin_users')
+        except Exception as e:
+            messages.error(request, f"Error updating user: {str(e)}")
+            
+    return render(request, 'admin_user_form.html', {'user_obj': user, 'title': 'Edit User'})
+
+@admin_required
+def admin_user_delete_view(request, user_id):
+    user = get_object_or_404(User, user_id=user_id)
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'deactivate':
+            user.is_active = False
+            user.save()
+            messages.success(request, f"User {user.username} deactivated.")
+        elif action == 'delete':
+            user.delete()
+            messages.success(request, f"User {user.username} deleted permanently.")
+        return redirect('admin_users')
+    return redirect('admin_users')
+
 
 @admin_required
 def admin_products_view(request):
