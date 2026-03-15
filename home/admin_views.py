@@ -109,7 +109,13 @@ def admin_users_view(request):
         'users': page_obj,
         'search_query': search_query,
         'status_filter': status_filter,
-        'sort_by': sort_by
+        'sort_by': sort_by,
+        'is_active_status': status_filter == 'active',
+        'is_inactive_status': status_filter == 'inactive',
+        'sort_newest': sort_by == '-date_joined',
+        'sort_oldest': sort_by == 'date_joined',
+        'sort_username': sort_by == 'username',
+        'sort_email': sort_by == 'email',
     })
 
 @admin_required
