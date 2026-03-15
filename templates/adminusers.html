@@ -8,37 +8,43 @@
 </div>
 
 <div class="adoption-panel">
-    <div class="adoption-header" style="flex-direction: column; align-items: flex-start; gap: 1rem;">
-        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
-            <h2 class="panel-title">Users List</h2>
-            <a href="{% url 'admin_user_create' %}" class="btn-add">Add New User</a>
-        </div>
+    <!-- Search and Filters -->
+    <div
+        style="background: white; border-radius: 0.75rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+        <form method="GET" style="display: flex; gap: 1rem; align-items: center; width: 100%; flex-wrap: wrap;">
+            <!-- Search input container with icon -->
+            <div style="flex: 1; min-width: 300px; position: relative; display: flex; align-items: center;">
+                <svg style="position: absolute; left: 1rem; color: #9ca3af; width: 20px; height: 20px;"
+                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input type="text" name="search" value="{{ search_query }}"
+                    placeholder="Search users by name or email..."
+                    style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.75rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; outline: none; font-size: 0.95rem; color: #374151;"
+                    onkeydown="if(event.key === 'Enter') this.form.submit()">
+            </div>
 
-        <!-- Search and Filters -->
-        <form method="GET" style="width: 100%; display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
-            <input type="text" name="search" value="{{ search_query }}"
-                placeholder="Search by name, email, or username..."
-                style="flex: 1; min-width: 250px; padding: 0.6rem; border: 1px solid #ddd; border-radius: 0.5rem;">
+            <!-- Status Buttons -->
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="submit" name="status" value=""
+                    style="padding: 0.6rem 1.25rem; border-radius: 0.5rem; border: none; font-weight: 500; font-size: 0.95rem; transition: all 0.2s; cursor: pointer;
+                    {% if not is_active_status and not is_inactive_status %}background: #4FBDBA; color: white;{% else %}background: #f3f4f6; color: #4b5563;{% endif %}">
+                    All
+                </button>
+                <button type="submit" name="status" value="active"
+                    style="padding: 0.6rem 1.25rem; border-radius: 0.5rem; border: none; font-weight: 500; font-size: 0.95rem; transition: all 0.2s; cursor: pointer;
+                    {% if is_active_status %}background: #4FBDBA; color: white;{% else %}background: #f3f4f6; color: #4b5563;{% endif %}">
+                    Active
+                </button>
+                <button type="submit" name="status" value="inactive"
+                    style="padding: 0.6rem 1.25rem; border-radius: 0.5rem; border: none; font-weight: 500; font-size: 0.95rem; transition: all 0.2s; cursor: pointer;
+                    {% if is_inactive_status %}background: #4FBDBA; color: white;{% else %}background: #f3f4f6; color: #4b5563;{% endif %}">
+                    Inactive
+                </button>
+            </div>
 
-            <select name="status"
-                style="padding: 0.6rem; border: 1px solid #ddd; border-radius: 0.5rem; background: white;">
-                <option value="">All Status</option>
-                <option value="active" {% if is_active_status %}selected{% endif %}>Active</option>
-                <option value="inactive" {% if is_inactive_status %}selected{% endif %}>Inactive</option>
-            </select>
-
-            <select name="sort"
-                style="padding: 0.6rem; border: 1px solid #ddd; border-radius: 0.5rem; background: white;">
-                <option value="-date_joined" {% if sort_newest %}selected{% endif %}>Newest Joined</option>
-                <option value="date_joined" {% if sort_oldest %}selected{% endif %}>Oldest Joined</option>
-                <option value="username" {% if sort_username %}selected{% endif %}>Username (A-Z)</option>
-                <option value="email" {% if sort_email %}selected{% endif %}>Email (A-Z)</option>
-            </select>
-
-            <button type="submit" class="btn-add" style="background: #4b5563;">Apply Filters</button>
-            {% if search_query or status_filter != '' or sort_by != '-date_joined' %}
-            <a href="{% url 'admin_users' %}" class="view-all" style="display: flex; align-items: center;">Clear All</a>
-            {% endif %}
+            <input type="hidden" name="sort" value="{{ sort_by }}">
         </form>
     </div>
 
