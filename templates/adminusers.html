@@ -4,7 +4,6 @@
 {% block content %}
 <div class="welcome">
     <h1>Manage Users</h1>
-    <p>View, create, update and delete platform users</p>
 </div>
 
 <div class="adoption-panel">
@@ -56,7 +55,6 @@
                     <th>Email</th>
                     <th>Dogs</th>
                     <th>Status</th>
-                    <th>Role</th>
                     <th>Last Active</th>
                     <th>Actions</th>
                 </tr>
@@ -81,13 +79,6 @@
                         <span class="badge badge-green">Active</span>
                         {% else %}
                         <span class="badge badge-orange">Inactive</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if user.is_staff %}
-                        <span class="badge badge-blue">Admin</span>
-                        {% else %}
-                        <span class="badge" style="background: #f3f4f6; color: #4b5563;">User</span>
                         {% endif %}
                     </td>
                     <td>

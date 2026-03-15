@@ -84,7 +84,7 @@ def admin_users_view(request):
     status_filter = request.GET.get('status', '')
     sort_by = request.GET.get('sort', '-date_joined')
     
-    users_list = User.objects.annotate(dog_count=Count('dogs'))
+    users_list = User.objects.filter(is_staff=False).annotate(dog_count=Count('dogs'))
     
     if search_query:
         users_list = users_list.filter(
