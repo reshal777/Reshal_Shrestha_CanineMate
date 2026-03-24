@@ -1,0 +1,136 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Checkout - Grooming - Canine Mate{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+        <!-- Progress Bar -->
+        <div class="mb-12">
+            <div class="flex items-center justify-between max-w-xs mx-auto">
+                <div class="flex flex-col items-center">
+                    <div
+                        class="w-8 h-8 bg-[#4FBDBA] text-white rounded-full flex items-center justify-center font-semibold mb-2">
+                        1</div>
+                    <span class="text-xs font-medium text-gray-500">Details</span>
+                </div>
+                <div class="flex-1 h-px bg-[#4FBDBA] mb-6 mx-4"></div>
+                <div class="flex flex-col items-center">
+                    <div
+                        class="w-8 h-8 bg-[#4FBDBA] text-white rounded-full flex items-center justify-center font-semibold mb-2">
+                        2</div>
+                    <span class="text-xs font-medium text-[#4FBDBA]">Payment</span>
+                </div>
+                <div class="flex-1 h-px bg-gray-200 mb-6 mx-4"></div>
+                <div class="flex flex-col items-center">
+                    <div
+                        class="w-8 h-8 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center font-semibold mb-2">
+                        3</div>
+                    <span class="text-xs font-medium text-gray-500">Confirm</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Order Summary -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                <h2 class="text-xl font-bold text-gray-900 mb-6 font-primary">Grooming Summary</h2>
+
+                <div class="space-y-6">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.673.337a4 4 0 01-2.586.345l-1.1-.22a2 2 0 00-1.548.331l-.8.592a2 2 0 01-2.38 0l-.8-.593a2 2 0 00-1.547-.33l-1.1.22a4 4 0 01-2.587-.345l-.673-.337a6 6 0 00-3.86-.517l-2.387.477a2 2 0 00-1.022.547l-.547 1.022a1 1 0 00.19 1.09l1.414 1.414a1 1 0 001.09.19l1.022-.547a2 2 0 011.022-.547l2.387-.477a6 6 0 013.86.517l.673.337a4 4 0 002.586.345l1.1.22a2 2 0 011.548-.331l.8-.592a2 2 0 002.38 0l.8.593a2 2 0 011.547.33l1.1-.22a4 4 0 002.587.345l.673.337a6 6 0 013.86.517l2.387-.477a2 2 0 011.022.547l.547 1.022a1 1 0 00.19 1.09l1.414 1.414a1 1 0 001.09.19l1.022-.547z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Salon</p>
+                            <p class="font-semibold text-gray-900">{{ booking.salon.name }}</p>
+                            <p class="text-xs text-gray-400">{{ booking.salon.location }}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Schedule</p>
+                            <p class="font-semibold text-gray-900">{{ booking.booking_date|date:"F d, Y" }}</p>
+                            <p class="text-xs text-gray-400">{{ booking.booking_time|time:"g:i A" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Service</p>
+                            <p class="font-semibold text-gray-900">{{ booking.service.name }}</p>
+                            <p class="text-xs text-gray-400">Dog: {{ booking.dog.name }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-gray-100">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500 font-medium">Session Fee</span>
+                        <span class="text-2xl font-bold text-gray-900 font-primary">Rs. {{ booking.amount }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900 mb-6 font-primary">Choose Payment Method</h2>
+
+                    <div class="space-y-4">
+                        <!-- Khalti Option -->
+                        <div class="relative">
+                            <input type="radio" name="payment_method" id="khalti" class="peer hidden" checked>
+                            <label for="khalti"
+                                class="flex items-center justify-between p-4 bg-white border-2 border-gray-100 rounded-xl cursor-pointer hover:bg-gray-50 peer-checked:border-[#4FBDBA] peer-checked:bg-[#4FBDBA]/5 transition-all">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-[#5d2e8e] rounded-lg flex items-center justify-center">
+                                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/ee/Khalti_Digital_Wallet_Logo.png.jpg"
+                                            alt="Khalti" class="w-10 h-10 object-contain">
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-gray-900">Khalti Wallet</p>
+                                        <p class="text-xs text-gray-500">Instant payment via Khalti</p>
+                                    </div>
+                                </div>
+                                <div
+                                    class="w-5 h-5 border-2 border-gray-200 rounded-full flex items-center justify-center peer-checked:border-[#4FBDBA]">
+                                    <div class="w-2.5 h-2.5 bg-[#4FBDBA] rounded-full hidden peer-checked:block"></div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <a href="{% url 'khalti_init_grooming' booking.id %}"
+                        class="w-full bg-[#5d2e8e] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 hover:bg-[#4a2472] transition-colors shadow-lg shadow-purple-200">
+                        <span>Pay with Khalti</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </a>
+                    <p class="text-center text-xs text-gray-400 mt-4">Secured by Khalti Payment Gateway</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

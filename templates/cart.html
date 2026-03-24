@@ -322,10 +322,18 @@
 
 {% block extra_js %}
 <script>
-    // cart data
+    // cart data - now populated from Django context
     const cartItems = [
-        { id: 1, name: 'Premium Dog Food', category: 'Food', price: 2500, quantity: 2, image: 'https://img.drz.lazcdn.com/static/np/p/74f70a70a3b250fb5d86816a8d3f2088.jpg_720x720q80.jpg' },
-        { id: 2, name: 'Interactive Dog Toy', category: 'Toys', price: 850, quantity: 1, image: 'https://cdn.shopify.com/s/files/1/2798/4248/files/Colour_toys_best_for_dogs_480x480.jpg?v=1717632650' }
+        {% for item in cart_items %}
+        { 
+            id: {{ item.id }}, 
+            name: "{{ item.product.name|escapejs }}", 
+            category: "{{ item.product.category|escapejs }}", 
+            price: {{ item.product.price }}, 
+            quantity: {{ item.quantity }}, 
+            image: "{% if item.product.image %}{{ item.product.image.url }}{% else %}https://via.placeholder.com/96?text=No+Image{% endif %}" 
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
     ];
 
     // render the whole page
@@ -364,9 +372,9 @@
               <h3 class="item-name">${item.name}</h3>
             </div>
             <!-- remove item -->
-            <button class="delete-btn" onclick="removeItem(${item.id})">
+            <a href="/home/remove-from-cart/${item.id}/" class="delete-btn">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-            </button>
+            </a>
           </div>
           <div class="item-bottom">
             <!-- qty controls -->
@@ -374,14 +382,14 @@
               <button class="qty-btn" onclick="changeQty(${item.id}, -1)">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
               </button>
-              <span class="qty-num">${item.quantity}</span>
+              <span class="qty-num" id="qty-${item.id}">${item.quantity}</span>
               <button class="qty-btn" onclick="changeQty(${item.id}, 1)">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               </button>
             </div>
             <!-- item price -->
             <div class="item-price">
-              <p class="item-total">Rs. ${item.price * item.quantity}</p>
+              <p class="item-total" id="total-${item.id}">Rs. ${item.price * item.quantity}</p>
               <p class="item-each">Rs. ${item.price} each</p>
             </div>
           </div>
@@ -392,7 +400,7 @@
 
         // free delivery tip shown only if under 3000
         const deliveryTip = subtotal < 3000
-            ? `<p class="delivery-tip">Add Rs. ${3000 - subtotal} more to get free delivery!</p>`
+            ? `<p class="delivery-tip" id="delivery-tip">Add Rs. ${Math.max(0, 3000 - subtotal)} more to get free delivery!</p>`
             : '';
 
         app.innerHTML = `
@@ -412,13 +420,13 @@
       <div>
         <div class="summary-card">
           <h2 class="summary-title">Order Summary</h2>
-          <div class="summary-row"><span>Subtotal</span><span>Rs. ${subtotal}</span></div>
-          <div class="summary-row"><span>Delivery</span><span>${delivery === 0 ? 'Free' : 'Rs. ' + delivery}</span></div>
-          ${deliveryTip}
+          <div class="summary-row"><span>Subtotal</span><span id="subtotal">Rs. ${subtotal}</span></div>
+          <div class="summary-row"><span>Delivery</span><span id="delivery">${delivery === 0 ? 'Free' : 'Rs. ' + delivery}</span></div>
+          <div id="tip-container">${deliveryTip}</div>
           <div class="summary-divider">
             <div class="total-row">
               <span class="total-label">Total</span>
-              <span class="total-amount">Rs. ${total}</span>
+              <span class="total-amount" id="grand-total">Rs. ${total}</span>
             </div>
           </div>
           <button class="checkout-btn" onclick="window.location.href='{% url 'checkout' %}'">Proceed to Checkout</button>
@@ -434,19 +442,31 @@
     </div>`;
     }
 
-    // update quantity, min 1
-    function changeQty(id, delta) {
+    // update quantity via AJAX
+    async function changeQty(id, delta) {
         const item = cartItems.find(i => i.id === id);
         if (!item) return;
-        item.quantity = Math.max(1, item.quantity + delta);
-        renderCart();
-    }
+        
+        if (item.quantity + delta < 1) return;
 
-    // remove item from cart
-    function removeItem(id) {
-        const idx = cartItems.findIndex(i => i.id === id);
-        if (idx !== -1) cartItems.splice(idx, 1);
-        renderCart();
+        try {
+            const response = await fetch(`/home/update-cart-quantity/${id}/?delta=${delta}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                // Update local model
+                item.quantity = data.quantity;
+                
+                // Refresh the whole cart UI to keep all totals synced easily
+                renderCart();
+            }
+        } catch (error) {
+            console.error('Failed to update quantity:', error);
+        }
     }
 
     // first render

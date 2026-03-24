@@ -1,0 +1,68 @@
+{% for product in products %}
+<div class="product-card">
+  <div class="product-img-wrap">
+    {% if product.image %}
+    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+    {% else %}
+    <div style="background:#f3f4f6; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#9ca3af; font-size: 0.8rem; font-weight: 500;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 0.5rem; opacity: 0.5;">
+        <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+      </svg>
+      No Image
+    </div>
+    {% endif %}
+    
+    {% if product.stock > 0 %}
+    <div class="stock-badge in">In Stock</div>
+    {% else %}
+    <div class="stock-badge out">Out of Stock</div>
+    {% endif %}
+    
+    {% if product.discount_percent > 0 %}
+    <div style="position: absolute; top: 1rem; left: 1rem; background: #fbbf24; color: #fff; padding: 0.25rem 0.6rem; border-radius: 0.5rem; font-size: 0.7rem; font-weight: 700; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">-{{ product.discount_percent }}%</div>
+    {% endif %}
+  </div>
+  
+  <div class="product-body">
+    <div class="product-cat">{{ product.category|upper }}</div>
+    <h3 class="product-name">{{ product.name }}</h3>
+    
+    <div class="product-rating">
+      {% with ""|center:5 as range %}
+      {% for _ in range %}
+        {% if forloop.counter <= product.rating %}
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#eab308"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
+        {% else %}
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#d1d5db"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
+        {% endif %}
+      {% endfor %}
+      {% endwith %}
+      <span class="rating-num">{{ product.rating|floatformat:1 }}</span>
+      <span class="rating-count">({{ product.reviews_count }})</span>
+    </div>
+    
+    <div class="product-footer" style="display: flex; gap: 8px;">
+      <div class="product-price" style="flex: 1;">
+        Rs. {{ product.price }}
+        {% if product.old_price %}
+        <span style="font-size: 0.8rem; text-decoration: line-through; color: #9ca3af; font-weight: 400; margin-left: 4px;">Rs. {{ product.old_price }}</span>
+        {% endif %}
+      </div>
+      <a href="{% url 'product_details' product.id %}" class="view-btn" style="padding: 0.5rem 0.85rem; background: #f3f4f6; color: #374151; text-decoration: none; font-size: 0.8rem; font-weight: 600; border-radius: 0.5rem; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        View Product
+      </a>
+      <button class="view-btn add-to-cart-btn" data-id="{{ product.id }}" title="Add to Cart" style="padding: 0.5rem; background: #4FBDBA; color: #fff;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+{% empty %}
+<div style="grid-column: 1 / -1; text-align: center; padding: 4rem; background: #fff; border-radius: 1rem; color: #6b7280;">
+  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem; opacity: 0.5;">
+    <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.56-7.43"/>
+  </svg>
+  <p>No products found in the system yet.</p>
+</div>
+{% endfor %}

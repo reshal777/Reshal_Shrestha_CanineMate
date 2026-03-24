@@ -1,6 +1,8 @@
 from django.utils import timezone
 from datetime import timedelta
-from home.models import Appointment, GroomingBooking, Vaccination, Medication, Dog
+from veterinary.models import Appointment
+from grooming.models import GroomingBooking
+from pets.models import Vaccination, Medication, Dog
 
 def notifications(request):
     notifications = []
@@ -111,6 +113,34 @@ def notifications(request):
                 'sort_date': med.next_due
             })
             
+        # 5. New Unified Reminders
+        from pets.models import Reminder
+        reminders = Reminder.objects.filter(
+            dog__in=user_dogs,
+            is_active=True,
+            start_date__gte=today,
+            start_date__lte=today + timedelta(days=30)
+        ).order_by('start_date')
+        
+        for rem in reminders:
+            days_away = (rem.start_date - today).days
+            time_str = rem.reminder_time.strftime('%I:%M %p')
+            
+            if days_away == 0:
+                dt_str = f"Due Today at {time_str}!"
+            elif days_away == 1:
+                dt_str = f"Tomorrow at {time_str}"
+            else:
+                dt_str = f"Due in {days_away} days"
+                
+            notifications.append({
+                'title': f"{rem.reminder_type} Alert",
+                'message': f"{rem.name} for {rem.dog.name}",
+                'time': dt_str,
+                'type': rem.reminder_type.lower(),
+                'sort_date': rem.start_date
+            })
+            
         # Sort by date closest to today
         notifications.sort(key=lambda x: x['sort_date'])
         
@@ -120,4 +150,12 @@ def notifications(request):
     return {
         'user_notifications': notifications,
         'notification_count': len(notifications)
+    }
+def global_context(request):
+    from shop.models import CartItem
+    cart_count = 0
+    if request.user.is_authenticated:
+        cart_count = CartItem.objects.filter(user=request.user).count()
+    return {
+        'cart_count': cart_count
     }

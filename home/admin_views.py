@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from accounts.models import User
-from .models import Product, Order
+from shop.models import Product, Order
 
 def admin_required(view_func):
     """Custom decorator for admin-only views"""

@@ -1,0 +1,154 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Checkout - Canine Mate{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+        <!-- Progress Bar -->
+        <div class="mb-12">
+            <div class="flex items-center justify-between max-w-xs mx-auto">
+                <div class="flex flex-col items-center">
+                    <div
+                        class="w-8 h-8 bg-[#4FBDBA] text-white rounded-full flex items-center justify-center font-semibold mb-2">
+                        1</div>
+                    <span class="text-xs font-medium text-gray-500">Details</span>
+                </div>
+                <div class="flex-1 h-px bg-[#4FBDBA] mb-6 mx-4"></div>
+                <div class="flex flex-col items-center">
+                    <div
+                        class="w-8 h-8 bg-[#4FBDBA] text-white rounded-full flex items-center justify-center font-semibold mb-2">
+                        2</div>
+                    <span class="text-xs font-medium text-[#4FBDBA]">Payment</span>
+                </div>
+                <div class="flex-1 h-px bg-gray-200 mb-6 mx-4"></div>
+                <div class="flex flex-col items-center">
+                    <div
+                        class="w-8 h-8 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center font-semibold mb-2">
+                        3</div>
+                    <span class="text-xs font-medium text-gray-500">Confirm</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Order Summary -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                <h2 class="text-XL font-bold text-gray-900 mb-6 font-primary">Appointment Summary</h2>
+
+                <div class="space-y-6">
+                    <div class="flex items-start gap-4">
+                        <div
+                            class="w-12 h-12 bg-[#4FBDBA]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Veterinarian</p>
+                            <p class="font-semibold text-gray-900">{{ appointment.veterinarian.name }}</p>
+                            <p class="text-xs text-gray-400">{{ appointment.veterinarian.clinic.name }}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Schedule</p>
+                            <p class="font-semibold text-gray-900">{{ appointment.appointment_date|date:"F d, Y" }}</p>
+                            <p class="text-xs text-gray-400">{{ appointment.appointment_time|time:"g:i A" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Service Type</p>
+                            <p class="font-semibold text-gray-900">{{ appointment.service_type }}</p>
+                            <p class="text-xs text-gray-400">Dog: {{ appointment.dog.name }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-gray-100">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500 font-medium">Consultation Fee</span>
+                        <span class="text-2xl font-bold text-gray-900 font-primary">Rs. {{ appointment.amount }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900 mb-6 font-primary">Choose Payment Method</h2>
+
+                    <div class="space-y-4">
+                        <!-- Khalti Option -->
+                        <div class="relative">
+                            <input type="radio" name="payment_method" id="khalti" class="peer hidden" checked>
+                            <label for="khalti"
+                                class="flex items-center justify-between p-4 bg-white border-2 border-gray-100 rounded-xl cursor-pointer hover:bg-gray-50 peer-checked:border-[#4FBDBA] peer-checked:bg-[#4FBDBA]/5 transition-all">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-[#5d2e8e] rounded-lg flex items-center justify-center">
+                                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/ee/Khalti_Digital_Wallet_Logo.png.jpg"
+                                            alt="Khalti" class="w-10 h-10 object-contain">
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-gray-900">Khalti Wallet</p>
+                                        <p class="text-xs text-gray-500">Instant payment via Khalti</p>
+                                    </div>
+                                </div>
+                                <div
+                                    class="w-5 h-5 border-2 border-gray-200 rounded-full flex items-center justify-center peer-checked:border-[#4FBDBA]">
+                                    <div class="w-2.5 h-2.5 bg-[#4FBDBA] rounded-full hidden peer-checked:block"></div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Placeholder for other methods -->
+                        <div class="opacity-50 grayscale pointer-events-none">
+                            <div class="flex items-center gap-4 p-4 border-2 border-gray-100 rounded-xl">
+                                <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-gray-900">Fonepay</p>
+                                    <p class="text-xs text-gray-500">Coming soon</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <a href="{% url 'khalti_init_appointment' appointment.id %}"
+                        class="w-full bg-[#5d2e8e] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 hover:bg-[#4a2472] transition-colors shadow-lg shadow-purple-200">
+                        <span>Pay with Khalti</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </a>
+                    <p class="text-center text-xs text-gray-400 mt-4">Secured by Khalti Payment Gateway</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

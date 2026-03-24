@@ -637,14 +637,13 @@
     <h2 class="section-title">My Grooming Bookings</h2>
     <div class="bookings-grid">
         {% for booking in bookings %}
-        <!-- confirmed -->
         <div class="card booking-card">
             <div class="booking-top">
                 <div>
                     <p class="booking-service">{{ booking.service.name }}</p>
                     <p class="booking-dog">Dog: {{ booking.dog.name }}</p>
                 </div>
-                <span class="badge badge-green">{{ booking.status }}</span>
+                <span class="badge {% if booking.status == 'Confirmed' %}badge-green{% elif booking.status == 'Pending' %}badge-orange{% else %}badge-blue{% endif %}">{{ booking.status }}</span>
             </div>
             <div class="booking-meta">
                 <div class="meta-row">
@@ -661,12 +660,19 @@
                         <circle cx="12" cy="12" r="10" />
                         <polyline points="12 6 12 12 16 14" />
                     </svg>
-                    {{ booking.booking_date|date:"M d, Y" }}
+                    {{ booking.booking_date|date:"M d, Y" }} at {{ booking.booking_time|time:"g:i A" }}
                 </div>
             </div>
             <div class="booking-actions">
+                {% if booking.status == 'Pending' %}
+                <a href="{% url 'grooming_checkout' booking.id %}" class="reschedule-btn" style="flex: 2; text-decoration: none; text-align: center; background: #4FBDBA; color: white;">Pay Now</a>
+                {% else %}
                 <button class="reschedule-btn"
-                    onclick="openRescheduleModal('{{ booking.id }}', '{{ booking.booking_date|date:'Y-m-d' }}', '{{ booking.booking_time|time:'H:i' }}')">Reschedule</button>
+                    data-booking-id="{{ booking.id }}"
+                    data-booking-date="{{ booking.booking_date|date:'Y-m-d' }}"
+                    data-booking-time="{{ booking.booking_time|time:'H:i' }}"
+                    onclick="openRescheduleModal(this)">Reschedule</button>
+                {% endif %}
                 <form action="{% url 'cancel_grooming' booking.id %}" method="POST" style="flex: 1; display: flex;">
                     {% csrf_token %}
                     <button type="submit" class="cancel-booking-btn" style="width: 100%;">Cancel</button>
@@ -776,7 +782,10 @@
         document.getElementById('booking-date').value = today;
     }
 
-    function openRescheduleModal(bookingId, date, time) {
+    function openRescheduleModal(btn) {
+        const bookingId = btn.getAttribute('data-booking-id');
+        const date = btn.getAttribute('data-booking-date');
+        const time = btn.getAttribute('data-booking-time');
         document.getElementById('modal-title').innerText = "Reschedule Grooming";
         document.getElementById('confirm-btn-text').innerText = "Save Changes";
 

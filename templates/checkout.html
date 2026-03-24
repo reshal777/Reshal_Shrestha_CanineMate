@@ -257,120 +257,113 @@
 
   <div class="checkout-grid">
     <!-- left: delivery info + payment -->
-    <div>
-      <!-- delivery info form -->
-      <div class="card">
-        <h2>Delivery Information</h2>
-        <!-- first + last name -->
-        <div class="field-row">
-          <div class="field">
-            <label>First Name</label>
-            <input type="text" placeholder="First Name" />
+    <form method="POST" action="{% url 'checkout' %}" class="contents">
+      {% csrf_token %}
+      <div>
+        <!-- delivery info form -->
+        <div class="card">
+          <h2>Delivery Information</h2>
+          <!-- first + last name -->
+          <div class="field-row">
+            <div class="field">
+              <label>First Name</label>
+              <input type="text" name="first_name" placeholder="First Name" required value="{{ user.first_name }}" />
+            </div>
+            <div class="field">
+              <label>Last Name</label>
+              <input type="text" name="last_name" placeholder="Last Name" required value="{{ user.last_name }}" />
+            </div>
           </div>
           <div class="field">
-            <label>Last Name</label>
-            <input type="text" placeholder="Last Name" />
-          </div>
-        </div>
-        <div class="field">
-          <label>Phone Number</label>
-          <input type="tel" placeholder="+977 9876543210" />
-        </div>
-        <div class="field">
-          <label>Email Address</label>
-          <input type="email" placeholder="your@email.com" />
-        </div>
-        <div class="field">
-          <label>Street Address</label>
-          <input type="text" placeholder="House no., Street name" />
-        </div>
-        <!-- city + postal code -->
-        <div class="field-row">
-          <div class="field">
-            <label>City</label>
-            <select>
-              <option>Pokhara Lakeside</option>
-              <option>Lalitpur</option>
-              <option>Bhaktapur</option>
-              <option>Pokhara</option>
-            </select>
+            <label>Phone Number</label>
+            <input type="tel" name="phone" placeholder="+977 9876543210" required value="{{ user.phone|default:'' }}" />
           </div>
           <div class="field">
-            <label>Postal Code</label>
-            <input type="text" placeholder="44600" />
+            <label>Email Address</label>
+            <input type="email" name="email" placeholder="your@email.com" required value="{{ user.email }}" />
+          </div>
+          <div class="field">
+            <label>Street Address</label>
+            <input type="text" name="address" placeholder="House no., Street name" required />
+          </div>
+          <!-- city + postal code -->
+          <div class="field-row">
+            <div class="field">
+              <label>City</label>
+              <select name="city" required>
+                <option value="Kathmandu">Kathmandu</option>
+                <option value="Lalitpur">Lalitpur</option>
+                <option value="Bhaktapur">Bhaktapur</option>
+                <option value="Pokhara">Pokhara</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Postal Code</label>
+              <input type="text" name="postal_code" placeholder="44600" required />
+            </div>
+          </div>
+          <div class="field">
+            <label>Delivery Notes (Optional)</label>
+            <textarea name="notes" rows="3" placeholder="Any special instructions for delivery..."></textarea>
           </div>
         </div>
-        <div class="field">
-          <label>Delivery Notes (Optional)</label>
-          <textarea rows="3" placeholder="Any special instructions for delivery..."></textarea>
+
+        <!-- payment method -->
+        <div class="card">
+          <h2>Payment Method</h2>
+          <!-- cash on delivery -->
+          <div class="payment-option active" id="opt-cod" onclick="selectCheckoutPayment('cod')">
+            <input type="radio" name="payment_method" value="Cash on Delivery" id="radio-cod" checked />
+            <label for="radio-cod" class="payment-label">
+              <strong>Cash on Delivery</strong>
+              <span>Pay when you receive your order</span>
+            </label>
+          </div>
+          <!-- Khalti -->
+          <div class="payment-option" id="opt-khalti" onclick="selectCheckoutPayment('khalti')">
+            <input type="radio" name="payment_method" value="khalti" id="radio-khalti" />
+            <label for="radio-khalti" class="payment-label">
+              <strong>Khalti</strong>
+              <span>Pay securely with Khalti</span>
+            </label>
+          </div>
         </div>
       </div>
 
-      <!-- payment method -->
-      <div class="card">
-        <h2>Payment Method</h2>
-        <!-- cash on delivery -->
-        <label class="payment-option active" id="opt-cod" onclick="selectCheckoutPayment('cod')">
-          <input type="radio" name="payment" value="cod" checked />
-          <div class="payment-label">
-            <strong>Cash on Delivery</strong>
-            <span>Pay when you receive your order</span>
+      <!-- right: order summary -->
+      <div>
+        <div class="summary-card">
+          <h2>Order Summary</h2>
+          <!-- item list -->
+          <div class="summary-items">
+            {% for item in cart_items %}
+            <div class="summary-item">
+              <span>{{ item.product.name }} x {{ item.quantity }}</span>
+              <span>Rs. {{ item.total_price }}</span>
+            </div>
+            {% endfor %}
           </div>
-        </label>
-        <!-- eSewa -->
-        <label class="payment-option" id="opt-esewa" onclick="selectCheckoutPayment('esewa')">
-          <input type="radio" name="payment" value="esewa" />
-          <div class="payment-label">
-            <strong>eSewa</strong>
-            <span>Pay securely with eSewa</span>
+          <!-- totals -->
+          <div class="summary-row"><span>Subtotal</span><span>Rs. {{ total_amount }}</span></div>
+          <div class="summary-row"><span>Delivery</span><span class="free-delivery">Free</span></div>
+          <div class="summary-divider">
+            <div class="total-row">
+              <span class="total-label">Total</span>
+              <span class="total-amount">Rs. {{ total_amount }}</span>
+            </div>
           </div>
-        </label>
-        <!-- Khalti -->
-        <label class="payment-option" id="opt-khalti" onclick="selectCheckoutPayment('khalti')">
-          <input type="radio" name="payment" value="khalti" />
-          <div class="payment-label">
-            <strong>Khalti</strong>
-            <span>Pay securely with Khalti</span>
-          </div>
-        </label>
-      </div>
-    </div>
-
-    <!-- right: order summary -->
-    <div>
-      <div class="summary-card">
-        <h2>Order Summary</h2>
-        <!-- item list -->
-        <div class="summary-items">
-          <div class="summary-item">
-            <span>Premium Dog Food x 2</span>
-            <span>Rs. 5000</span>
-          </div>
-          <div class="summary-item">
-            <span>Interactive Dog Toy x 1</span>
-            <span>Rs. 850</span>
-          </div>
+          <!-- place order -->
+          <button type="submit" class="place-order-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            Place Order
+          </button>
+          <p class="terms-note">By placing this order, you agree to our Terms &amp; Conditions and Privacy Policy</p>
         </div>
-        <!-- totals -->
-        <div class="summary-row"><span>Subtotal</span><span>Rs. 5850</span></div>
-        <div class="summary-row"><span>Delivery</span><span class="free-delivery">Free</span></div>
-        <div class="summary-divider">
-          <div class="total-row">
-            <span class="total-label">Total</span>
-            <span class="total-amount">Rs. 5850</span>
-          </div>
-        </div>
-        <!-- place order -->
-        <button class="place-order-btn" onclick="confirmPlaceOrder()">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-          Place Order
-        </button>
-        <p class="terms-note">By placing this order, you agree to our Terms &amp; Conditions and Privacy Policy</p>
       </div>
-    </div>
+    </form>
   </div>
 </div>
 {% endblock %}
@@ -378,19 +371,21 @@
 {% block extra_js %}
 <script>
   // highlight the selected payment option
-  function selectCheckoutPayment(method) {
-    const options = ['cod', 'esewa', 'khalti'];
-    options.forEach(opt => {
-      const el = document.getElementById('opt-' + opt);
-      el.classList.toggle('active', opt === method);
-      el.querySelector('input').checked = opt === method;
+  document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+      // Remove active class from all options
+      document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('active'));
+      // Adding active class to the parent div
+      this.closest('.payment-option').classList.add('active');
     });
-  }
+  });
 
-  // place order confirmation
-  function confirmPlaceOrder() {
-    alert('Order placed successfully! You will receive a confirmation email shortly.');
-    window.location.href = "{% url 'dashboard' %}";
+  // Enable entire card click
+  function selectCheckoutPayment(method) {
+    const radio = document.getElementById('radio-' + method);
+    if (radio) {
+      radio.click(); // Trigger change event
+    }
   }
 </script>
 {% endblock %}

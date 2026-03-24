@@ -413,19 +413,41 @@
         </div>
         <!-- category buttons, JS handles active state -->
         <div id="categories">
-          <button class="cat-btn active" data-cat="allproducts">All Products</button>
-          <button class="cat-btn" data-cat="food">Food</button>
-          <button class="cat-btn" data-cat="toys">Toys</button>
-          <button class="cat-btn" data-cat="accessories">Accessories</button>
-          <button class="cat-btn" data-cat="health&wellness">Health &amp; Wellness</button>
+          <a href="{% url 'shop' %}" class="cat-btn {% if not request.GET.category %}active{% endif %}">All Products</a>
+          {% for category in categories %}
+          <a href="{% url 'shop' %}?category={{ category }}" class="cat-btn {% if request.GET.category == category %}active{% endif %}">{{ category }}</a>
+          {% endfor %}
         </div>
-        <!-- price filter checkboxes -->
+        <!-- price filter dynamic links -->
         <div class="price-section">
           <h3>Price Range</h3>
-          <label class="price-label"><input type="checkbox" /><span>Under Rs. 500</span></label>
-          <label class="price-label"><input type="checkbox" /><span>Rs. 500 - 1000</span></label>
-          <label class="price-label"><input type="checkbox" /><span>Rs. 1000 - 2000</span></label>
-          <label class="price-label"><input type="checkbox" /><span>Above Rs. 2000</span></label>
+          <a href="{% url 'shop' %}{% if request.GET.category %}?category={{ request.GET.category }}&{% else %}?{% endif %}price_range=under_500" class="price-link {% if current_price_range == 'under_500' %}active{% endif %}" style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size: 0.875rem; color: #4b5563; text-decoration:none;">
+            <div style="width:16px; height:16px; border:1px solid #d1d5db; border-radius:4px; display:flex; align-items:center; justify-content:center; background:{% if current_price_range == 'under_500' %}#4FBDBA{% else %}transparent{% endif %};">
+                {% if current_price_range == 'under_500' %}<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>{% endif %}
+            </div>
+            Under Rs. 500
+          </a>
+          <a href="{% url 'shop' %}{% if request.GET.category %}?category={{ request.GET.category }}&{% else %}?{% endif %}price_range=500_1000" class="price-link {% if current_price_range == '500_1000' %}active{% endif %}" style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size: 0.875rem; color: #4b5563; text-decoration:none;">
+            <div style="width:16px; height:16px; border:1px solid #d1d5db; border-radius:4px; display:flex; align-items:center; justify-content:center; background:{% if current_price_range == '500_1000' %}#4FBDBA{% else %}transparent{% endif %};">
+                {% if current_price_range == '500_1000' %}<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>{% endif %}
+            </div>
+            Rs. 500 - 1000
+          </a>
+          <a href="{% url 'shop' %}{% if request.GET.category %}?category={{ request.GET.category }}&{% else %}?{% endif %}price_range=1000_2000" class="price-link {% if current_price_range == '1000_2000' %}active{% endif %}" style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size: 0.875rem; color: #4b5563; text-decoration:none;">
+            <div style="width:16px; height:16px; border:1px solid #d1d5db; border-radius:4px; display:flex; align-items:center; justify-content:center; background:{% if current_price_range == '1000_2000' %}#4FBDBA{% else %}transparent{% endif %};">
+                {% if current_price_range == '1000_2000' %}<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>{% endif %}
+            </div>
+            Rs. 1000 - 2000
+          </a>
+          <a href="{% url 'shop' %}{% if request.GET.category %}?category={{ request.GET.category }}&{% else %}?{% endif %}price_range=above_2000" class="price-link {% if current_price_range == 'above_2000' %}active{% endif %}" style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size: 0.875rem; color: #4b5563; text-decoration:none;">
+            <div style="width:16px; height:16px; border:1px solid #d1d5db; border-radius:4px; display:flex; align-items:center; justify-content:center; background:{% if current_price_range == 'above_2000' %}#4FBDBA{% else %}transparent{% endif %};">
+                {% if current_price_range == 'above_2000' %}<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>{% endif %}
+            </div>
+            Above Rs. 2000
+          </a>
+          {% if current_price_range %}
+          <a href="{% url 'shop' %}{% if request.GET.category %}?category={{ request.GET.category }}{% endif %}" style="font-size: 0.75rem; color: #ef4444; text-decoration:underline; display:block; margin-top:8px;">Clear Price Filter</a>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -433,7 +455,7 @@
     <!-- product listing -->
     <div class="products-area">
       <div class="products-header">
-        <p id="product-count">6 products found</p>
+        <p id="product-count">{{ product_count }} products found</p>
         <select class="sort-select">
           <option>Sort by: Popular</option>
           <option>Price: Low to High</option>
@@ -441,8 +463,10 @@
           <option>Highest Rated</option>
         </select>
       </div>
-      <!-- cards injected here by JS -->
-      <div class="products-grid" id="products-grid"></div>
+      <!-- cards loop -->
+      <div class="products-grid" id="products-grid">
+        {% include 'shop_product_list.html' %}
+      </div>
     </div>
   </div>
 
@@ -469,96 +493,147 @@
 
 {% block extra_js %}
 <script>
-  // all product data
-  const products = [
-    {
-      id: 1, name: 'Premium Dog Food', category: 'Food', price: 2500, rating: 0, reviews: 0, image:
-        'https://m.media-amazon.com/images/I/71WuWI0+VxL.jpg', inStock: true
-    },
-    {
-      id: 2, name: 'Interactive Dog Toy', category: 'Toys', price: 850, rating: 0, reviews: 0, image:
-        'https://armorthepooch.ca/cdn/shop/products/TotallyPooched-Huff_nPuffRubberBall_StickSet3pc2.webp?v=1681950681&width=2400', inStock: true
-    },
-    {
-      id: 3, name: 'Leather Dog Collar', category: 'Accessories', price: 1200, rating: 0, reviews: 0, image:
-        'https://assets.mgimgs.com/mgimgs/rk/images/dp/wcm/202542/0002/carson-leather-dog-collar-2-o.jpg', inStock: true
-    },
-    {
-      id: 4, name: 'Dog Shampoo Set', category: 'Health & Wellness', price: 950, rating: 0, reviews: 0, image:
-        'https://www.hugglepets.co.uk/wp-content/uploads/2023/11/Sampoo-and-Cologne4455.png', inStock: true
-    },
-    {
-      id: 5, name: 'Organic Dog Treats', category: 'Food', price: 650, rating: 0, reviews: 0, image:
-        'https://tastythriftytimely.com/wp-content/uploads/2023/01/3-Ingredient-Dog-Treats-Featured.jpg', inStock: true
-    },
-    {
-      id: 6, name: 'Plush Toy Bundle', category: 'Toys', price: 1100, rating: 0, reviews: 0, image:
-        'https://www.worldofbears.com/wp-content/uploads/2023/10/pic_600_91974.jpg', inStock: true
-    }
-  ];
-
-  let selectedCategory = 'allproducts';
-  let searchQuery = '';
-
-  // builds and renders the product cards
-  function renderProducts() {
-    const grid = document.getElementById('products-grid');
-
-    // filter by category AND search query
-    const filtered = products.filter(p => {
-      const matchesCategory = selectedCategory === 'allproducts' ||
-        p.category.toLowerCase().replace(/\s/g, '') === selectedCategory.replace(/\s/g, '');
-      const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.category.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
-    });
-
-    document.getElementById('product-count').textContent = `${filtered.length} products found`;
-
-    grid.innerHTML = filtered.map(p => `
-  <a href="/home/product/${p.id}/" class="product-card">
-    <div class="product-img-wrap">
-      <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/400x256?text=No+Image'" />
-      <span class="stock-badge ${p.inStock ? 'in' : 'out'}">${p.inStock ? 'In Stock' : 'Out of Stock'}</span>
-    </div>
-    <div class="product-body">
-      <span class="product-cat">${p.category}</span>
-      <h3 class="product-name">${p.name}</h3>
-      <!-- star rating -->
-      <div class="product-rating">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1">
-          <polygon
-            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-        </svg>
-        <span class="rating-num">${p.rating}</span>
-        <span class="rating-count">(${p.reviews})</span>
-      </div>
-      <div class="product-footer">
-        <span class="product-price">Rs. ${p.price}</span>
-        <button class="view-btn">View Details</button>
-      </div>
-    </div>
-  </a>
-  `).join('');
+  // Initialize Lucide icons if not already done
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
   }
 
-  // handle category button clicks
-  document.getElementById('categories').addEventListener('click', e => {
-    const btn = e.target.closest('.cat-btn');
-    if (!btn) return;
-    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    selectedCategory = btn.dataset.cat;
-    renderProducts();
+  const productsGrid = document.getElementById('products-grid');
+
+  // Helper to handle AJAX filtering
+  async function performFilter(url) {
+    // Show a subtle loading state
+    productsGrid.style.opacity = '0.5';
+    productsGrid.style.transition = 'opacity 0.2s';
+
+    try {
+        const response = await fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+        const html = await response.text();
+        
+        // Update grid
+        productsGrid.innerHTML = html;
+        productsGrid.style.opacity = '1';
+        
+        // Update URL without refresh
+        window.history.pushState({}, '', url);
+        
+        // If lucide is used in the partial, re-run it
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        
+    } catch (error) {
+        console.error('Filtering failed:', error);
+        productsGrid.style.opacity = '1';
+    }
+  }
+
+  // Intercept Category & Price Link Clicks
+  document.addEventListener('click', function(e) {
+    const trigger = e.target.closest('.cat-btn, .price-link');
+    if (trigger) {
+        e.preventDefault();
+        const url = trigger.getAttribute('href');
+        
+        // Update Active States UI immediately for better feel
+        if (trigger.classList.contains('cat-btn')) {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            trigger.classList.add('active');
+        }
+        
+        performFilter(url);
+    }
+    
+    // Clear filter link
+    if (e.target.matches('a[style*="clear"]')) {
+        e.preventDefault();
+        performFilter(e.target.getAttribute('href'));
+    }
   });
 
-  // handle search input
-  document.getElementById('product-search').addEventListener('input', e => {
-    searchQuery = e.target.value;
-    renderProducts();
+  // AJAX Search with Debounce
+  let searchTimeout;
+  const searchInput = document.querySelector('.search-box input');
+  if (searchInput) {
+    searchInput.addEventListener('input', function(e) {
+      clearTimeout(searchTimeout);
+      const query = e.target.value;
+      const baseUrl = window.location.pathname;
+      const params = new URLSearchParams(window.location.search);
+      
+      if (query) params.set('search', query);
+      else params.delete('search');
+      
+      const newUrl = `${baseUrl}?${params.toString()}`;
+      
+      searchTimeout = setTimeout(() => {
+        performFilter(newUrl);
+      }, 300); // 300ms debounce
+    });
+  }
+
+  // AJAX Add to Cart
+  document.addEventListener('click', async function(e) {
+    const btn = e.target.closest('.add-to-cart-btn');
+    if (btn) {
+        e.preventDefault();
+        const productId = btn.getAttribute('data-id');
+        const url = `/home/add-to-cart/${productId}/`;
+        
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            if (response.status === 403) {
+                 window.location.href = '{% url 'login' %}';
+                 return;
+            }
+            
+            const data = await response.json();
+            if (data.success) {
+                // Update Badge in Navbar
+                const badge = document.querySelector('a[href="/home/cart/"] span');
+                if (badge) {
+                    badge.textContent = data.cart_count;
+                } else {
+                    // Create badge if it didn't exist
+                    const cartLink = document.querySelector('a[href="/home/cart/"]');
+                    if (cartLink) {
+                        const newBadge = document.createElement('span');
+                        newBadge.className = 'absolute top-0 right-0 inline-flex items-center justify-center min-w-[18px] h-[18px] text-[9px] font-bold text-white bg-[#4FBDBA] rounded-full px-1.5 shadow-sm border border-white';
+                        newBadge.textContent = data.cart_count;
+                        cartLink.appendChild(newBadge);
+                    }
+                }
+                
+                // Visual feedback
+                btn.style.background = '#22c55e';
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+                
+                setTimeout(() => {
+                    btn.style.background = '#4FBDBA';
+                    btn.innerHTML = originalHtml;
+                }, 1500);
+            }
+        } catch (error) {
+             // Handle guest redirect if not logged in
+             window.location.href = '{% url 'login' %}';
+        }
+    }
   });
 
-  // first load
-  renderProducts();
+  // Handle browser back/forward buttons
+  window.onpopstate = function() {
+    window.location.reload();
+  };
 </script>
 {% endblock %}

@@ -4,7 +4,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'CanineMate.settings')
 django.setup()
 
-from home.models import GroomingSalon, GroomingService
+from grooming.models import GroomingSalon, GroomingService
 
 def seed_grooming():
     salon, created = GroomingSalon.objects.update_or_create(

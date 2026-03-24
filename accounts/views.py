@@ -10,8 +10,8 @@ def login_view(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
     if request.method == "POST":
-        email = request.POST.get("email").strip().lower()
-        password = request.POST.get("password")
+        email = request.POST.get("email", "").strip().lower()
+        password = request.POST.get("password", "")
 
         if not email or not password:
             messages.error(request, "Email and password are required.")
@@ -37,7 +37,9 @@ def login_view(request):
     return render(request, "login.html")
 
 
-from home.models import Dog, Appointment, GroomingBooking
+from pets.models import Dog
+from veterinary.models import Appointment
+from grooming.models import GroomingBooking
 from django.utils import timezone
 from datetime import timedelta
 from django.views.decorators.cache import never_cache
@@ -85,10 +87,10 @@ def signup_view(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
     if request.method == "POST":
-        username = request.POST.get("username").strip()
-        email = request.POST.get("email").strip().lower()
-        password = request.POST.get("password")
-        password2 = request.POST.get("password2")
+        username = request.POST.get("username", "").strip()
+        email = request.POST.get("email", "").strip().lower()
+        password = request.POST.get("password", "")
+        password2 = request.POST.get("password2", "")
         phone = request.POST.get("phone", "").strip() or None
 
         if not username or not email or not password:

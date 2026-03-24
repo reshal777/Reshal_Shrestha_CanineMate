@@ -1,6 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Veterinarian, Dog, Appointment, Clinic, GroomingSalon, GroomingService, GroomingBooking, Vaccination, HealthRecord, Medication, ChatMessage
+from pets.models import Dog, Vaccination, HealthRecord, Medication, Reminder
+from veterinary.models import Clinic, Veterinarian, Appointment
+from grooming.models import GroomingSalon, GroomingService, GroomingBooking
+from shop.models import Product, Order, CartItem, OrderItem
+from chat.models import ChatMessage
 from django.contrib import messages
 from django.db.models import Q
 from accounts.models import User
@@ -9,6 +13,8 @@ import json
 import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
+from payment.khalti_utils import initiate_khalti_payment, verify_khalti_payment
 
 def index_view(request):
     if request.user.is_authenticated:
@@ -32,16 +38,197 @@ def contact_us_view(request):
     return render(request, "contactus.html")
 
 def shop_view(request):
-    return render(request, "shop.html")
+    category_filter = request.GET.get('category')
+    price_range = request.GET.get('price_range')
+    search_query = request.GET.get('search')
+    
+    products = Product.objects.all().order_by('-id')
+    
+    if category_filter:
+        products = products.filter(category=category_filter)
+        
+    if price_range:
+        if price_range == 'under_500':
+            products = products.filter(price__lt=500)
+        elif price_range == '500_1000':
+            products = products.filter(price__gte=500, price__lte=1000)
+        elif price_range == '1000_2000':
+            products = products.filter(price__gte=1000, price__lte=2000)
+        elif price_range == 'above_2000':
+            products = products.filter(price__gt=2000)
+            
+    if search_query:
+        products = products.filter(name__icontains=search_query)
+            
+    categories = Product.objects.values_list('category', flat=True).distinct()
+    
+    context = {
+        'products': products,
+        'categories': categories,
+        'product_count': products.count(),
+        'current_price_range': price_range,
+        'current_category': category_filter,
+    }
+    
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, "shop_product_list.html", context)
+        
+    return render(request, "shop.html", context)
 
 def cart_view(request):
-    return render(request, "cart.html")
+    if not request.user.is_authenticated:
+        return redirect('login')
+    cart_items = CartItem.objects.filter(user=request.user).select_related('product')
+    total = sum(item.total_price for item in cart_items)
+    return render(request, "cart.html", {'cart_items': cart_items, 'total': total})
 
-def product_details_view(request, product_id=None):
-    return render(request, "productdetails.html")
+@login_required
+def add_to_cart_view(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    quantity = int(request.GET.get('qty', 1))
+    
+    cart_item, created = CartItem.objects.get_or_create(user=request.user, product=product)
+    
+    if not created:
+        cart_item.quantity += quantity
+    else:
+        cart_item.quantity = quantity
+        
+    cart_item.save()
+    
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'success': True, 'cart_count': CartItem.objects.filter(user=request.user).count()})
 
+    messages.success(request, f"Added {product.name} to your cart!")
+    next_url = request.GET.get('next')
+    if next_url:
+        return redirect(next_url)
+    return redirect('shop')
+
+@login_required
+def remove_from_cart_view(request, item_id):
+    item = get_object_or_404(CartItem, id=item_id, user=request.user)
+    item.delete()
+    return redirect('cart')
+
+@login_required
+def update_cart_quantity_view(request, item_id):
+    """AJAX endpoint to increment/decrement quantity on the cart page."""
+    item = get_object_or_404(CartItem, id=item_id, user=request.user)
+    delta = int(request.GET.get('delta', 1))
+    
+    if item.quantity + delta >= 1:
+        item.quantity += delta
+        item.save()
+        
+    cart_items = CartItem.objects.filter(user=request.user)
+    subtotal = sum(i.total_price for i in cart_items)
+    delivery = 0 if subtotal >= 3000 else 150
+    total = subtotal + delivery
+    
+    return JsonResponse({
+        'success': True,
+        'quantity': item.quantity,
+        'item_total': float(item.total_price),
+        'subtotal': float(subtotal),
+        'delivery': delivery,
+        'total': float(total)
+    })
+
+def product_details_view(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    related_products = Product.objects.filter(category=product.category).exclude(id=product.id)[:5]
+    
+    context = {
+        'product': product,
+        'related_products': related_products,
+    }
+    return render(request, "productdetails.html", context)
+
+@login_required
 def checkout_view(request):
-    return render(request, "checkout.html")
+    cart_items = CartItem.objects.filter(user=request.user)
+    if not cart_items.exists():
+        messages.warning(request, "Your cart is empty.")
+        return redirect('shop')
+        
+    total_amount = sum(item.total_price for item in cart_items)
+    
+    if request.method == "POST":
+        payment_method = request.POST.get('payment_method', 'Cash on Delivery')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        phone = request.POST.get('phone')
+        email = request.POST.get('email')
+        address = request.POST.get('address')
+        city = request.POST.get('city')
+        postal_code = request.POST.get('postal_code')
+        
+        # Create the order
+        order = Order.objects.create(
+            user=request.user,
+            amount=int(total_amount),
+            payment_method=payment_method,
+            first_name=first_name,
+            last_name=last_name,
+            phone=phone,
+            email=email,
+            address=address,
+            city=city,
+            postal_code=postal_code,
+            status='Pending'
+        )
+        
+        # Create order items
+        for cart_item in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                product=cart_item.product,
+                quantity=cart_item.quantity,
+                price=cart_item.product.price
+            )
+        
+        # If Khalti, initiate payment
+        if payment_method.lower() == 'khalti':
+            amount_paisa = int(total_amount * 100)
+            return_url = request.build_absolute_uri(reverse('khalti_callback'))
+            website_url = request.build_absolute_uri('/')
+            
+            customer_info = {
+                "name": f"{first_name} {last_name}",
+                "email": email,
+                "phone": phone or "9800000000"
+            }
+            
+            from payment.khalti_utils import initiate_khalti_payment
+            response = initiate_khalti_payment(
+                amount=amount_paisa,
+                purchase_order_id=f"ORD-{order.id}",
+                purchase_order_name=f"Order {order.order_id}",
+                return_url=return_url,
+                website_url=website_url,
+                customer_info=customer_info
+            )
+            
+            if "payment_url" in response:
+                order.pidx = response['pidx']
+                order.save()
+                return redirect(response['payment_url'])
+            else:
+                error_msg = response.get('detail') or response.get('error_key') or 'Unknown error'
+                messages.error(request, f"Khalti initiation failed: {error_msg}")
+                return redirect('checkout')
+        else:
+            # Cash on Delivery
+            cart_items.delete()
+            messages.success(request, "Order placed successfully! We will contact you soon for delivery.")
+            return render(request, "payment_success.html", {"message": "Your order has been placed successfully! 🐾"})
+
+    context = {
+        'cart_items': cart_items,
+        'total_amount': total_amount,
+    }
+    return render(request, "checkout.html", context)
 
 @login_required
 def doctor_profile_view(request, vet_id):
@@ -183,8 +370,64 @@ def delete_health_record(request, record_id):
     messages.success(request, "Health record deleted.")
     return redirect('dogprofile', dog_id=dog_id)
 
+@login_required
 def medicine_reminder_view(request):
-    return render(request, "medicinereminder.html")
+    dogs = Dog.objects.filter(owner=request.user)
+    reminders = Reminder.objects.filter(dog__owner=request.user).order_by('start_date', 'reminder_time')
+    
+    # Segmenting for the template
+    medicine_reminders = reminders.filter(reminder_type='Medicine')
+    vaccine_reminders = reminders.filter(reminder_type='Vaccine')
+    
+    # Upcoming this week (next 7 days)
+    from datetime import date, timedelta
+    today = date.today()
+    next_week = today + timedelta(days=7)
+    upcoming_this_week = reminders.filter(
+        is_active=True,
+        start_date__gte=today,
+        start_date__lte=next_week
+    )[:5]
+    
+    context = {
+        'dogs': dogs,
+        'medicine_reminders': medicine_reminders,
+        'vaccine_reminders': vaccine_reminders,
+        'upcoming_this_week': upcoming_this_week,
+    }
+    return render(request, "medicinereminder.html", context)
+
+@login_required
+def add_reminder(request):
+    if request.method == "POST":
+        dog_id = request.POST.get('dog')
+        reminder_type = request.POST.get('reminder_type')
+        name = request.POST.get('name')
+        frequency = request.POST.get('frequency')
+        time = request.POST.get('time')
+        start_date = request.POST.get('start_date')
+        
+        dog = get_object_or_404(Dog, id=dog_id, owner=request.user)
+        
+        from pets.models import Reminder
+        Reminder.objects.create(
+            dog=dog,
+            reminder_type=reminder_type,
+            name=name,
+            frequency=frequency,
+            reminder_time=time,
+            start_date=start_date
+        )
+        messages.success(request, f"Reminder for {name} added!")
+        
+    return redirect('medicinereminder')
+
+@login_required
+def toggle_reminder(request, reminder_id):
+    reminder = get_object_or_404(Reminder, id=reminder_id, dog__owner=request.user)
+    reminder.is_active = not reminder.is_active
+    reminder.save()
+    return JsonResponse({'success': True, 'is_active': reminder.is_active})
 
 @login_required
 def vet_appointment_view(request):
@@ -199,7 +442,7 @@ def vet_appointment_view(request):
         dog = get_object_or_404(Dog, id=dog_id, owner=request.user)
         vet = get_object_or_404(Veterinarian, id=vet_id)
 
-        Appointment.objects.create(
+        appointment = Appointment.objects.create(
             user=request.user,
             dog=dog,
             veterinarian=vet,
@@ -207,14 +450,18 @@ def vet_appointment_view(request):
             appointment_date=date,
             appointment_time=time,
             notes=notes,
-            status='Confirmed'
+            status='Pending',
+            amount=vet.consultation_fee
         )
-        messages.success(request, "Appointment booked successfully!")
-        return redirect('vetappointment')
+        messages.success(request, f"Appointment initialized. Please complete the payment to confirm it.")
+        return redirect('vet_checkout', appointment_id=appointment.id)
 
     # GET request logic
-    # Fetch confirmed appointments only
-    appointments = Appointment.objects.filter(user=request.user, status='Confirmed').order_by('appointment_date', 'appointment_time')
+    # Fetch confirmed and pending appointments
+    appointments = Appointment.objects.filter(
+        user=request.user, 
+        status__in=['Confirmed', 'Pending']
+    ).order_by('appointment_date', 'appointment_time')
     
     # Fetch veterinarians sorted by rating
     veterinarians = Veterinarian.objects.all().order_by('-rating')
@@ -272,7 +519,7 @@ def grooming_booking_view(request):
         service = get_object_or_404(GroomingService, id=service_id)
         salon = GroomingSalon.objects.first()
 
-        GroomingBooking.objects.create(
+        booking = GroomingBooking.objects.create(
             user=request.user,
             dog=dog,
             service=service,
@@ -280,13 +527,17 @@ def grooming_booking_view(request):
             booking_date=date,
             booking_time=time,
             notes=notes,
-            status='Confirmed'
+            status='Pending',
+            amount=service.price
         )
-        messages.success(request, "Grooming booking confirmed successfully!")
-        return redirect('groomingbooking')
+        messages.success(request, "Grooming booking initialized. Please complete the payment to confirm it.")
+        return redirect('grooming_checkout', booking_id=booking.id)
 
     # GET request logic
-    bookings = GroomingBooking.objects.filter(user=request.user, status='Confirmed').order_by('booking_date', 'booking_time')
+    bookings = GroomingBooking.objects.filter(
+        user=request.user, 
+        status__in=['Confirmed', 'Pending']
+    ).order_by('booking_date', 'booking_time')
     services = GroomingService.objects.all()
     salon = GroomingSalon.objects.first()
     dogs = Dog.objects.filter(owner=request.user)
@@ -381,7 +632,7 @@ def get_user_profile_api(request):
         appointments = Appointment.objects.filter(user=user, status='Confirmed').count()
         grooming_bookings = GroomingBooking.objects.filter(user=user, status='Confirmed').count()
         
-        from payment.models import Order
+        from shop.models import Order
         try:
             orders = Order.objects.filter(user=user).count()
         except:
@@ -502,3 +753,167 @@ def chatbot_proxy(request):
             return JsonResponse({"error": f"An unexpected error occurred: {str(e)} 🐾"}, status=500)
             
     return JsonResponse({"error": "Invalid request"}, status=400)
+
+@login_required
+def vet_checkout_view(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id, user=request.user)
+    if appointment.status != 'Pending':
+        messages.warning(request, "This appointment is already processed.")
+        return redirect('vetappointment')
+    
+    return render(request, "vet_checkout.html", {'appointment': appointment})
+
+@login_required
+def khalti_init_appointment_payment(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id, user=request.user)
+    
+    # Amount in Paisa
+    amount_paisa = int(appointment.amount * 100)
+    
+    # Return URL: Need to pass some unique ID to verify later
+    return_url = request.build_absolute_uri(reverse('khalti_callback'))
+    website_url = request.build_absolute_uri('/')
+    
+    customer_info = {
+        "name": request.user.get_full_name() or request.user.username,
+        "email": request.user.email,
+        "phone": request.user.phone or "9800000000"
+    }
+    
+    from payment.khalti_utils import initiate_khalti_payment
+    response = initiate_khalti_payment(
+        amount=amount_paisa,
+        purchase_order_id=f"APPT-{appointment.id}",
+        purchase_order_name=f"{appointment.service_type} Appointment",
+        return_url=return_url,
+        website_url=website_url,
+        customer_info=customer_info
+    )
+    
+    if "payment_url" in response:
+        # Store pidx in the appointment
+        appointment.pidx = response['pidx']
+        appointment.save()
+        return redirect(response['payment_url'])
+    else:
+        messages.error(request, f"Failed to initiate Khalti payment: {response.get('detail', 'Unknown error')}")
+        return redirect('vet_checkout', appointment_id=appointment.id)
+
+@login_required
+def khalti_callback_view(request):
+    pidx = request.GET.get('pidx') or request.GET.get('transaction_id')
+    status = request.GET.get('status')
+    purchase_order_id = request.GET.get('purchase_order_id')
+    
+    if not pidx:
+        messages.error(request, "Invalid payment callback.")
+        return redirect('vetappointment')
+
+    # Verify payment status using lookup API
+    from payment.khalti_utils import verify_khalti_payment
+    verification = verify_khalti_payment(pidx)
+    
+    # Khalti status can be 'Completed' or check for successful verification status code or return values
+    if verification.get('status') == 'Completed':
+        try:
+             appointment = None
+             # Try finding by purchase_order_id first
+             if purchase_order_id and purchase_order_id.startswith('APPT-'):
+                try:
+                    appt_id = purchase_order_id.split('-')[1]
+                    appointment = Appointment.objects.get(id=appt_id)
+                except:
+                    pass
+             
+             # Fallback to pidx if not found
+             if not appointment:
+                appointment = Appointment.objects.get(pidx=pidx)
+             
+             appointment.paid = True
+             appointment.status = 'Confirmed'
+             appointment.save()
+             
+             messages.success(request, "Payment successful! Your appointment is confirmed.")
+             return render(request, "payment_success.html", {"message": "Your appointment has been confirmed! 🐾"})
+        except Exception as e:
+             # Try for grooming booking
+             try:
+                 booking = None
+                 if purchase_order_id and purchase_order_id.startswith('GRM-'):
+                     booking_id = purchase_order_id.split('-')[1]
+                     booking = GroomingBooking.objects.get(id=booking_id)
+                 else:
+                     booking = GroomingBooking.objects.get(pidx=pidx)
+                 
+                 booking.paid = True
+                 booking.status = 'Confirmed'
+                 booking.save()
+                 
+                 messages.success(request, "Payment successful! Your grooming booking is confirmed.")
+                 return render(request, "payment_success.html", {"message": "Your grooming session is scheduled! 🐾"})
+             except Exception as grooming_e:
+                 # Try for shop order
+                 try:
+                     order = None
+                     if purchase_order_id and purchase_order_id.startswith('ORD-'):
+                         order_id_pk = purchase_order_id.split('-')[1]
+                         order = Order.objects.get(id=order_id_pk)
+                     else:
+                         order = Order.objects.get(pidx=pidx)
+                     
+                     order.paid = True
+                     order.status = 'Processing'
+                     order.save()
+                     
+                     # Clear Cart
+                     CartItem.objects.filter(user=order.user).delete()
+                     
+                     messages.success(request, "Payment successful! Your order is being processed.")
+                     return render(request, "payment_success.html", {"message": "Your order has been placed successfully! 🐾"})
+                 except Exception as inner_e:
+                     messages.error(request, f"Payment verified but error updating record: {str(inner_e)}")
+                     return redirect('dashboard')
+    else:
+        messages.error(request, "Payment failed or was cancelled.")
+        return redirect('dashboard')
+
+@login_required
+def grooming_checkout_view(request, booking_id):
+    booking = get_object_or_404(GroomingBooking, id=booking_id, user=request.user)
+    if booking.status != 'Pending':
+        messages.warning(request, "This booking is already processed.")
+        return redirect('groomingbooking')
+    
+    return render(request, "grooming_checkout.html", {'booking': booking})
+
+@login_required
+def khalti_init_grooming_payment(request, booking_id):
+    booking = get_object_or_404(GroomingBooking, id=booking_id, user=request.user)
+    
+    amount_paisa = int(booking.amount * 100)
+    return_url = request.build_absolute_uri(reverse('khalti_callback'))
+    website_url = request.build_absolute_uri('/')
+    
+    customer_info = {
+        "name": request.user.get_full_name() or request.user.username,
+        "email": request.user.email,
+        "phone": request.user.phone or "9800000000"
+    }
+    
+    from payment.khalti_utils import initiate_khalti_payment
+    response = initiate_khalti_payment(
+        amount=amount_paisa,
+        purchase_order_id=f"GRM-{booking.id}",
+        purchase_order_name=f"Grooming: {booking.service.name}",
+        return_url=return_url,
+        website_url=website_url,
+        customer_info=customer_info
+    )
+    
+    if "payment_url" in response:
+        booking.pidx = response['pidx']
+        booking.save()
+        return redirect(response['payment_url'])
+    else:
+        messages.error(request, f"Failed to initiate Khalti payment: {response.get('detail', 'Unknown error')}")
+        return redirect('grooming_checkout', booking_id=booking.id)

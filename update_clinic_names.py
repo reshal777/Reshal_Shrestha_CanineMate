@@ -4,7 +4,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'CanineMate.settings')
 django.setup()
 
-from home.models import Clinic
+from veterinary.models import Clinic
 
 def update_clinics():
     clinics = Clinic.objects.all()

@@ -460,14 +460,15 @@
           Medicine Schedule
         </h2>
 
-        <!-- heartworm — enabled -->
-        <div class="reminder-row med on" id="row-1">
+        <!-- Dynamic Medicine Reminders -->
+        {% for reminder in medicine_reminders %}
+        <div class="reminder-row med {% if reminder.is_active %}on{% else %}off{% endif %}" id="row-{{ reminder.id }}">
           <div class="reminder-top">
             <div>
-              <p class="reminder-name">Heartworm Prevention</p>
-              <p class="reminder-dog">Dog: Buddy</p>
+              <p class="reminder-name">{{ reminder.name }}</p>
+              <p class="reminder-dog">Dog: {{ reminder.dog.name }}</p>
             </div>
-            <button class="toggle on" onclick="toggleReminder('row-1', this)" title="Toggle"></button>
+            <button class="toggle {% if reminder.is_active %}on{% endif %}" onclick="toggleReminder({{ reminder.id }}, this)" title="Toggle"></button>
           </div>
           <div class="reminder-meta">
             <div class="meta-item">
@@ -478,7 +479,7 @@
                 <line x1="8" y1="2" x2="8" y2="6" />
                 <line x1="3" y1="10" x2="21" y2="10" />
               </svg>
-              Monthly
+              {{ reminder.frequency }}
             </div>
             <div class="meta-item">
               <svg class="meta-teal" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
@@ -486,43 +487,14 @@
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
               </svg>
-              09:00 AM
+              {{ reminder.reminder_time|time:"g:i A" }}
             </div>
-            <span class="due-label">Due: Feb 1, 2026</span>
+            <span class="due-label">Due: {{ reminder.start_date|date:"M d, Y" }}</span>
           </div>
         </div>
-
-        <!-- flea treatment — enabled -->
-        <div class="reminder-row med on" id="row-2">
-          <div class="reminder-top">
-            <div>
-              <p class="reminder-name">Flea Treatment</p>
-              <p class="reminder-dog">Dog: Max</p>
-            </div>
-            <button class="toggle on" onclick="toggleReminder('row-2', this)" title="Toggle"></button>
-          </div>
-          <div class="reminder-meta">
-            <div class="meta-item">
-              <svg class="meta-teal" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-              Monthly
-            </div>
-            <div class="meta-item">
-              <svg class="meta-teal" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-              10:00 AM
-            </div>
-            <span class="due-label">Due: Jan 20, 2026</span>
-          </div>
-        </div>
+        {% empty %}
+        <p class="text-sm text-gray-500 italic py-4">No medication reminders set.</p>
+        {% endfor %}
       </div>
 
       <!-- vaccination timeline -->
@@ -536,14 +508,15 @@
           Vaccination Timeline
         </h2>
 
-        <!-- rabies — enabled -->
-        <div class="reminder-row vac on" id="row-3">
+        <!-- Dynamic Vaccine Reminders -->
+        {% for reminder in vaccine_reminders %}
+        <div class="reminder-row vac {% if reminder.is_active %}on{% else %}off{% endif %}" id="row-{{ reminder.id }}">
           <div class="reminder-top">
             <div>
-              <p class="reminder-name">Rabies Vaccine</p>
-              <p class="reminder-dog">Dog: Buddy</p>
+              <p class="reminder-name">{{ reminder.name }}</p>
+              <p class="reminder-dog">Dog: {{ reminder.dog.name }}</p>
             </div>
-            <button class="toggle on orange" onclick="toggleReminder('row-3', this, true)" title="Toggle"></button>
+            <button class="toggle {% if reminder.is_active %}on orange{% endif %}" onclick="toggleReminder({{ reminder.id }}, this, true)" title="Toggle"></button>
           </div>
           <div class="reminder-meta">
             <div class="meta-item">
@@ -554,7 +527,7 @@
                 <line x1="8" y1="2" x2="8" y2="6" />
                 <line x1="3" y1="10" x2="21" y2="10" />
               </svg>
-              Yearly
+              {{ reminder.frequency }}
             </div>
             <div class="meta-item">
               <svg class="meta-orange" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
@@ -562,43 +535,14 @@
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
               </svg>
-              11:00 AM
+              {{ reminder.reminder_time|time:"g:i A" }}
             </div>
-            <span class="due-label">Due: Jan 20, 2026</span>
+            <span class="due-label">Due: {{ reminder.start_date|date:"M d, Y" }}</span>
           </div>
         </div>
-
-        <!-- distemper — disabled -->
-        <div class="reminder-row vac off" id="row-4">
-          <div class="reminder-top">
-            <div>
-              <p class="reminder-name">Distemper Vaccine</p>
-              <p class="reminder-dog">Dog: Max</p>
-            </div>
-            <button class="toggle" onclick="toggleReminder('row-4', this, true)" title="Toggle"></button>
-          </div>
-          <div class="reminder-meta">
-            <div class="meta-item">
-              <svg class="meta-orange" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-              Yearly
-            </div>
-            <div class="meta-item">
-              <svg class="meta-orange" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-              02:00 PM
-            </div>
-            <span class="due-label">Due: Feb 10, 2026</span>
-          </div>
-        </div>
+        {% empty %}
+        <p class="text-sm text-gray-400 italic py-4">No vaccination reminders set.</p>
+        {% endfor %}
       </div>
     </div>
 
@@ -614,19 +558,15 @@
           </svg>
           Upcoming This Week
         </div>
-        <!-- only showing 3 enabled reminders -->
+        <!-- Dynamic Upcoming Reminders -->
+        {% for reminder in upcoming_this_week %}
         <div class="upcoming-item">
-          <p class="upcoming-name">Heartworm Prevention</p>
-          <p class="upcoming-sub">Buddy • Feb 1, 2026</p>
+          <p class="upcoming-name">{{ reminder.name }}</p>
+          <p class="upcoming-sub">{{ reminder.dog.name }} • {{ reminder.start_date|date:"M d, Y" }}</p>
         </div>
-        <div class="upcoming-item">
-          <p class="upcoming-name">Flea Treatment</p>
-          <p class="upcoming-sub">Max • Jan 20, 2026</p>
-        </div>
-        <div class="upcoming-item">
-          <p class="upcoming-name">Rabies Vaccine</p>
-          <p class="upcoming-sub">Buddy • Jan 20, 2026</p>
-        </div>
+        {% empty %}
+        <p class="text-xs text-blue-100 opacity-80 italic">No reminders for this week.</p>
+        {% endfor %}
       </div>
 
       <!-- notification settings -->
@@ -663,46 +603,50 @@
       <h2>Add New Reminder</h2>
     </div>
     <div class="modal-body">
-      <div class="field">
-        <label>Select Dog</label>
-        <select>
-          <option>Buddy</option>
-          <option>Max</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Reminder Type</label>
-        <select>
-          <option>Medicine</option>
-          <option>Vaccine</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Name</label>
-        <input type="text" placeholder="e.g., Heartworm Prevention" />
-      </div>
-      <div class="field">
-        <label>Frequency</label>
-        <select>
-          <option>Daily</option>
-          <option>Weekly</option>
-          <option>Monthly</option>
-          <option>Yearly</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Time</label>
-        <input type="time" />
-      </div>
-      <div class="field">
-        <label>Start Date</label>
-        <input type="date" />
-      </div>
-
-      <div class="modal-actions">
-        <button class="modal-cancel" onclick="closeModal()">Cancel</button>
-        <button class="modal-confirm" onclick="closeModal()">Add Reminder</button>
-      </div>
+      <form method="POST" action="{% url 'add_reminder' %}">
+        {% csrf_token %}
+        <div class="field">
+          <label>Select Dog</label>
+          <select name="dog" required>
+            {% for dog in dogs %}
+            <option value="{{ dog.id }}">{{ dog.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label>Reminder Type</label>
+          <select name="reminder_type" required>
+            <option value="Medicine">Medicine</option>
+            <option value="Vaccine">Vaccine</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Name</label>
+          <input type="text" name="name" placeholder="e.g., Heartworm Prevention" required />
+        </div>
+        <div class="field">
+          <label>Frequency</label>
+          <select name="frequency" required>
+            <option value="Daily">Daily</option>
+            <option value="Weekly">Weekly</option>
+            <option value="Monthly" selected>Monthly</option>
+            <option value="Yearly">Yearly</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Time</label>
+          <input type="time" name="time" required />
+        </div>
+        <div class="field">
+          <label>Start Date</label>
+          <input type="date" name="start_date" required />
+        </div>
+  
+        <div class="modal-actions">
+          <button type="button" class="modal-cancel" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="modal-confirm">Add Reminder</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -726,25 +670,35 @@
   });
 
   // toggle reminder row on/off — isVaccine determines which color class to use
-  function toggleReminder(rowId, btn, isVaccine = false) {
-    const row = document.getElementById(rowId);
-    const isOn = btn.classList.contains('on');
-
-    if (isOn) {
-      // turn off
-      btn.classList.remove('on');
-      if (isVaccine) {
-        btn.classList.remove('orange');
-        row.classList.replace('on', 'off');
-      } else {
-        row.classList.replace('on', 'off');
+  function toggleReminder(reminderId, btn, isVaccine = false) {
+    fetch(`/home/toggle-reminder/${reminderId}/`, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "Content-Type": "application/json"
       }
-    } else {
-      // turn on
-      btn.classList.add('on');
-      if (isVaccine) btn.classList.add('orange');
-      row.classList.replace('off', 'on');
-    }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        const row = document.getElementById(`row-${reminderId}`);
+        const isOn = data.is_active;
+
+        if (!isOn) {
+          // turn off
+          btn.classList.remove('on');
+          if (isVaccine) btn.classList.remove('orange');
+          row.classList.remove('on');
+          row.classList.add('off');
+        } else {
+          // turn on
+          btn.classList.add('on');
+          if (isVaccine) btn.classList.add('orange');
+          row.classList.remove('off');
+          row.classList.add('on');
+        }
+      }
+    });
   }
 </script>
 {% endblock %}

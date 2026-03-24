@@ -40,7 +40,13 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts",
     "home",
+    "payment",
     "channels",
+    "pets",
+    "shop",
+    "veterinary",
+    "grooming",
+    "chat",
 ]
 
 MIDDLEWARE = [
@@ -75,6 +81,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "home.context_processors.notifications",
+                "home.context_processors.global_context",
             ],
         },
     },
@@ -140,8 +147,21 @@ STATICFILES_DIRS = [
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'accounts.backends.EmailBackend',
+]
+
 AUTH_USER_MODEL = 'accounts.User'
+
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'index'
+# Khalti Configuration
+KHALTI_PUBLIC_KEY = "341eb052d8214489a5639eed3495aa61"
+KHALTI_SECRET_KEY = "6f207e29a0c34eb4b36b27dbd244b360"
+KHALTI_API_URL = "https://a.khalti.com/api/v2/" # Production URL since keys were given as live? No, user said live but requested sandbox.
+# Actually sandbox URL is dev.khalti.com as per docs.
+KHALTI_SANDBOX_API_URL = "https://dev.khalti.com/api/v2/epayment/initiate/"
+KHALTI_SANDBOX_LOOKUP_URL = "https://dev.khalti.com/api/v2/epayment/lookup/"

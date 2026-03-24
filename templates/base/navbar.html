@@ -20,6 +20,18 @@
 
             <div class="flex items-center gap-4">
                 {% if user.is_authenticated %}
+                <!-- Shopping Cart -->
+                <a href="{% url 'cart' %}" class="relative p-2 text-gray-400 hover:text-[#4FBDBA] transition-all duration-300 hover:scale-110" title="Shopping Cart">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    {% if cart_count > 0 %}
+                    <span class="absolute top-0 right-0 inline-flex items-center justify-center min-w-[18px] h-[18px] text-[9px] font-bold text-white bg-[#4FBDBA] rounded-full px-1.5 shadow-sm border border-white">
+                        {{ cart_count }}
+                    </span>
+                    {% endif %}
+                </a>
+
                 <!-- Notification Dropdown Container -->
                 <div class="relative ml-2" id="notif-menu-container">
                     <!-- Notification Bell -->
@@ -54,7 +66,7 @@
                         <div class="overflow-y-auto flex-1 overscroll-none scrollbar-thin scrollbar-thumb-gray-200">
                             {% if user_notifications %}
                             {% for notif in user_notifications %}
-                            <a href="{% if notif.type == 'appointment' %}{% url 'vetappointment' %}{% elif notif.type == 'grooming' %}{% url 'groomingbooking' %}{% else %}{% url 'dashboard' %}{% endif %}"
+                            <a href="{% if notif.type == 'appointment' %}{% url 'vetappointment' %}{% elif notif.type == 'grooming' %}{% url 'groomingbooking' %}{% elif notif.type == 'medicine' or notif.type == 'medication' or notif.type == 'vaccine' %}{% url 'medicinereminder' %}{% else %}{% url 'dashboard' %}{% endif %}"
                                 class="group flex items-start px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0"
                                 role="menuitem" tabindex="-1">
                                 <div class="flex-shrink-0 mt-0.5">
@@ -75,13 +87,22 @@
                                                 d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                                         </svg>
                                     </div>
-                                    {% elif notif.type == 'vaccination' %}
+                                    {% elif notif.type == 'vaccination' or notif.type == 'vaccine' %}
                                     <div
                                         class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
                                             </path>
+                                        </svg>
+                                    </div>
+                                    {% elif notif.type == 'medicine' or notif.type == 'medication' %}
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-600">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
+                                            <path d="m8.5 8.5 7 7" />
                                         </svg>
                                     </div>
                                     {% else %}

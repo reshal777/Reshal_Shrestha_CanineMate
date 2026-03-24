@@ -462,14 +462,14 @@
   <h2 class="section-title">Upcoming Appointments</h2>
   <div class="apt-grid">
     {% for appointment in appointments %}
-    <!-- appointment card — confirmed -->
+    <!-- appointment card — confirmed or pending -->
     <div class="card apt-card">
       <div class="apt-top">
         <div>
           <p class="apt-type">{{ appointment.service_type }}</p>
           <p class="apt-dog">Dog: {{ appointment.dog.name }}</p>
         </div>
-        <span class="badge badge-green">{{ appointment.status }}</span>
+        <span class="badge {% if appointment.status == 'Confirmed' %}badge-green{% elif appointment.status == 'Pending' %}badge-orange{% else %}badge-blue{% endif %}">{{ appointment.status }}</span>
       </div>
       <div class="apt-meta">
         <div class="meta-row">
@@ -500,10 +500,17 @@
         </div>
       </div>
       <div class="apt-actions">
+        {% if appointment.status == 'Pending' %}
+        <a href="{% url 'vet_checkout' appointment.id %}" class="confirm-btn" style="flex: 2; padding: .5rem; text-decoration: none;">
+          Pay Now
+        </a>
+        {% else %}
         <button class="reschedule-btn" data-apt-id="{{ appointment.id }}"
           data-apt-date="{{ appointment.appointment_date|date:'Y-m-d' }}"
           data-apt-time="{{ appointment.appointment_time|time:'H:i' }}"
           onclick="openRescheduleModal(this)">Reschedule</button>
+        {% endif %}
+        
         <form action="{% url 'cancel_appointment' appointment.id %}" method="POST" style="flex: 1; display: flex;">
           {% csrf_token %}
           <button type="submit" class="cancel-btn" style="width: 100%;">Cancel</button>
