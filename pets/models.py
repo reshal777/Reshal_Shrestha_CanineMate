@@ -18,12 +18,41 @@ class Dog(models.Model):
     image = models.ImageField(upload_to='dog_profiles/', blank=True, null=True)
     microchip_id = models.CharField(max_length=100, blank=True, null=True)
     special_needs = models.TextField(blank=True, null=True)
+    
+    # Adoption fields
+    is_adoptable = models.BooleanField(default=False)
+    is_adoption_post = models.BooleanField(default=False)  # True = posted via adoption form, not a personal dog
+    description = models.TextField(blank=True, null=True)
+    location = models.CharField(max_length=100, blank=True, null=True)
+    is_vaccinated = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'home_dog'
 
     def __str__(self):
         return self.name
+
+class AdoptionRequest(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+    ]
+    
+    dog = models.ForeignKey(Dog, on_delete=models.CASCADE, related_name='adoption_requests')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    full_name = models.CharField(max_length=200)
+    phone = models.CharField(max_length=20)
+    address = models.TextField()
+    reason = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'home_adoptionrequest'
+
+    def __str__(self):
+        return f"Adoption for {self.dog.name} by {self.full_name}"
 
 class Vaccination(models.Model):
     dog = models.ForeignKey(Dog, on_delete=models.CASCADE, related_name='vaccinations')

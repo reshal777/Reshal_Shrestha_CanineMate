@@ -538,8 +538,6 @@
           {% endif %}
         </div>
         <p class="vet-name">{{ vet.name }}</p>
-        <p class="vet-specialty" style="font-size: 0.8rem; color: #4FBDBA; font-weight: 500; margin-bottom: 0.25rem;">{{
-          vet.specialty }}</p>
         <p class="vet-clinic">{{ vet.clinic.name }}</p>
         <p class="vet-location">{{ vet.clinic.location }}</p>
         <div class="vet-rating" style="margin-bottom: 0;"><span class="star">★</span><span>{{ vet.rating }}</span></div>
@@ -663,7 +661,9 @@
 
     // default date to today
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('appointment-date').value = today;
+    const dateInput = document.getElementById('appointment-date');
+    dateInput.value = today;
+    dateInput.min = today;
   }
 
   function openModalWithVet(btn) {

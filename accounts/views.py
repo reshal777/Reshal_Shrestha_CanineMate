@@ -8,29 +8,42 @@ from django.contrib.auth.decorators import login_required
 
 def login_view(request):
     if request.user.is_authenticated:
+        if request.user.is_staff:
+            return redirect("admin:index")
         return redirect("dashboard")
+        
     if request.method == "POST":
-        email = request.POST.get("email", "").strip().lower()
+        login_input = request.POST.get("email", "").strip() # This field will now handle both email and username
         password = request.POST.get("password", "")
 
-        if not email or not password:
-            messages.error(request, "Email and password are required.")
+        if not login_input or not password:
+            messages.error(request, "Email/Username and password are required.")
             return redirect("login")
 
-        user = authenticate(request, email=email, password=password)
+        # Try to authenticate with username first (since admin uses 'admin' username)
+        user = authenticate(request, username=login_input, password=password)
+        
+        # If username fails, try to authenticate with email
+        if user is None and '@' in login_input:
+            from .models import User
+            try:
+                user_obj = User.objects.get(email__iexact=login_input)
+                user = authenticate(request, username=user_obj.username, password=password)
+            except User.DoesNotExist:
+                user = None
 
         if user is not None:
             if user.is_active:
                 login(request, user)
-                # Redirect admin/staff users to admin dashboard
+                # Redirect admin/staff users to the standard Django admin
                 if user.is_staff:
-                    return redirect("admin_dashboard")
+                    return redirect("admin:index")
                 else:
                     return redirect("dashboard")
             else:
                 messages.error(request, "Your account is inactive.")
         else:
-            messages.error(request, "Invalid email or password.")
+            messages.error(request, "Invalid credentials.")
 
         return redirect("login")
 
@@ -42,6 +55,7 @@ from veterinary.models import Appointment
 from grooming.models import GroomingBooking
 from django.utils import timezone
 from datetime import timedelta
+from django.db.models import Q
 from django.views.decorators.cache import never_cache
 
 @login_required
@@ -49,20 +63,22 @@ from django.views.decorators.cache import never_cache
 def dashboard_view(request):
     # Prevent admin users from accessing regular dashboard
     if request.user.is_staff:
-        return redirect("admin_dashboard")
+        return redirect("admin:index")
         
-    user_dogs = Dog.objects.filter(owner=request.user)
+    user_dogs = Dog.objects.filter(owner=request.user, is_adoption_post=False)
     now = timezone.now()
     today = now.date()
     
+    now_time = now.time()
+    
     upcoming_appointments = Appointment.objects.filter(
-        user=request.user,
-        appointment_date__gte=today
+        Q(appointment_date__gt=today) | Q(appointment_date=today, appointment_time__gte=now_time),
+        user=request.user
     ).order_by('appointment_date', 'appointment_time')
     
     upcoming_groomings = GroomingBooking.objects.filter(
-        user=request.user,
-        booking_date__gte=today
+        Q(booking_date__gt=today) | Q(booking_date=today, booking_time__gte=now_time),
+        user=request.user
     ).order_by('booking_date', 'booking_time')
     
     context = {

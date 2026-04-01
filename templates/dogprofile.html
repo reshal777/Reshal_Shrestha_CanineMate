@@ -538,7 +538,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="profileContainer">
     <div class="profile-grid">
 
         <!-- left: profile card -->
@@ -577,11 +577,15 @@
                 <!-- name + breed -->
                 <div class="dog-name-area">
                     <h2 class="dog-name">{{ dog.name }}</h2>
-                    <p class="dog-breed">{{ dog.breed|default:"Unknown Breed" }}</p>
+                    <p class="dog-breed">{{ dog.breed|default:"Unknown Breed" }} • {{ dog.age|default:"N/A" }}</p>
                 </div>
 
                 <!-- age / gender / weight / color -->
                 <div class="info-grid">
+                    <div class="info-box">
+                        <p class="info-label">Age</p>
+                        <p class="info-value">{{ dog.age|default:"N/A" }}</p>
+                    </div>
 
                     <div class="info-box">
                         <p class="info-label">Gender</p>
@@ -805,6 +809,10 @@
                 <label>Breed</label>
                 <input type="text" name="breed">
             </div>
+            <div class="form-group">
+                <label>Age</label>
+                <input type="text" name="age" placeholder="e.g. 2 years">
+            </div>
 
             <div class="form-group">
                 <label>Gender</label>
@@ -844,6 +852,10 @@
             <div class="form-group">
                 <label>Breed</label>
                 <input type="text" name="breed" value="{{ dog.breed|default:'' }}">
+            </div>
+            <div class="form-group">
+                <label>Age</label>
+                <input type="text" name="age" value="{{ dog.age|default:'' }}" placeholder="e.g. 2 years">
             </div>
 
             <div class="form-group">
@@ -963,6 +975,45 @@
 
 {% block extra_js %}
 <script>
+    // Smooth AJAX switching for dog tabs
+    document.addEventListener('click', function (e) {
+        const tab = e.target.closest('.dog-tab');
+        if (tab && !tab.classList.contains('active')) {
+            e.preventDefault();
+            const url = tab.getAttribute('href');
+            switchDogSmoothly(url);
+        }
+    });
+
+    async function switchDogSmoothly(url) {
+        const container = document.getElementById('profileContainer');
+        container.style.transition = 'opacity 0.2s ease';
+        container.style.opacity = '0.5';
+
+        try {
+            const response = await fetch(url);
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newContent = doc.getElementById('profileContainer').innerHTML;
+
+            container.innerHTML = newContent;
+            document.title = doc.title;
+            history.pushState(null, '', url);
+            
+            // Re-apply transition
+            container.style.opacity = '1';
+        } catch (err) {
+            console.error('Error switching dog:', err);
+            window.location.href = url; // Fallback to normal load
+        }
+    }
+
+    // Handle back/forward buttons
+    window.addEventListener('popstate', function() {
+        window.location.reload();
+    });
+
     function openModal(id) {
         document.getElementById(id).style.display = 'flex';
     }

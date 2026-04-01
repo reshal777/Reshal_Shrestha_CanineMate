@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Canine Mate – Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --teal: #4FBDBA;
+            --teal-dark: #3da5a2;
+            --orange: #F4A261;
+            --orange-dark: #e89451;
+            --bg: #FAFAF7;
+            --white: #fff;
+            --text: #333333;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --sidebar-w: 256px;
+            --sidebar-w-collapsed: 80px;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* ── Sidebar ─────────────────────────────────── */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: var(--sidebar-w);
+            background: var(--white);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, .08);
+            z-index: 50;
+            transition: width .3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #sidebar.collapsed {
+            width: var(--sidebar-w-collapsed);
+        }
+
+        .sidebar-logo {
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .logo-full {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .logo-icon svg {
+            color: #fff;
+        }
+
+        .logo-text {
+            display: block;
+        }
+
+        .logo-text p {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .logo-text span {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .logo-mini {
+            display: none;
+            margin: auto;
+        }
+
+        #sidebar.collapsed .logo-full {
+            display: none;
+        }
+
+        #sidebar.collapsed .logo-mini {
+            display: flex;
+        }
+
+        nav {
+            padding: 16px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 15px;
+            color: var(--muted);
+            transition: background .2s, color .2s;
+            white-space: nowrap;
+        }
+
+        .nav-link:hover {
+            background: #f3f4f6;
+            color: var(--text);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(79, 189, 186, .35);
+        }
+
+        .nav-link svg {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+        }
+
+        .nav-label {
+            transition: opacity .2s;
+        }
+
+        #sidebar.collapsed .nav-label {
+            display: none;
+        }
+
+        /* Toggle button */
+        #sidebar-toggle {
+            position: absolute;
+            top: 76px;
+            right: -12px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--teal);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(79, 189, 186, .4);
+            transition: background .2s;
+            z-index: 60;
+        }
+
+        #sidebar-toggle:hover {
+            background: var(--teal-dark);
+        }
+
+        #sidebar-toggle svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Sidebar bottom user */
+        .sidebar-user {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .sidebar-user-inner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .avatar-sm {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-sm svg {
+            color: #fff;
+            width: 18px;
+            height: 18px;
+        }
+
+        .user-info p {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .user-info span {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        #sidebar.collapsed .sidebar-user {
+            display: none;
+        }
+
+        /* ── Main ────────────────────────────────────── */
+        #main {
+            flex: 1;
+            margin-left: var(--sidebar-w);
+            transition: margin-left .3s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.collapsed #main {
+            margin-left: var(--sidebar-w-collapsed);
+        }
+
+        /* Header */
+        header {
+            background: var(--white);
+            box-shadow: 0 1px 6px rgba(0, 0, 0, .06);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            padding: 0 32px;
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+
+        .header-title h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .header-title p {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--muted);
+            transition: color .2s;
+        }
+
+        .icon-btn:hover {
+            color: var(--teal);
+        }
+
+        /* Profile dropdown */
+        .profile-wrap {
+            position: relative;
+        }
+
+        .profile-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: background .2s;
+        }
+
+        .profile-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .avatar-xs {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-xs svg {
+            color: #fff;
+            width: 16px;
+            height: 16px;
+        }
+
+        .dropdown {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            width: 224px;
+            background: var(--white);
+            border-radius: 14px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, .12);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: none;
+            z-index: 100;
+        }
+
+        .dropdown.open {
+            display: block;
+        }
+
+        .dd-head {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dd-head p {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .dd-head span {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .dd-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            font-size: 13px;
+            color: #374151;
+            cursor: pointer;
+            transition: background .15s;
+        }
+
+        .dd-item:hover {
+            background: #f9fafb;
+        }
+
+        .dd-item svg {
+            width: 16px;
+            height: 16px;
+            color: var(--muted);
+        }
+
+        .dd-divider {
+            border-top: 1px solid var(--border);
+            margin-top: 4px;
+            padding-top: 4px;
+        }
+
+        .dd-logout {
+            color: #ef4444 !important;
+        }
+
+        .dd-logout:hover {
+            background: #fef2f2 !important;
+        }
+
+        .dd-logout svg {
+            color: #ef4444 !important;
+        }
+
+        /* ── Content ─────────────────────────────────── */
+        .content {
+            padding: 32px;
+            flex: 1;
+        }
+
+        /* Stats grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        @media(max-width:1100px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media(max-width:600px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .07);
+            transition: box-shadow .2s;
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 8px 28px rgba(0, 0, 0, .12);
+        }
+
+        .stat-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+        }
+
+        .stat-icon svg {
+            color: #fff;
+            width: 28px;
+            height: 28px;
+        }
+
+        .badge {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .badge svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .badge-up {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .badge-down {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        /* Card */
+        .card {
+            background: var(--white);
+            border-radius: 18px;
+            padding: 32px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .07);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .card-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .card-header p {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .view-all {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--teal);
+            cursor: pointer;
+        }
+
+        .view-all:hover {
+            text-decoration: underline;
+        }
+
+        /* Revenue breakdown */
+        .rev-item {
+            margin-bottom: 20px;
+        }
+
+        .rev-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .rev-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .rev-amount p {
+            font-weight: 700;
+            color: var(--text);
+            font-size: 14px;
+            text-align: right;
+        }
+
+        .rev-amount span {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .progress-track {
+            width: 100%;
+            background: #e5e7eb;
+            border-radius: 999px;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width .6s ease;
+        }
+
+        .rev-total {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .rev-total span {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .rev-total strong {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--teal);
+        }
+
+        /* Two-column grid */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        @media(max-width:900px) {
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* List rows */
+        .list-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 10px;
+            transition: background .15s;
+        }
+
+        .list-row:hover {
+            background: #f9fafb;
+        }
+
+        .row-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar-lg {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+            box-shadow: 0 3px 10px rgba(79, 189, 186, .3);
+        }
+
+        .row-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .row-sub {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .row-right {
+            text-align: right;
+        }
+
+        .teal-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--teal);
+        }
+
+        .gray-text {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        /* Product rows */
+        .prod-num {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #fff;
+            font-size: 13px;
+            flex-shrink: 0;
+            box-shadow: 0 3px 10px rgba(244, 162, 97, .3);
+        }
+
+        /* Payments table */
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead tr {
+            border-bottom: 2px solid var(--border);
+        }
+
+        th {
+            text-align: left;
+            padding: 14px 16px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--muted);
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f3f4f6;
+            transition: background .15s;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        td {
+            padding: 14px 16px;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .td-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar-md {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .badge-method {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #15803d;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-pending {
+            background: #ffedd5;
+            color: #c2410c;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .td-amount {
+            font-weight: 700;
+            color: var(--teal);
+        }
+
+        .td-date p {
+            color: var(--text);
+        }
+
+        .td-date span {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        .mb-8 {
+            margin-bottom: 32px;
+        }
+
+        /* grad helpers */
+        .g-teal {
+            background: linear-gradient(135deg, #4FBDBA, #3da5a2);
+        }
+
+        .g-green {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+
+        .g-orange {
+            background: linear-gradient(135deg, #F4A261, #e89451);
+        }
+
+        .g-red {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ══ Sidebar ══ -->
+    <aside id="sidebar">
+        <!-- Logo -->
+        <div class="sidebar-logo">
+            <div class="logo-full">
+                <div class="logo-icon">
+                    <i data-lucide="paw-print" style="width:22px;height:22px;color:#fff"></i>
+                </div>
+                <div class="logo-text">
+                    <p>Canine Mate</p>
+                    <span>Admin Panel</span>
+                </div>
+            </div>
+            <div class="logo-icon logo-mini">
+                <i data-lucide="paw-print" style="width:22px;height:22px;color:#fff"></i>
+            </div>
+        </div>
+
+        <!-- Nav -->
+        <nav>
+            <a class="nav-link active" href="#">
+                <i data-lucide="layout-dashboard"></i>
+                <span class="nav-label">Dashboard</span>
+            </a>
+            <a class="nav-link" href="#">
+                <i data-lucide="users"></i>
+                <span class="nav-label">Users</span>
+            </a>
+            <a class="nav-link" href="#">
+                <i data-lucide="package"></i>
+                <span class="nav-label">Products</span>
+            </a>
+            <a class="nav-link" href="#">
+                <i data-lucide="shopping-bag"></i>
+                <span class="nav-label">Orders</span>
+            </a>
+            <a class="nav-link" href="#">
+                <i data-lucide="heart"></i>
+                <span class="nav-label">Adoptions</span>
+            </a>
+            <a class="nav-link" href="#">
+                <i data-lucide="credit-card"></i>
+                <span class="nav-label">Payments</span>
+            </a>
+            <a class="nav-link" href="#">
+                <i data-lucide="file-text"></i>
+                <span class="nav-label">Reports</span>
+            </a>
+            <a class="nav-link" href="#">
+                <i data-lucide="settings"></i>
+                <span class="nav-label">Settings</span>
+            </a>
+        </nav>
+
+        <!-- Toggle -->
+        <button id="sidebar-toggle">
+            <i data-lucide="x" id="toggle-icon"></i>
+        </button>
+
+        <!-- User -->
+        <div class="sidebar-user">
+            <div class="sidebar-user-inner">
+                <div class="avatar-sm">
+                    <i data-lucide="user"></i>
+                </div>
+                <div class="user-info">
+                    <p>Admin</p>
+                    <span>admin@caninemate.com.np</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ══ Main ══ -->
+    <div id="main">
+
+        <!-- Header -->
+        <header>
+            <div class="header-inner">
+                <div class="header-title">
+                    <h1>Dashboard Overview</h1>
+                    <p>Welcome back, Administrator</p>
+                </div>
+                <div class="header-right">
+                    <button class="icon-btn">
+                        <i data-lucide="home" style="width:20px;height:20px"></i>
+                    </button>
+                    <div class="profile-wrap">
+                        <button class="profile-btn" id="profile-btn">
+                            <div class="avatar-xs"><i data-lucide="user"></i></div>
+                            <i data-lucide="chevron-down" style="width:16px;height:16px;color:#6b7280"></i>
+                        </button>
+                        <div class="dropdown" id="dropdown">
+                            <div class="dd-head">
+                                <p>Administrator</p>
+                                <span>admin@caninemate.com.np</span>
+                            </div>
+                            <div class="dd-item">
+                                <i data-lucide="user"></i> My Profile
+                            </div>
+                            <div class="dd-item">
+                                <i data-lucide="settings"></i> Settings
+                            </div>
+                            <div class="dd-divider">
+                                <div class="dd-item dd-logout">
+                                    <i data-lucide="log-out"></i> Logout
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <div class="content">
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <!-- Total Users -->
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-icon g-teal"><i data-lucide="users"></i></div>
+                        <div class="badge badge-up">
+                            <i data-lucide="arrow-up-right"></i> +12%
+                        </div>
+                    </div>
+                    <div class="stat-value">1,248</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <!-- Revenue -->
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-icon g-green"><i data-lucide="dollar-sign"></i></div>
+                        <div class="badge badge-up">
+                            <i data-lucide="arrow-up-right"></i> +23%
+                        </div>
+                    </div>
+                    <div class="stat-value">NPR 485,600</div>
+                    <div class="stat-label">Total Revenue</div>
+                </div>
+                <!-- Orders -->
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-icon g-orange"><i data-lucide="shopping-bag"></i></div>
+                        <div class="badge badge-up">
+                            <i data-lucide="arrow-up-right"></i> +18%
+                        </div>
+                    </div>
+                    <div class="stat-value">342</div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+                <!-- Adoptions -->
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-icon g-red"><i data-lucide="heart"></i></div>
+                        <div class="badge badge-down">
+                            <i data-lucide="arrow-down-right"></i> -5%
+                        </div>
+                    </div>
+                    <div class="stat-value">36</div>
+                    <div class="stat-label">Adoption Requests</div>
+                </div>
+            </div>
+
+            <!-- Revenue Breakdown -->
+            <div class="card mb-8">
+                <div class="card-header">
+                    <div>
+                        <h2>Revenue Breakdown</h2>
+                        <p>Distribution by category</p>
+                    </div>
+                    <i data-lucide="bar-chart-3" style="width:32px;height:32px;color:var(--teal)"></i>
+                </div>
+
+                <div class="rev-item">
+                    <div class="rev-top">
+                        <div class="rev-label"><span class="dot" style="background:var(--teal)"></span>Product Sales
+                        </div>
+                        <div class="rev-amount">
+                            <p>NPR 285,600</p><span>58.8%</span>
+                        </div>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:58.8%;background:var(--teal)"></div>
+                    </div>
+                </div>
+                <div class="rev-item">
+                    <div class="rev-top">
+                        <div class="rev-label"><span class="dot" style="background:var(--orange)"></span>Vet
+                            Appointments</div>
+                        <div class="rev-amount">
+                            <p>NPR 125,400</p><span>25.8%</span>
+                        </div>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:25.8%;background:var(--orange)"></div>
+                    </div>
+                </div>
+                <div class="rev-item">
+                    <div class="rev-top">
+                        <div class="rev-label"><span class="dot" style="background:#3b82f6"></span>Grooming Services
+                        </div>
+                        <div class="rev-amount">
+                            <p>NPR 54,200</p><span>11.2%</span>
+                        </div>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:11.2%;background:#3b82f6"></div>
+                    </div>
+                </div>
+                <div class="rev-item">
+                    <div class="rev-top">
+                        <div class="rev-label"><span class="dot" style="background:#a855f7"></span>Other Services</div>
+                        <div class="rev-amount">
+                            <p>NPR 20,400</p><span>4.2%</span>
+                        </div>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:4.2%;background:#a855f7"></div>
+                    </div>
+                </div>
+
+                <div class="rev-total">
+                    <span>Total Revenue</span>
+                    <strong>NPR 485,600</strong>
+                </div>
+            </div>
+
+            <!-- Users + Products -->
+            <div class="two-col">
+
+                <!-- Recent Users -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2>Recent Users</h2>
+                            <p>New registrations</p>
+                        </div>
+                        <a class="view-all" href="#">View All</a>
+                    </div>
+                    <div id="users-list"></div>
+                </div>
+
+                <!-- Top Products -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2>Top Products</h2>
+                            <p>Best sellers this month</p>
+                        </div>
+                        <a class="view-all" href="#">View All</a>
+                    </div>
+                    <div id="products-list"></div>
+                </div>
+            </div>
+
+            <!-- Recent Payments -->
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h2>Recent Payments</h2>
+                        <p>Latest transactions</p>
+                    </div>
+                    <button class="view-all" style="background:none;border:none;font-family:inherit;cursor:pointer">View
+                        All</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Date &amp; Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payments-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div><!-- /content -->
+    </div><!-- /main -->
+
+    <script>
+        // Init lucide icons
+        lucide.createIcons();
+
+        // ── Sidebar toggle ──────────────────────────────
+        const sidebar = document.getElementById('sidebar');
+        const main = document.getElementById('main');
+        const toggleBtn = document.getElementById('sidebar-toggle');
+        const toggleIcon = document.getElementById('toggle-icon');
+        let collapsed = false;
+
+        toggleBtn.addEventListener('click', () => {
+            collapsed = !collapsed;
+            sidebar.classList.toggle('collapsed', collapsed);
+            document.body.classList.toggle('collapsed', collapsed);
+            toggleIcon.setAttribute('data-lucide', collapsed ? 'menu' : 'x');
+            lucide.createIcons();
+        });
+
+        // ── Profile dropdown ─────────────────────────────
+        document.getElementById('profile-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('dropdown').classList.toggle('open');
+        });
+        document.addEventListener('click', () => {
+            document.getElementById('dropdown').classList.remove('open');
+        });
+
+        // ── Data ─────────────────────────────────────────
+        const recentUsers = [
+            { name: 'Ram Sharma', email: 'ram@email.com', joined: 'Jan 15, 2026', dogs: 2 },
+            { name: 'Sita Thapa', email: 'sita@email.com', joined: 'Jan 14, 2026', dogs: 1 },
+            { name: 'Hari Gurung', email: 'hari@email.com', joined: 'Jan 13, 2026', dogs: 3 },
+            { name: 'Maya Rai', email: 'maya@email.com', joined: 'Jan 12, 2026', dogs: 1 },
+            { name: 'Krishna Lama', email: 'krishna@email.com', joined: 'Jan 11, 2026', dogs: 2 }
+        ];
+
+        const topProducts = [
+            { name: 'Premium Dog Food (5kg)', sales: 145, revenue: 72500, trend: 'up' },
+            { name: 'Leather Dog Collar', sales: 98, revenue: 58800, trend: 'up' },
+            { name: 'Dog Toy Bundle', sales: 87, revenue: 43500, trend: 'up' },
+            { name: 'Dog Shampoo', sales: 76, revenue: 30400, trend: 'down' },
+            { name: 'Dog Treats Pack', sales: 65, revenue: 19500, trend: 'up' }
+        ];
+
+        const recentPayments = [
+            { user: 'Ram Sharma', type: 'Product Purchase', amount: 2500, date: 'Mar 24, 2026', time: '10:30 AM', status: 'Success', method: 'eSewa' },
+            { user: 'Sita Thapa', type: 'Vet Appointment', amount: 1500, date: 'Mar 24, 2026', time: '09:15 AM', status: 'Success', method: 'Khalti' },
+            { user: 'Hari Gurung', type: 'Grooming Service', amount: 800, date: 'Mar 23, 2026', time: '04:20 PM', status: 'Success', method: 'Cash' },
+            { user: 'Maya Rai', type: 'Product Purchase', amount: 3200, date: 'Mar 23, 2026', time: '02:45 PM', status: 'Pending', method: 'eSewa' },
+            { user: 'Krishna Lama', type: 'Vet Appointment', amount: 2000, date: 'Mar 23, 2026', time: '11:30 AM', status: 'Success', method: 'Khalti' }
+        ];
+
+        // ── Render Users ──────────────────────────────────
+        const usersList = document.getElementById('users-list');
+        recentUsers.forEach(u => {
+            usersList.innerHTML += `
+      <div class="list-row">
+        <div class="row-left">
+          <div class="avatar-lg">${u.name.charAt(0)}</div>
+          <div>
+            <div class="row-name">${u.name}</div>
+            <div class="row-sub">${u.email}</div>
+          </div>
+        </div>
+        <div class="row-right">
+          <div class="teal-text">${u.dogs} dogs</div>
+          <div class="gray-text">${u.joined}</div>
+        </div>
+      </div>`;
+        });
+
+        // ── Render Products ───────────────────────────────
+        const productsList = document.getElementById('products-list');
+        topProducts.forEach((p, i) => {
+            const trendIcon = p.trend === 'up'
+                ? `<i data-lucide="trending-up" style="width:12px;height:12px;color:#16a34a"></i>`
+                : `<i data-lucide="trending-down" style="width:12px;height:12px;color:#dc2626"></i>`;
+            productsList.innerHTML += `
+      <div class="list-row">
+        <div class="row-left">
+          <div class="prod-num">#${i + 1}</div>
+          <div>
+            <div class="row-name" style="font-size:13px">${p.name}</div>
+            <div class="row-sub">${p.sales} sales</div>
+          </div>
+        </div>
+        <div class="row-right">
+          <div class="teal-text" style="font-weight:700">NPR ${p.revenue.toLocaleString()}</div>
+          <div style="display:flex;justify-content:flex-end;margin-top:4px">${trendIcon}</div>
+        </div>
+      </div>`;
+        });
+
+        // ── Render Payments ───────────────────────────────
+        const tbody = document.getElementById('payments-tbody');
+        recentPayments.forEach(pay => {
+            const statusBadge = pay.status === 'Success'
+                ? `<span class="badge-success">Success</span>`
+                : `<span class="badge-pending">Pending</span>`;
+            tbody.innerHTML += `
+      <tr>
+        <td>
+          <div class="td-user">
+            <div class="avatar-md">${pay.user.charAt(0)}</div>
+            <span style="font-weight:500;color:var(--text)">${pay.user}</span>
+          </div>
+        </td>
+        <td style="color:var(--muted)">${pay.type}</td>
+        <td class="td-amount">NPR ${pay.amount.toLocaleString()}</td>
+        <td><span class="badge-method">${pay.method}</span></td>
+        <td class="td-date"><p>${pay.date}</p><span>${pay.time}</span></td>
+        <td>${statusBadge}</td>
+      </tr>`;
+        });
+
+        // Re-init icons after dynamic content
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

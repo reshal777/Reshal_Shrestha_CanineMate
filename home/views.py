@@ -19,10 +19,10 @@ from payment.khalti_utils import initiate_khalti_payment, verify_khalti_payment
 def index_view(request):
     if request.user.is_authenticated:
         if request.user.is_staff:
-            return redirect('admin_dashboard')
+            return redirect('admin:index')
         return redirect('dashboard')
         
-    vets = Veterinarian.objects.all()[:4]
+    vets = Veterinarian.objects.exclude(specialty__icontains='Grooming')[:4]
     if not vets.exists():
         clinic = Clinic.objects.create(name="CanineMate Pet Centre", location="Kathmandu")
         v1 = Veterinarian.objects.create(name="Dr. Rajesh Sharma", clinic=clinic, experience_years=15, specialty="Chief Veterinarian", about="Expert in general veterinary medicine and emergency care.")
@@ -32,10 +32,160 @@ def index_view(request):
     return render(request, "index.html", {'vets': vets})
 
 def adoption_listing_view(request):
-    return render(request, "adoptionlisting.html")
+    breed_filter = request.GET.get('breed', 'All Breeds')
+    age_filter = request.GET.get('age', 'All Ages')
+    location_filter = request.GET.get('location', 'All Locations')
+    
+    dogs = Dog.objects.filter(is_adoptable=True)
+    
+    if breed_filter != 'All Breeds':
+        dogs = dogs.filter(breed__iexact=breed_filter)
+        
+    if age_filter != 'All Ages':
+        if 'Puppy' in age_filter:
+            dogs = dogs.filter(age__icontains='6 months') # Simplified check, usually it would be comparison with actual birthday
+        elif 'Young' in age_filter:
+            # We'll do a simple contains check for common terms for now
+            dogs = dogs.filter(Q(age__icontains='1 year') | Q(age__icontains='2 years'))
+        elif 'Adult' in age_filter:
+            # Check for ages beyond 3
+            dogs = dogs.exclude(age__icontains='months').exclude(age__icontains='1 year').exclude(age__icontains='2 years')
+            
+    if location_filter != 'All Locations':
+        dogs = dogs.filter(location__iexact=location_filter)
+        
+    breeds = Dog.objects.filter(is_adoptable=True).values_list('breed', flat=True).distinct()
+    locations = Dog.objects.filter(is_adoptable=True).values_list('location', flat=True).distinct()
+    
+    context = {
+        'dogs': dogs,
+        'dog_count': dogs.count(),
+        'breeds': breeds,
+        'locations': locations,
+        'current_breed': breed_filter,
+        'current_age': age_filter,
+        'current_location': location_filter,
+    }
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, "adoption_list_partial.html", context)
+
+    return render(request, "adoptionlisting.html", context)
+
+@login_required
+def post_adoption_view(request):
+    if request.method == "POST":
+        name = request.POST.get('name')
+        breed = request.POST.get('breed')
+        age = request.POST.get('age')
+        gender = request.POST.get('gender')
+        weight = request.POST.get('weight')
+        color = request.POST.get('color')
+        
+        description = request.POST.get('description')
+        location = request.POST.get('location')
+        is_vaccinated = request.POST.get('is_vaccinated') == 'on'
+        microchip_id = request.POST.get('microchip_id')
+        special_needs = request.POST.get('special_needs')
+        
+        image = request.FILES.get('image')
+        
+        # Create Dog with adoptable flag set to True
+        dog = Dog.objects.create(
+            owner=request.user,
+            name=name,
+            breed=breed,
+            age=age,
+            gender=gender,
+            weight=weight,
+            color=color,
+            description=description,
+            location=location,
+            is_vaccinated=is_vaccinated,
+            microchip_id=microchip_id,
+            special_needs=special_needs,
+            image=image,
+            is_adoptable=True,
+            is_adoption_post=True
+        )
+        
+        messages.success(request, f"Successfully posted {dog.name} for adoption!")
+        return redirect('adoption')
+        
+    return render(request, "Postadoption.html")
+
+@login_required
+def edit_adoption_view(request, dog_id):
+    dog = get_object_or_404(Dog, id=dog_id, owner=request.user, is_adoptable=True)
+    if request.method == "POST":
+        dog.name = request.POST.get('name')
+        dog.breed = request.POST.get('breed')
+        dog.age = request.POST.get('age')
+        dog.gender = request.POST.get('gender')
+        dog.weight = request.POST.get('weight')
+        dog.color = request.POST.get('color')
+        
+        dog.description = request.POST.get('description')
+        dog.location = request.POST.get('location')
+        dog.is_vaccinated = request.POST.get('is_vaccinated') == 'on'
+        
+        if request.FILES.get('image'):
+            dog.image = request.FILES.get('image')
+            
+        dog.save()
+        messages.success(request, f"Adoption post for {dog.name} updated!")
+        return redirect('adoption')
+        
+    return render(request, "Postadoption.html", {"dog": dog})
+
+@login_required
+def delete_adoption_view(request, dog_id):
+    dog = get_object_or_404(Dog, id=dog_id, owner=request.user, is_adoptable=True)
+    name = dog.name
+    dog.delete()
+    messages.success(request, f"Adoption post for {name} has been deleted.")
+    return redirect('adoption')
+
+@login_required
+def adopt_dog_view(request, dog_id):
+    if request.method == "POST":
+        dog = get_object_or_404(Dog, id=dog_id, is_adoptable=True)
+        
+        full_name = request.POST.get('full_name')
+        phone = request.POST.get('phone')
+        address = request.POST.get('address')
+        reason = request.POST.get('reason')
+        
+        # Check if already submitted a request
+        if AdoptionRequest.objects.filter(dog=dog, user=request.user, status='Pending').exists():
+            messages.warning(request, f"You already have a pending request for {dog.name}.")
+            return redirect('adoptionlisting')
+
+        AdoptionRequest.objects.create(
+            dog=dog,
+            user=request.user,
+            full_name=full_name,
+            phone=phone,
+            address=address,
+            reason=reason
+        )
+        messages.success(request, f"Your adoption request for {dog.name} has been submitted! We will contact you soon.")
+        return redirect('adoptionlisting')
+        
+    return redirect('adoptionlisting')
 
 def contact_us_view(request):
     return render(request, "contactus.html")
+
+@login_required
+def user_settings_view(request):
+    """User settings page"""
+    return render(request, "usersetting.html")
+
+def about_us_view(request):
+    vets = Veterinarian.objects.exclude(specialty__icontains='Grooming')[:4]
+    return render(request, "Aboutus.html", {'vets': vets})
+
 
 def shop_view(request):
     category_filter = request.GET.get('category')
@@ -233,17 +383,17 @@ def checkout_view(request):
 @login_required
 def doctor_profile_view(request, vet_id):
     vet = get_object_or_404(Veterinarian, id=vet_id)
-    dogs = Dog.objects.filter(owner=request.user)
+    dogs = Dog.objects.filter(owner=request.user, is_adoption_post=False)
     return render(request, "doctorprofile.html", {"vet": vet, "dogs": dogs})
 
 @login_required
 def dog_profile_view(request, dog_id=None):
-    dogs = Dog.objects.filter(owner=request.user)
+    dogs = Dog.objects.filter(owner=request.user, is_adoption_post=False)
     
     if not dogs.exists():
         # Optional: create a demo dog for first-time users
         Dog.objects.create(owner=request.user, name="Buddy", breed="Golden Retriever", age="3 years", gender="Male", weight="32 kg", color="Golden")
-        dogs = Dog.objects.filter(owner=request.user)
+        dogs = Dog.objects.filter(owner=request.user, is_adoption_post=False)
     
     if dog_id:
         dog = get_object_or_404(Dog, id=dog_id, owner=request.user)
@@ -372,7 +522,7 @@ def delete_health_record(request, record_id):
 
 @login_required
 def medicine_reminder_view(request):
-    dogs = Dog.objects.filter(owner=request.user)
+    dogs = Dog.objects.filter(owner=request.user, is_adoption_post=False)
     reminders = Reminder.objects.filter(dog__owner=request.user).order_by('start_date', 'reminder_time')
     
     # Segmenting for the template
@@ -381,11 +531,14 @@ def medicine_reminder_view(request):
     
     # Upcoming this week (next 7 days)
     from datetime import date, timedelta
-    today = date.today()
+    from django.utils import timezone
+    now = timezone.now()
+    today = now.date()
+    now_time = now.time()
     next_week = today + timedelta(days=7)
     upcoming_this_week = reminders.filter(
+        Q(start_date__gt=today) | Q(start_date=today, reminder_time__gte=now_time),
         is_active=True,
-        start_date__gte=today,
         start_date__lte=next_week
     )[:5]
     
@@ -435,19 +588,31 @@ def vet_appointment_view(request):
         dog_id = request.POST.get('dog')
         vet_id = request.POST.get('vet')
         service_type = request.POST.get('service_type')
-        date = request.POST.get('date')
+        date_str = request.POST.get('date')
         time = request.POST.get('time')
         notes = request.POST.get('notes', '')
 
+        # Past date check
+        from django.utils import timezone
+        booking_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        if booking_date < timezone.now().date():
+            messages.error(request, "You cannot book appointments in the past.")
+            return redirect('vetappointment')
+
         dog = get_object_or_404(Dog, id=dog_id, owner=request.user)
         vet = get_object_or_404(Veterinarian, id=vet_id)
+
+        # Duplicate check
+        if Appointment.objects.filter(dog=dog, veterinarian=vet, appointment_date=booking_date, appointment_time=time, status__in=['Confirmed', 'Pending']).exists():
+            messages.error(request, f"There is already a booking for {dog.name} with this vet at this exact time.")
+            return redirect('vetappointment')
 
         appointment = Appointment.objects.create(
             user=request.user,
             dog=dog,
             veterinarian=vet,
             service_type=service_type,
-            appointment_date=date,
+            appointment_date=booking_date,
             appointment_time=time,
             notes=notes,
             status='Pending',
@@ -457,24 +622,27 @@ def vet_appointment_view(request):
         return redirect('vet_checkout', appointment_id=appointment.id)
 
     # GET request logic
-    # Fetch confirmed and pending appointments
+    # Fetch only upcoming confirmed and pending appointments
+    from django.utils import timezone
+    now = timezone.now()
     appointments = Appointment.objects.filter(
+        Q(appointment_date__gt=now.date()) | Q(appointment_date=now.date(), appointment_time__gte=now.time()),
         user=request.user, 
         status__in=['Confirmed', 'Pending']
     ).order_by('appointment_date', 'appointment_time')
     
     # Fetch veterinarians sorted by rating
-    veterinarians = Veterinarian.objects.all().order_by('-rating')
+    veterinarians = Veterinarian.objects.exclude(specialty__icontains='Grooming').order_by('-rating')
     
     # Fetch user's dogs
-    dogs = Dog.objects.filter(owner=request.user)
+    dogs = Dog.objects.filter(owner=request.user, is_adoption_post=False)
     
     # Ensure there are dogs for the user for the demo
     if not dogs.exists():
         # Let's create dummy dog for the demo purpose if requested user exists
         Dog.objects.create(owner=request.user, name="Buddy", breed="Golden Retriever")
         Dog.objects.create(owner=request.user, name="Max", breed="Golden Retriever")
-        dogs = Dog.objects.filter(owner=request.user)
+        dogs = Dog.objects.filter(owner=request.user, is_adoption_post=False)
 
     context = {
         'appointments': appointments,
@@ -511,20 +679,32 @@ def grooming_booking_view(request):
     if request.method == "POST":
         dog_id = request.POST.get('dog')
         service_id = request.POST.get('service')
-        date = request.POST.get('date')
+        date_str = request.POST.get('date')
         time = request.POST.get('time')
         notes = request.POST.get('notes', '')
+
+        # Past date check
+        from django.utils import timezone
+        booking_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        if booking_date < timezone.now().date():
+            messages.error(request, "You cannot book grooming services in the past.")
+            return redirect('groomingbooking')
 
         dog = get_object_or_404(Dog, id=dog_id, owner=request.user)
         service = get_object_or_404(GroomingService, id=service_id)
         salon = GroomingSalon.objects.first()
+
+        # Duplicate check
+        if GroomingBooking.objects.filter(dog=dog, booking_date=booking_date, booking_time=time, status__in=['Confirmed', 'Pending']).exists():
+            messages.error(request, f"There is already a grooming booking for {dog.name} at this exact time.")
+            return redirect('groomingbooking')
 
         booking = GroomingBooking.objects.create(
             user=request.user,
             dog=dog,
             service=service,
             salon=salon,
-            booking_date=date,
+            booking_date=booking_date,
             booking_time=time,
             notes=notes,
             status='Pending',
@@ -534,13 +714,16 @@ def grooming_booking_view(request):
         return redirect('grooming_checkout', booking_id=booking.id)
 
     # GET request logic
+    from django.utils import timezone
+    now = timezone.now()
     bookings = GroomingBooking.objects.filter(
+        Q(booking_date__gt=now.date()) | Q(booking_date=now.date(), booking_time__gte=now.time()),
         user=request.user, 
         status__in=['Confirmed', 'Pending']
     ).order_by('booking_date', 'booking_time')
     services = GroomingService.objects.all()
     salon = GroomingSalon.objects.first()
-    dogs = Dog.objects.filter(owner=request.user)
+    dogs = Dog.objects.filter(owner=request.user, is_adoption_post=False)
     
     context = {
         'bookings': bookings,
@@ -601,9 +784,19 @@ def chat_list_view(request):
 def user_profile_view(request):
     """Display user profile page"""
     user = request.user
-    dogs = Dog.objects.filter(owner=user)
-    appointments = Appointment.objects.filter(user=user, status='Confirmed').order_by('-appointment_date')[:5]
-    grooming_bookings = GroomingBooking.objects.filter(user=user, status='Confirmed').order_by('-booking_date')[:5]
+    from django.utils import timezone
+    now = timezone.now()
+    today = now.date()
+    now_time = now.time()
+    dogs = Dog.objects.filter(owner=user, is_adoption_post=False)
+    appointments = Appointment.objects.filter(
+        Q(appointment_date__gt=today) | Q(appointment_date=today, appointment_time__gte=now_time),
+        user=user, status='Confirmed'
+    ).order_by('appointment_date')[:5]
+    grooming_bookings = GroomingBooking.objects.filter(
+        Q(booking_date__gt=today) | Q(booking_date=today, booking_time__gte=now_time),
+        user=user, status='Confirmed'
+    ).order_by('booking_date')[:5]
     
     # Calculate recent activities
     activities = []
@@ -626,82 +819,208 @@ def user_profile_view(request):
 @csrf_exempt
 def get_user_profile_api(request):
     """API endpoint to get user profile data"""
-    if request.method == "GET":
-        user = request.user
-        dogs = Dog.objects.filter(owner=user)
-        appointments = Appointment.objects.filter(user=user, status='Confirmed').count()
-        grooming_bookings = GroomingBooking.objects.filter(user=user, status='Confirmed').count()
-        
-        from shop.models import Order
-        try:
-            orders = Order.objects.filter(user=user).count()
-        except:
-            orders = 0
-        
-        profile_data = {
-            'name': user.get_full_name() or user.username,
-            'email': user.email,
-            'phone': user.phone or '',
-            'location': user.location or '',
-            'bio': user.bio or '',
-            'joinedDate': user.date_joined.strftime('%B %d, %Y') if user.date_joined else 'N/A',
-            'dogs': [
-                {
-                    'id': dog.id,
-                    'name': dog.name,
-                    'breed': dog.breed or 'Unknown',
-                    'age': dog.age or 'N/A',
-                    'image': dog.image.url if dog.image else 'https://via.placeholder.com/300x300?text=No+Image'
-                }
-                for dog in dogs
-            ],
-            'stats': {
-                'dogs': dogs.count(),
-                'appointments': appointments,
-                'orders': orders,
-                'bookings': grooming_bookings,
-            }
-        }
-        return JsonResponse(profile_data)
-    return JsonResponse({'error': 'Invalid request'}, status=400)
+    try:
+        if request.method == "GET":
+            user = request.user
+            dogs = Dog.objects.filter(owner=user, is_adoption_post=False)
+            
+            from shop.models import Order
+            from grooming.models import GroomingBooking
+            from django.db.models import Sum
+            from django.utils import timezone
+            
+            # Calculate Stats
+            from django.utils import timezone
+            now = timezone.now()
+            today = now.date()
+            now_time = now.time()
+            appointments_count = Appointment.objects.filter(
+                Q(appointment_date__gt=today) | Q(appointment_date=today, appointment_time__gte=now_time),
+                user=user, status='Confirmed'
+            ).count()
+            grooming_count = GroomingBooking.objects.filter(
+                Q(booking_date__gt=today) | Q(booking_date=today, booking_time__gte=now_time),
+                user=user, status='Confirmed'
+            ).count()
+            orders_count = Order.objects.filter(user=user, paid=True).count()
+            
+            # Total Spent
+            spent_orders = Order.objects.filter(user=user, paid=True).aggregate(total=Sum('amount'))['total'] or 0
+            spent_appts = Appointment.objects.filter(user=user, paid=True).aggregate(total=Sum('amount'))['total'] or 0
+            spent_grooming = GroomingBooking.objects.filter(user=user, paid=True).aggregate(total=Sum('amount'))['total'] or 0
+            total_spent = spent_orders + spent_appts + spent_grooming
+            
+            # Upcoming Events
+            upcoming_appts = Appointment.objects.filter(
+                Q(appointment_date__gt=today) | Q(appointment_date=today, appointment_time__gte=now_time),
+                user=user, 
+                status__in=['Confirmed', 'Pending']
+            ).order_by('appointment_date', 'appointment_time')[:3]
+            
+            events = []
+            for a in upcoming_appts:
+                events.append({
+                    'title': f"{a.service_type} - {a.dog.name}",
+                    'date': a.appointment_date.strftime('%b %d, %Y'),
+                    'urgent': a.appointment_date == timezone.now().date()
+                })
 
+            # Recent Activity
+            activities = []
+            # Recent orders
+            recent_orders = Order.objects.filter(user=user).order_by('-date')[:2]
+            for o in recent_orders:
+                activities.append({
+                    'action': f"Placed order {o.order_id}",
+                    'date': o.date.strftime('%B %d, %Y'),
+                    'time': "Recently",
+                    'iconClass': 'icon-green',
+                    'iconName': 'shopping-bag'
+                })
+            
+            # Recent appts
+            recent_appts = Appointment.objects.filter(user=user).order_by('-id')[:2]
+            for a in recent_appts:
+                activities.append({
+                    'action': f"Appointment: {a.service_type} for {a.dog.name}",
+                    'date': a.appointment_date.strftime('%B %d, %Y'),
+                    'time': "Recently",
+                    'iconClass': 'icon-blue',
+                    'iconName': 'calendar'
+                })
+
+            # Achievements
+            achievements = [
+                { 
+                    'name': 'Caring Parent', 
+                    'description': 'Completed 5+ vet sessions', 
+                    'iconColor': 'yellow', 
+                    'unlocked': appointments_count >= 5,
+                    'svgPath': '<path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15"/><path d="M11 12 5.12 2.2"/><path d="m13 12 5.88-9.8"/><path d="M8 7h8"/><circle cx="12" cy="17" r="5"/><path d="M12 18v-2h-.5"/>'
+                },
+                {
+                    'name': 'Shopping Star',
+                    'description': 'First item purchased',
+                    'iconColor': 'blue',
+                    'unlocked': orders_count > 0,
+                    'svgPath': '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>'
+                },
+                {
+                    'name': 'Health Champion',
+                    'description': 'Added your first dog',
+                    'iconColor': 'green',
+                    'unlocked': dogs.exists(),
+                    'svgPath': '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'
+                }
+            ]
+            
+            profile_data = {
+                'name': user.get_full_name() or user.username,
+                'email': user.email,
+                'phone': user.phone or '',
+                'location': user.location or '',
+                'bio': user.bio or '',
+                'joinedDate': user.date_joined.strftime('%B %d, %Y') if user.date_joined else 'N/A',
+                'profilePicture': user.profile_picture.url if user.profile_picture else None,
+                'coverPicture': user.cover_picture.url if user.cover_picture else None,
+                'totalSpent': f"NPR {total_spent:,}",
+                'dogs': [
+                    {
+                        'id': dog.id,
+                        'name': dog.name,
+                        'breed': dog.breed or 'Unknown',
+                        'age': dog.age or 'N/A',
+                        'weight': dog.weight or 'N/A',
+                        'healthScore': 95, # Mock for now
+                        'image': dog.image.url if dog.image else 'https://via.placeholder.com/300x300?text=No+Image'
+                    }
+                    for dog in dogs
+                ],
+                'upcomingEvents': events,
+                'recentActivity': activities,
+                'achievements': achievements,
+                'stats': [
+                    { 'label': 'My Dogs', 'value': str(dogs.count()), 'iconClass': 'teal', 'trend': '+0', 'iconName': 'dog' },
+                    { 'label': 'Appointments', 'value': str(appointments_count), 'iconClass': 'teal', 'trend': '+2', 'iconName': 'calendar-check-2' },
+                    { 'label': 'Orders', 'value': str(orders_count), 'iconClass': 'teal', 'trend': '+3', 'iconName': 'package' },
+                    { 'label': 'Bookings', 'value': str(grooming_count), 'iconClass': 'orange', 'trend': '+1', 'iconName': 'scissors' }
+                ]
+            }
+            return JsonResponse(profile_data)
+        return JsonResponse({'error': 'Invalid request'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 @login_required
 @csrf_exempt
 def update_user_profile_api(request):
     """API endpoint to update user profile"""
     if request.method == "POST":
         try:
-            data = json.loads(request.body)
+            # Handle both JSON and Multipart data
+            if request.content_type == 'application/json':
+                data = json.loads(request.body)
+            else:
+                data = request.POST
+
             user = request.user
             
             # Update user fields
             if 'first_name' in data:
                 user.first_name = data.get('first_name', user.first_name)
+            elif 'name' in data:
+                # Split full name
+                full_name = data.get('name', '').split(' ')
+                user.first_name = full_name[0]
+                user.last_name = ' '.join(full_name[1:]) if len(full_name) > 1 else ''
+            
             if 'last_name' in data:
                 user.last_name = data.get('last_name', user.last_name)
+            if 'email' in data and data.get('email'):
+                new_email = data.get('email').strip()
+                from accounts.models import User as UserModel
+                if new_email != user.email and UserModel.objects.filter(email=new_email).exclude(pk=user.pk).exists():
+                    return JsonResponse({'success': False, 'error': 'This email is already in use.'}, status=400)
+                user.email = new_email
+            if 'username' in data and data.get('username'):
+                new_username = data.get('username').strip()
+                from accounts.models import User as UserModel
+                if new_username != user.username and UserModel.objects.filter(username=new_username).exclude(pk=user.pk).exists():
+                    return JsonResponse({'success': False, 'error': 'This username is already taken.'}, status=400)
+                user.username = new_username
             if 'phone' in data:
                 user.phone = data.get('phone', user.phone)
             if 'location' in data:
                 user.location = data.get('location', user.location)
             if 'bio' in data:
                 user.bio = data.get('bio', user.bio)
-            
+            # Handle password change
+            if 'new_password' in data and data.get('new_password'):
+                if not user.check_password(data.get('current_password', '')):
+                    return JsonResponse({'success': False, 'error': 'Current password is incorrect.'}, status=400)
+                user.set_password(data.get('new_password'))
+                from django.contrib.auth import update_session_auth_hash
+                update_session_auth_hash(request, user)
+            # Handle Image Uploads
+            if 'profile_picture' in request.FILES:
+                user.profile_picture = request.FILES['profile_picture']
+            if 'cover_picture' in request.FILES:
+                user.cover_picture = request.FILES['cover_picture']
+
             user.save()
-            messages.success(request, "Profile updated successfully!")
             
             return JsonResponse({
                 'success': True,
-                'message': 'Profile updated successfully',
                 'user': {
-                    'name': user.get_full_name() or user.username,
-                    'email': user.email,
-                    'phone': user.phone or '',
-                    'location': user.location or '',
-                    'bio': user.bio or '',
+                    'name': user.get_full_name(),
+                    'phone': user.phone,
+                    'location': user.location,
+                    'bio': user.bio,
+                    'profile_picture': user.profile_picture.url if user.profile_picture else None,
+                    'cover_picture': user.cover_picture.url if user.cover_picture else None,
                 }
             })
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+             return JsonResponse({'error': str(e)}, status=400)
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 @csrf_exempt

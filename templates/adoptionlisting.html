@@ -3,7 +3,15 @@
 {% block title %}Adopt a Dog - Canine Mate{% endblock %}
 
 {% block extra_head %}
-<!-- No extra styles needed as it uses Tailwind extensively -->
+<style>
+    .modal {
+        transition: opacity 0.25s ease;
+    }
+    body.modal-active {
+        overflow-x: hidden;
+        overflow-y: hidden !important;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -17,7 +25,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
-            <span class="text-white font-medium">6 Dogs Available for Adoption</span>
+            <span class="text-white font-medium">{{ dog_count }} Dogs Available for Adoption</span>
         </div>
     </div>
 </div>
@@ -25,322 +33,277 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Filters -->
     <div class="bg-white rounded-2xl p-6 shadow-lg mb-8">
-        <div class="flex items-center gap-2 mb-4">
-            <svg class="w-5 h-5 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-            </svg>
-            <h2 class="font-semibold text-[#333333]">Filter Dogs</h2>
-        </div>
+        <form method="GET" action="{% url 'adoption' %}" id="filterForm">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    <h2 class="font-semibold text-[#333333]">Filter Dogs</h2>
+                </div>
+                <a href="{% url 'post_adoption' %}" class="bg-[#4FBDBA] hover:bg-[#3da5a2] text-white px-5 py-2.5 rounded-xl font-semibold shadow-md transition-all flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Post a Dog
+                </a>
+            </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-[#333333] mb-2">Breed</label>
-                <select
-                    class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]">
-                    <option>All Breeds</option>
-                    <option>Golden Retriever</option>
-                    <option>Labrador</option>
-                    <option>German Shepherd</option>
-                </select>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div>
+                    <label class="block text-sm font-medium text-[#333333] mb-2">Breed</label>
+                    <select name="breed" onchange="updateDogs()"
+                        class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]">
+                        <option value="All Breeds" {% if current_breed == 'All Breeds' %}selected{% endif %}>All Breeds</option>
+                        {% for breed in breeds %}
+                        <option value="{{ breed }}" {% if current_breed == breed %}selected{% endif %}>{{ breed }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-[#333333] mb-2">Age</label>
+                    <select name="age" onchange="updateDogs()"
+                        class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]">
+                        <option value="All Ages" {% if current_age == 'All Ages' %}selected{% endif %}>All Ages</option>
+                        <option value="Puppy (0-1 year)" {% if current_age == 'Puppy (0-1 year)' %}selected{% endif %}>Puppy (0-1 year)</option>
+                        <option value="Young (1-3 years)" {% if current_age == 'Young (1-3 years)' %}selected{% endif %}>Young (1-3 years)</option>
+                        <option value="Adult (3+ years)" {% if current_age == 'Adult (3+ years)' %}selected{% endif %}>Adult (3+ years)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-[#333333] mb-2">Location</label>
+                    <select name="location" onchange="updateDogs()"
+                        class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]">
+                        <option value="All Locations" {% if current_location == 'All Locations' %}selected{% endif %}>All Locations</option>
+                        {% for loc in locations %}
+                        <option value="{{ loc }}" {% if current_location == loc %}selected{% endif %}>{{ loc }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <a href="{% url 'adoption' %}" class="block text-center px-4 py-2.5 text-gray-500 hover:text-[#4FBDBA] transition-colors text-sm font-medium">Clear Filters</a>
+                </div>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-[#333333] mb-2">Age</label>
-                <select
-                    class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]">
-                    <option>All Ages</option>
-                    <option>Puppy (0-1 year)</option>
-                    <option>Young (1-3 years)</option>
-                    <option>Adult (3+ years)</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-[#333333] mb-2">Location</label>
-                <select
-                    class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]">
-                    <option>All Locations</option>
-                    <option>Pokhara Lakeside</option>
-                    <option>Lalitpur</option>
-                    <option>Bhaktapur</option>
-                    <option>Pokhara</option>
-                </select>
-            </div>
-        </div>
+        </form>
     </div>
 
     <!-- Dogs Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Dog 1 -->
-        <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all group">
-            <div class="relative h-64 overflow-hidden">
-                <img src="https://w0.peakpx.com/wallpaper/700/301/HD-wallpaper-german-shepherd-german-dog-dogs-shepherd-police-leaves-thumbnail.jpg"
-                    alt="Rocky - German Shepherd"
-                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                <div class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-                    Vaccinated</div>
-            </div>
-            <div class="p-6">
-                <div class="flex items-start justify-between mb-2">
-                    <div>
-                        <h3 class="text-xl font-semibold text-[#333333]">Rocky</h3>
-                        <p class="text-gray-600">German Shepherd</p>
-                    </div>
-                    <span class="text-sm bg-[#4FBDBA]/10 text-[#4FBDBA] px-3 py-1 rounded-full">Male</span>
-                </div>
-                <div class="space-y-2 mb-4">
-                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                        <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span>2 years</span>
-                    </div>
-                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                        <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Pokhara Lakeside</span>
-                    </div>
-                </div>
-                <p class="text-sm text-gray-600 mb-4">Friendly and energetic, great with kids</p>
-                <button
-                    class="w-full bg-[#4FBDBA] text-white py-2.5 rounded-lg hover:bg-[#3da5a2] transition-colors shadow-md hover:shadow-lg">View
-                    Details</button>
-            </div>
-        </div>
+    <div id="dogsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% include 'adoption_list_partial.html' %}
+    </div>
 
-        <!-- Dog 2 -->
-        <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all group">
-            <div class="relative h-64 overflow-hidden">
-                <img src="https://images7.alphacoders.com/443/443165.jpg" alt="Scotch - Golden Retriever"
-                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                <div class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-                    Vaccinated</div>
+    <!-- Details Modal -->
+    <div id="detailsModal" class="modal fixed w-full h-full top-0 left-0 flex items-center justify-center opacity-0 pointer-events-none z-50">
+        <div class="modal-overlay absolute w-full h-full bg-black opacity-50"></div>
+        <div class="modal-container bg-white w-11/12 md:max-w-3xl mx-auto rounded-3xl shadow-2xl z-50 overflow-y-auto max-h-[90vh]">
+            <div class="relative">
+                <img id="modalImg" src="" alt="" class="w-full h-64 object-cover">
+                <button onclick="closeModals()" class="absolute top-4 right-4 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white rounded-full p-2 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
-            <div class="p-6">
-                <div class="flex items-start justify-between mb-2">
+            <div class="p-8">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
                     <div>
-                        <h3 class="text-xl font-semibold text-[#333333]">Scotch</h3>
-                        <p class="text-gray-600">Golden Retriever</p>
+                        <h2 id="modalName" class="text-3xl font-bold text-gray-900 mb-1"></h2>
+                        <p id="modalBreed" class="text-gray-500 text-lg"></p>
                     </div>
-                    <span class="text-sm bg-[#4FBDBA]/10 text-[#4FBDBA] px-3 py-1 rounded-full">Male</span>
-                </div>
-                <div class="space-y-2 mb-4">
-                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                        <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span>1 year</span>
-                    </div>
-                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                        <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Pokhara</span>
+                    <div class="flex gap-2">
+                        <span id="modalGender" class="px-4 py-1.5 rounded-full text-sm font-semibold"></span>
+                        <span id="modalVaccinated" class="bg-green-100 text-green-700 px-4 py-1.5 rounded-full text-sm font-semibold"></span>
                     </div>
                 </div>
-                <p class="text-sm text-gray-600 mb-4">Sweet and gentle, loves to play</p>
-                <button
-                    class="w-full bg-[#4FBDBA] text-white py-2.5 rounded-lg hover:bg-[#3da5a2] transition-colors shadow-md hover:shadow-lg">View
-                    Details</button>
-            </div>
-        </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8 py-6 border-y border-gray-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-[#4FBDBA]/10 rounded-xl flex items-center justify-center text-[#4FBDBA]">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Age</p>
+                            <p id="modalAge" class="text-gray-800 font-bold"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Location</p>
+                            <p id="modalLocation" class="text-gray-800 font-bold"></p>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- Dog 3 -->
-        <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all group">
-            <div class="relative h-64 overflow-hidden">
-                <img src="https://iheartdogs.com/wp-content/uploads/2024/08/Labrador-Retriever-Black-scaled.jpg"
-                    alt="Charlie - Labrador"
-                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                <div class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-                    Vaccinated</div>
-            </div>
-            <div class="p-6">
-                <div class="flex items-start justify-between mb-2">
-                    <div>
-                        <h3 class="text-xl font-semibold text-[#333333]">Charlie</h3>
-                        <p class="text-gray-600">Labrador</p>
-                    </div>
-                    <span class="text-sm bg-[#4FBDBA]/10 text-[#4FBDBA] px-3 py-1 rounded-full">Male</span>
+                <div class="mb-8">
+                    <h3 class="text-lg font-bold text-gray-900 mb-3">About</h3>
+                    <p id="modalDescription" class="text-gray-600 leading-relaxed"></p>
                 </div>
-                <div class="space-y-2 mb-4">
-                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                        <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span>3 years</span>
-                    </div>
-                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                        <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Bhaktapur</span>
-                    </div>
-                </div>
-                <p class="text-sm text-gray-600 mb-4">Well-trained, good with other dogs</p>
-                <button
-                    class="w-full bg-[#4FBDBA] text-white py-2.5 rounded-lg hover:bg-[#3da5a2] transition-colors shadow-md hover:shadow-lg">View
-                    Details</button>
-            </div>
-        </div>
 
-        <!-- Dog 4 -->
-        <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all group">
-            <div class="relative h-64 overflow-hidden">
-                <img src="https://content.lyka.com.au/f/1016262/1104x676/e36872ce32/beagle.png/m/640x427/smart/filters:format(webp)"
-                    alt="Bella - Beagle"
-                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                <div class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-                    Vaccinated</div>
-            </div>
-            <div class="p-6">
-                <div class="flex items-start justify-between mb-2">
-                    <div>
-                        <h3 class="text-xl font-semibold text-[#333333]">Bella</h3>
-                        <p class="text-gray-600">Beagle</p>
-                    </div>
-                    <span class="text-sm bg-pink-100 text-pink-600 px-3 py-1 rounded-full">Female</span>
-                </div>
-                <div class="space-y-2 mb-4">
-                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                        <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span>6 months</span>
-                    </div>
-                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                        <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Pokhara Lakeside</span>
-                    </div>
-                </div>
-                <p class="text-sm text-gray-600 mb-4">Playful puppy looking for a loving home</p>
-                <button
-                    class="w-full bg-[#4FBDBA] text-white py-2.5 rounded-lg hover:bg-[#3da5a2] transition-colors shadow-md hover:shadow-lg">View
-                    Details</button>
-            </div>
-        </div>
-
-        <!-- Dog 5 -->
-        <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all group">
-            <div class="relative h-64 overflow-hidden">
-                <img src="https://andreaarden.com/wp-content/uploads/2024/04/wesley-sanchez-cyimMEASu3A-unsplash-scaled.jpg"
-                    alt="Max - Husky"
-                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                <div class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-                    Vaccinated</div>
-            </div>
-            <div class="p-6">
-                <div class="flex items-start justify-between mb-2">
-                    <div>
-                        <h3 class="text-xl font-semibold text-[#333333]">Max</h3>
-                        <p class="text-gray-600">Husky</p>
-                    </div>
-                    <span class="text-sm bg-[#4FBDBA]/10 text-[#4FBDBA] px-3 py-1 rounded-full">Male</span>
-                </div>
-                <div class="space-y-2 mb-4">
-                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                        <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span>2 years</span>
-                    </div>
-                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                        <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Pokhara</span>
-                    </div>
-                </div>
-                <p class="text-sm text-gray-600 mb-4">Active and adventurous, needs space to run</p>
-                <button
-                    class="w-full bg-[#4FBDBA] text-white py-2.5 rounded-lg hover:bg-[#3da5a2] transition-colors shadow-md hover:shadow-lg">View
-                    Details</button>
-            </div>
-        </div>
-
-        <!-- Dog 6 -->
-        <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all group">
-            <div class="relative h-64 overflow-hidden">
-                <img src="https://premiumpethouse.com/public/img/dog-breeds/culture-pomeranian/culture-pomeranian9.jpg"
-                    alt="Daisy - Pomeranian"
-                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                <div class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-                    Vaccinated</div>
-            </div>
-            <div class="p-6">
-                <div class="flex items-start justify-between mb-2">
-                    <div>
-                        <h3 class="text-xl font-semibold text-[#333333]">Daisy</h3>
-                        <p class="text-gray-600">Pomeranian</p>
-                    </div>
-                    <span class="text-sm bg-pink-100 text-pink-600 px-3 py-1 rounded-full">Female</span>
-                </div>
-                <div class="space-y-2 mb-4">
-                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                        <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span>1 year</span>
-                    </div>
-                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                        <svg class="w-4 h-4 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Lalitpur</span>
-                    </div>
-                </div>
-                <p class="text-sm text-gray-600 mb-4">Small and adorable, perfect for apartments</p>
-                <button
-                    class="w-full bg-[#4FBDBA] text-white py-2.5 rounded-lg hover:bg-[#3da5a2] transition-colors shadow-md hover:shadow-lg">View
-                    Details</button>
+                <button id="modalAdoptBtn" class="w-full bg-[#4FBDBA] text-white py-4 rounded-2xl font-bold text-lg hover:bg-[#3da5a2] shadow-xl hover:shadow-2xl transition-all">
+                    Adopt Me Now
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Info Banner -->
-    <div class="mt-12 bg-[#F6E27F] rounded-2xl p-8 text-center shadow-inner">
-        <h3 class="text-2xl font-bold text-[#333333] mb-3">Ready to Adopt?</h3>
-        <p class="text-gray-700 mb-6 max-w-2xl mx-auto">All our dogs are vaccinated, health-checked, and ready for
-            their forever homes.</p>
-        <div class="flex flex-wrap justify-center gap-4">
-            <div class="bg-white rounded-lg px-6 py-3 shadow-md">
-                <div class="text-2xl font-bold text-[#4FBDBA]">GOOD</div>
-                <div class="text-xs text-gray-500 uppercase tracking-wider">Health Status</div>
+    <!-- Adoption Form Modal -->
+    <div id="adoptModal" class="modal fixed w-full h-full top-0 left-0 flex items-center justify-center opacity-0 pointer-events-none z-50">
+        <div class="modal-overlay absolute w-full h-full bg-black opacity-50"></div>
+        <div class="modal-container bg-white w-11/12 md:max-w-xl mx-auto rounded-3xl shadow-2xl z-50 overflow-hidden">
+            <div class="bg-[#4FBDBA] p-6 text-white flex justify-between items-center">
+                <h2 class="text-2xl font-bold">Adopt <span id="adoptDogName"></span></h2>
+                <button onclick="closeModals()" class="text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
-            <div class="bg-white rounded-lg px-6 py-3 shadow-md">
-                <div class="text-2xl font-bold text-[#4FBDBA]">YES</div>
-                <div class="text-xs text-gray-500 uppercase tracking-wider">Vaccinated</div>
-            </div>
-            <div class="bg-white rounded-lg px-6 py-3 shadow-md">
-                <div class="text-2xl font-bold text-[#4FBDBA]">99%</div>
-                <div class="text-xs text-gray-500 uppercase tracking-wider">Happy Tales</div>
-            </div>
+            <form id="adoptForm" method="POST" class="p-8">
+                {% csrf_token %}
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
+                        <input type="text" name="full_name" required value="{{ request.user.get_full_name|default:request.user.username }}"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
+                        <input type="text" name="phone" required value="{{ request.user.phone|default:'' }}"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Address</label>
+                        <textarea name="address" required rows="2"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]">{{ request.user.location|default:'' }}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Why do you want to adopt this dog?</label>
+                        <textarea name="reason" required rows="3" placeholder="Tell us about your home and experience..."
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]"></textarea>
+                    </div>
+                </div>
+                <div class="mt-8 flex gap-3">
+                    <button type="button" onclick="closeModals()" class="flex-1 px-4 py-3 border border-gray-200 text-gray-600 rounded-xl font-bold hover:bg-gray-50 transition-all">Cancel</button>
+                    <button type="submit" class="flex-1 px-4 py-3 bg-[#4FBDBA] text-white rounded-xl font-bold hover:bg-[#3da5a2] shadow-lg transition-all">Submit Application</button>
+                </div>
+            </form>
         </div>
     </div>
+
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateDogs() {
+        const form = document.getElementById('filterForm');
+        const formData = new FormData(form);
+        const params = new URLSearchParams(formData);
+        const grid = document.getElementById('dogsGrid');
+        
+        // Dim the grid while loading
+        grid.style.opacity = '0.5';
+        grid.style.transition = 'opacity 0.2s';
+
+        fetch(`${window.location.pathname}?${params.toString()}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            grid.innerHTML = html;
+            grid.style.opacity = '1';
+            attachEventListeners(); // Re-attach listeners to new buttons
+        })
+        .catch(error => {
+            console.error('Error updating dogs:', error);
+            grid.style.opacity = '1';
+        });
+    }
+
+    function attachEventListeners() {
+        // Event listener for Details buttons
+        document.querySelectorAll('.details-btn').forEach(btn => {
+            btn.onclick = function() {
+                const d = btn.dataset;
+                openDetailsModal(d.id, d.name, d.breed, d.age, d.gender, d.location, d.description, d.image, d.vaccinated);
+            }
+        });
+
+        // Event listener for Adopt buttons
+        document.querySelectorAll('.adopt-btn').forEach(btn => {
+            btn.onclick = function() {
+                const d = btn.dataset;
+                openAdoptModal(d.id, d.name);
+            }
+        });
+    }
+
+    // Initial attachment
+    attachEventListeners();
+
+    function openDetailsModal(id, name, breed, age, gender, location, description, imgUrl, vaccinated) {
+        document.getElementById('modalName').innerText = name;
+        document.getElementById('modalBreed').innerText = breed;
+        document.getElementById('modalAge').innerText = age + ' years';
+        document.getElementById('modalLocation').innerText = location;
+        document.getElementById('modalDescription').innerText = description;
+        document.getElementById('modalImg').src = imgUrl || 'https://via.placeholder.com/600x400?text=' + name;
+        
+        const genderEl = document.getElementById('modalGender');
+        genderEl.innerText = gender;
+        if (gender === 'Male') {
+            genderEl.className = 'bg-[#4FBDBA]/10 text-[#4FBDBA] px-4 py-1.5 rounded-full text-sm font-semibold';
+        } else {
+            genderEl.className = 'bg-pink-100 text-pink-600 px-4 py-1.5 rounded-full text-sm font-semibold';
+        }
+        
+        document.getElementById('modalVaccinated').innerText = vaccinated === 'Yes' ? 'Fully Vaccinated' : 'Partially Vaccinated';
+        
+        document.getElementById('modalAdoptBtn').onclick = function() {
+            closeModals();
+            openAdoptModal(id, name);
+        };
+        
+        toggleModal('detailsModal');
+    }
+
+    function openAdoptModal(id, name) {
+        {% if not request.user.is_authenticated %}
+        window.location.href = "{% url 'login' %}?next=" + window.location.pathname;
+        return;
+        {% endif %}
+        
+        document.getElementById('adoptDogName').innerText = name;
+        document.getElementById('adoptForm').action = "/home/adopt-dog/" + id + "/";
+        toggleModal('adoptModal');
+    }
+
+    function toggleModal(modalId) {
+        const body = document.querySelector('body')
+        const modal = document.getElementById(modalId)
+        modal.classList.toggle('opacity-0')
+        modal.classList.toggle('pointer-events-none')
+        body.classList.toggle('modal-active')
+    }
+
+    function closeModals() {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            modal.classList.add('opacity-0');
+            modal.classList.add('pointer-events-none');
+        });
+        document.querySelector('body').classList.remove('modal-active');
+    }
+
+    // Close modals on escape key
+    document.onkeydown = function(evt) {
+        evt = evt || window.event;
+        if (evt.keyCode == 27) {
+            closeModals();
+        }
+    };
+</script>
 {% endblock %}

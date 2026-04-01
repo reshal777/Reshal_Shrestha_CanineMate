@@ -28,6 +28,7 @@ class Veterinarian(models.Model):
     languages = models.CharField(max_length=200, default="Nepali, English")
     image = models.ImageField(upload_to='vets/', blank=True, null=True)
     is_emergency_available = models.BooleanField(default=False)
+    available_time = models.CharField(max_length=200, default="Mon - Fri, 09:00 AM - 05:00 PM")
     initial = models.CharField(max_length=1, blank=True)
 
     class Meta:

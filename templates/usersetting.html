@@ -1,0 +1,627 @@
+{% extends 'base/base.html' %}
+{% block title %}Settings – CanineMate{% endblock %}
+
+{% block extra_head %}
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  .settings-wrap { max-width: 1280px; margin: 0 auto; padding: 2.5rem 2rem; display: grid; grid-template-columns: 260px 1fr; gap: 2rem; align-items: start; }
+
+  /* Sidebar */
+  .settings-sidebar { background: #fff; border-radius: 1.25rem; box-shadow: 0 4px 18px rgba(0,0,0,.07); padding: 1rem; position: sticky; top: 90px; }
+  .nav-btn { width:100%; display:flex; align-items:center; gap:.75rem; padding:.75rem 1rem; border-radius:.75rem; border:none; cursor:pointer; font-size:.9rem; font-weight:500; color:#374151; background:none; transition:background .2s; text-align:left; }
+  .nav-btn:hover { background:#f9fafb; }
+  .nav-btn.active { background:linear-gradient(90deg,#4FBDBA,#3da5a2); color:#fff; box-shadow:0 4px 12px rgba(79,189,186,.35); }
+
+  /* Tab panels */
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+
+  /* Card */
+  .card { background:#fff; border-radius:1.25rem; box-shadow:0 4px 18px rgba(0,0,0,.07); padding:2rem; margin-bottom:1.5rem; }
+  .card-head { display:flex; align-items:center; gap:.75rem; margin-bottom:1.75rem; }
+  .card-icon { width:48px; height:48px; border-radius:.75rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .card-icon svg { width:24px; height:24px; }
+  .card-icon.teal   { background:rgba(79,189,186,.1); } .card-icon.teal svg   { color:#4FBDBA; }
+  .card-icon.purple { background:#f3e8ff; }             .card-icon.purple svg { color:#7c3aed; }
+  .card-icon.orange { background:rgba(244,162,97,.1); } .card-icon.orange svg { color:#F4A261; }
+  .card-icon.blue   { background:#dbeafe; }             .card-icon.blue svg   { color:#2563eb; }
+  .card-icon.green  { background:#dcfce7; }             .card-icon.green svg  { color:#16a34a; }
+  .card-title { font-size:1.4rem; font-weight:700; color:#333; }
+  .card-sub   { font-size:.875rem; color:#6b7280; margin-top:.125rem; }
+
+  /* Form */
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; }
+  .field-label { display:block; font-size:.875rem; font-weight:600; color:#374151; margin-bottom:.5rem; }
+  .input-wrap { position:relative; }
+  .input-icon { position:absolute; left:.75rem; top:50%; transform:translateY(-50%); color:#9ca3af; width:20px; height:20px; pointer-events:none; }
+  input[type="text"], input[type="email"], input[type="tel"], input[type="date"], input[type="password"], select, textarea {
+    width:100%; padding:.75rem 1rem; border-radius:.75rem; border:1px solid #e5e7eb;
+    font-size:.9rem; color:#333; font-family:inherit; outline:none; background:#fff;
+    transition:box-shadow .2s, border-color .2s;
+  }
+  textarea { resize:vertical; min-height:90px; }
+  .has-icon input, .has-icon select { padding-left:2.5rem; }
+  input:focus, select:focus, textarea:focus { box-shadow:0 0 0 2px #4FBDBA; border-color:transparent; }
+
+  /* Buttons */
+  .btn-teal { background:linear-gradient(90deg,#4FBDBA,#3da5a2); color:#fff; border:none; padding:.75rem 1.75rem; border-radius:.75rem; font-weight:600; font-size:.9rem; cursor:pointer; transition:box-shadow .2s; }
+  .btn-teal:hover { box-shadow:0 6px 18px rgba(79,189,186,.4); }
+  .btn-gray { background:#e5e7eb; color:#374151; border:none; padding:.75rem 1.5rem; border-radius:.75rem; font-weight:600; font-size:.9rem; cursor:pointer; transition:background .2s; }
+  .btn-gray:hover { background:#d1d5db; }
+  .btn-row { display:flex; gap:.75rem; padding-top:1.25rem; }
+
+  /* Toggle */
+  .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:1rem; border-radius:.75rem; background:#f9fafb; transition:background .2s; }
+  .toggle-row:hover { background:#f3f4f6; }
+  .toggle-label { font-weight:500; color:#333; font-size:.9rem; }
+  .toggle-desc  { font-size:.8rem; color:#6b7280; margin-top:.125rem; }
+  .toggle { position:relative; width:56px; height:28px; flex-shrink:0; }
+  .toggle input { opacity:0; width:0; height:0; }
+  .toggle-track { position:absolute; inset:0; background:#d1d5db; border-radius:9999px; cursor:pointer; transition:background .3s; }
+  .toggle-track::after { content:''; position:absolute; top:3px; left:4px; width:22px; height:22px; background:#fff; border-radius:50%; transition:transform .3s; box-shadow:0 1px 4px rgba(0,0,0,.2); }
+  .toggle input:checked + .toggle-track { background:#4FBDBA; }
+  .toggle input:checked + .toggle-track::after { transform:translateX(26px); }
+
+  /* Section divider */
+  .section-divider { border-top:1px solid #e5e7eb; margin-top:1.5rem; padding-top:1.5rem; }
+  .group-title { font-weight:600; color:#374151; margin-bottom:.75rem; display:flex; align-items:center; gap:.5rem; font-size:.95rem; }
+  .group-title svg { color:#4FBDBA; width:20px; height:20px; }
+
+  /* Security rows */
+  .sec-row { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1.25rem; border-radius:.75rem; border:2px solid #f3f4f6; transition:border-color .2s; flex-wrap:wrap; }
+  .sec-row:hover { border-color:#4FBDBA; }
+  .sec-row-left { display:flex; align-items:center; gap:1rem; flex:1; min-width:0; }
+  .sec-icon { width:48px; height:48px; border-radius:.75rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .sec-icon svg { width:24px; height:24px; }
+  .sec-icon.teal   { background:rgba(79,189,186,.1); } .sec-icon.teal   svg { color:#4FBDBA; }
+  .sec-icon.green  { background:#dcfce7; }             .sec-icon.green  svg { color:#16a34a; }
+  .sec-icon.blue   { background:#dbeafe; }             .sec-icon.blue   svg { color:#2563eb; }
+  .sec-icon.red    { background:#fee2e2; }             .sec-icon.red    svg { color:#dc2626; }
+  .sec-title { font-weight:600; color:#333; font-size:.9rem; }
+  .sec-sub   { font-size:.8rem; color:#6b7280; margin-top:.125rem; }
+  .btn-sm-teal { background:#4FBDBA; color:#fff; border:none; padding:.5rem 1.25rem; border-radius:.5rem; font-weight:500; font-size:.875rem; cursor:pointer; transition:background .2s; white-space:nowrap; }
+  .btn-sm-teal:hover { background:#3da5a2; }
+  .btn-sm-blue { background:#3b82f6; color:#fff; border:none; padding:.5rem 1.25rem; border-radius:.5rem; font-weight:500; font-size:.875rem; cursor:pointer; transition:background .2s; white-space:nowrap; }
+  .btn-sm-blue:hover { background:#2563eb; }
+  .btn-sm-red  { background:#ef4444; color:#fff; border:none; padding:.5rem 1.25rem; border-radius:.5rem; font-weight:500; font-size:.875rem; cursor:pointer; transition:background .2s; white-space:nowrap; }
+  .btn-sm-red:hover  { background:#dc2626; }
+
+  /* Theme */
+  .theme-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  .theme-btn { padding:1.5rem 1rem; border-radius:.75rem; border:2px solid #e5e7eb; background:#fff; cursor:pointer; text-align:center; transition:border-color .2s, background .2s; }
+  .theme-btn.selected { border-color:#4FBDBA; background:rgba(79,189,186,.05); }
+  .theme-btn svg { margin:0 auto .75rem; display:block; }
+  .theme-btn-name { font-size:.875rem; font-weight:600; color:#333; }
+  .theme-btn-sub  { font-size:.75rem; color:#6b7280; margin-top:.25rem; }
+
+  /* Storage bar */
+  .storage-bar-bg { height:12px; background:#e5e7eb; border-radius:9999px; overflow:hidden; margin-top:.75rem; }
+  .storage-bar-fill { height:100%; background:linear-gradient(90deg,#4FBDBA,#3da5a2); border-radius:9999px; }
+
+  /* Danger zone */
+  .danger-zone { background:#fef2f2; border:2px solid #fecaca; border-radius:.75rem; padding:1.25rem; }
+
+  /* Alert banner */
+  .alert-success { background:#f0fdf4; border:1px solid #bbf7d0; color:#15803d; border-radius:.75rem; padding:.875rem 1.25rem; font-size:.9rem; font-weight:500; margin-bottom:1.5rem; display:none; }
+  .alert-error   { background:#fef2f2; border:1px solid #fecaca; color:#dc2626;  border-radius:.75rem; padding:.875rem 1.25rem; font-size:.9rem; font-weight:500; margin-bottom:1.5rem; display:none; }
+
+  /* Modals */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; align-items:center; justify-content:center; padding:1rem; }
+  .modal-overlay.open { display:flex; }
+  .modal-box { background:#fff; border-radius:1rem; padding:1.75rem; max-width:440px; width:100%; animation:popIn .25s ease; }
+  @keyframes popIn { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+  .modal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+  .modal-title { font-size:1.2rem; font-weight:700; color:#333; }
+  .modal-title.red { color:#dc2626; }
+  .modal-close { background:none; border:none; cursor:pointer; color:#9ca3af; display:flex; }
+  .modal-close:hover { color:#374151; }
+  .modal-error { background:#fef2f2; border:1px solid #fecaca; border-radius:.5rem; padding:.75rem 1rem; margin-bottom:1rem; font-size:.875rem; color:#dc2626; display:none; }
+  .pass-wrap { position:relative; }
+  .pass-toggle { position:absolute; right:.75rem; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#9ca3af; display:flex; }
+  .pass-toggle:hover { color:#374151; }
+  .modal-btn-row { display:flex; gap:.75rem; padding-top:1rem; }
+  .btn-full-teal    { flex:1; background:linear-gradient(90deg,#4FBDBA,#3da5a2); color:#fff; border:none; padding:.75rem; border-radius:.5rem; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:.5rem; }
+  .btn-full-teal:hover { box-shadow:0 6px 18px rgba(79,189,186,.4); }
+  .btn-full-outline { flex:1; background:#fff; color:#6b7280; border:2px solid #d1d5db; padding:.75rem; border-radius:.5rem; font-weight:600; cursor:pointer; }
+  .btn-full-outline:hover { background:#f9fafb; }
+  .btn-full-red  { flex:1; background:#ef4444; color:#fff; border:none; padding:.75rem; border-radius:.5rem; font-weight:600; cursor:pointer; }
+  .btn-full-red:hover { background:#dc2626; }
+  .del-icon-wrap { width:64px; height:64px; background:#fee2e2; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem; }
+  .del-icon-wrap svg { color:#dc2626; width:32px; height:32px; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% load static %}
+<div class="settings-wrap">
+
+  <!-- ── Sidebar ── -->
+  <aside>
+    <div class="settings-sidebar">
+      <!-- Profile mini -->
+      <div style="text-align:center;padding:.75rem 0 1.25rem;border-bottom:1px solid #f3f4f6;margin-bottom:.75rem;">
+        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#4FBDBA,#3da5a2);margin:0 auto .75rem;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+          {% if user.profile_picture %}
+            <img src="{{ user.profile_picture.url }}" style="width:100%;height:100%;object-fit:cover;">
+          {% else %}
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          {% endif %}
+        </div>
+        <div style="font-weight:700;font-size:.95rem;color:#333;" id="sidebar-name">{{ user.get_full_name|default:user.username }}</div>
+        <div style="font-size:.8rem;color:#6b7280;margin-top:.125rem;">{{ user.email }}</div>
+      </div>
+      <nav style="display:flex;flex-direction:column;gap:.25rem;">
+        <button class="nav-btn active" onclick="switchTab('account',this)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Account
+        </button>
+        <button class="nav-btn" onclick="switchTab('security',this)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Security
+        </button>
+        <button class="nav-btn" onclick="switchTab('notifications',this)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Notifications
+        </button>
+        <button class="nav-btn" onclick="switchTab('privacy',this)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Privacy
+        </button>
+
+        <button class="nav-btn" onclick="switchTab('data',this)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+          Data &amp; Storage
+        </button>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main>
+
+    <!-- ════ ACCOUNT ════ -->
+    <div id="tab-account" class="tab-panel active">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert-success" style="display:block;">✓ {{ message }}</div>
+        {% endfor %}
+      {% endif %}
+      <div id="acct-success" class="alert-success">✓ Profile updated successfully!</div>
+      <div id="acct-error"   class="alert-error">✗ <span id="acct-error-msg"></span></div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-icon teal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div><div class="card-title">Account Information</div><div class="card-sub">Update your personal details</div></div>
+        </div>
+
+        <form id="profile-form">
+          {% csrf_token %}
+          <div class="grid-2">
+            <div>
+              <label class="field-label">First Name</label>
+              <input type="text" id="first_name" name="first_name" value="{{ user.first_name|default:'' }}" placeholder="First Name">
+            </div>
+            <div>
+              <label class="field-label">Last Name</label>
+              <input type="text" id="last_name" name="last_name" value="{{ user.last_name|default:'' }}" placeholder="Last Name">
+            </div>
+            <div>
+              <label class="field-label">Username</label>
+              <div class="input-wrap has-icon">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <input type="text" id="username" name="username" value="{{ user.username }}" placeholder="Username">
+              </div>
+            </div>
+            <div>
+              <label class="field-label">Email Address</label>
+              <div class="input-wrap has-icon">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                <input type="email" id="email" name="email" value="{{ user.email }}" placeholder="Email">
+              </div>
+            </div>
+            <div>
+              <label class="field-label">Phone Number</label>
+              <div class="input-wrap has-icon">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg>
+                <input type="tel" id="phone" name="phone" value="{{ user.phone|default:'' }}" placeholder="+977 98XXXXXXXX">
+              </div>
+            </div>
+            <div>
+              <label class="field-label">Location</label>
+              <div class="input-wrap has-icon">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                <input type="text" id="location" name="location" value="{{ user.location|default:'' }}" placeholder="City, Country">
+              </div>
+            </div>
+            <div style="grid-column:1/-1;">
+              <label class="field-label">Bio</label>
+              <textarea id="bio" name="bio" placeholder="Tell us about yourself...">{{ user.bio|default:'' }}</textarea>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn-teal" onclick="saveProfile()">Save Changes</button>
+            <button type="button" class="btn-gray" onclick="resetProfile()">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Profile Picture -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-icon teal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+          </div>
+          <div><div class="card-title">Profile Picture</div><div class="card-sub">Update your avatar</div></div>
+        </div>
+        <form method="post" action="{% url 'update_user_profile_api' %}" enctype="multipart/form-data" id="avatar-form">
+          {% csrf_token %}
+          <div style="display:flex;align-items:center;gap:1.5rem;">
+            <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#4FBDBA,#3da5a2);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+              {% if user.profile_picture %}
+                <img src="{{ user.profile_picture.url }}" style="width:100%;height:100%;object-fit:cover;" id="avatar-preview">
+              {% else %}
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              {% endif %}
+            </div>
+            <div>
+              <label class="btn-teal" style="cursor:pointer;display:inline-block;">
+                Upload Photo
+                <input type="file" name="profile_picture" accept="image/*" style="display:none;" onchange="previewAvatar(this)">
+              </label>
+              <p style="font-size:.8rem;color:#6b7280;margin-top:.5rem;">JPG, PNG or GIF · Max 5 MB</p>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ════ SECURITY ════ -->
+    <div id="tab-security" class="tab-panel">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div><div class="card-title">Security Settings</div><div class="card-sub">Manage password and login security</div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+          <div class="sec-row">
+            <div class="sec-row-left">
+              <div class="sec-icon teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+              <div><div class="sec-title">Password</div><div class="sec-sub">Keep your account secure with a strong password</div></div>
+            </div>
+            <button class="btn-sm-teal" onclick="openModal('pwModal')">Change Password</button>
+          </div>
+
+          <div class="sec-row">
+            <div class="sec-row-left">
+              <div class="sec-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg></div>
+              <div><div class="sec-title">Active Sessions</div><div class="sec-sub">Currently logged in on this device</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ NOTIFICATIONS ════ -->
+    <div id="tab-notifications" class="tab-panel">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-icon orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <div><div class="card-title">Notification Preferences</div><div class="card-sub">Choose how you want to be notified</div></div>
+        </div>
+
+        <div class="group-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          Email Notifications
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.75rem;margin-bottom:1.5rem;">
+          <div class="toggle-row"><div><div class="toggle-label">Appointment Reminders</div><div class="toggle-desc">Email reminders for upcoming appointments</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label></div>
+          <div class="toggle-row"><div><div class="toggle-label">Order Updates</div><div class="toggle-desc">Updates about your orders and deliveries</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label></div>
+          <div class="toggle-row"><div><div class="toggle-label">Promotional Emails</div><div class="toggle-desc">Special offers and discounts</div></div><label class="toggle"><input type="checkbox"><span class="toggle-track"></span></label></div>
+        </div>
+
+        <div class="group-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg>
+          App Notifications
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.75rem;">
+          <div class="toggle-row"><div><div class="toggle-label">Medicine Reminders</div><div class="toggle-desc">Alerts for your dog's medication schedule</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label></div>
+          <div class="toggle-row"><div><div class="toggle-label">Vaccination Alerts</div><div class="toggle-desc">Alerts for upcoming vaccinations</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label></div>
+          <div class="toggle-row"><div><div class="toggle-label">Adoption Alerts</div><div class="toggle-desc">When new dogs are available for adoption</div></div><label class="toggle"><input type="checkbox"><span class="toggle-track"></span></label></div>
+        </div>
+
+        <div class="section-divider">
+          <button class="btn-teal" onclick="showToast('Notification preferences saved!')">Save Preferences</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PRIVACY ════ -->
+    <div id="tab-privacy" class="tab-panel">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div><div class="card-title">Privacy Settings</div><div class="card-sub">Control your visibility and data sharing</div></div>
+        </div>
+        <div class="privacy-select-wrap" style="padding:1.25rem;border-radius:.75rem;border:2px solid #f3f4f6;margin-bottom:1.5rem;">
+          <label class="field-label">Profile Visibility</label>
+          <select>
+            <option value="public">Public – Anyone can view your profile</option>
+            <option value="private">Private – Only you</option>
+            <option value="friends">Friends Only</option>
+          </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.75rem;">
+          <div class="toggle-row"><div><div class="toggle-label">Show Email on Profile</div><div class="toggle-desc">Make your email visible to others</div></div><label class="toggle"><input type="checkbox"><span class="toggle-track"></span></label></div>
+          <div class="toggle-row"><div><div class="toggle-label">Show Phone on Profile</div><div class="toggle-desc">Make your phone visible to others</div></div><label class="toggle"><input type="checkbox"><span class="toggle-track"></span></label></div>
+          <div class="toggle-row"><div><div class="toggle-label">Show Location</div><div class="toggle-desc">Display location on your profile</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label></div>
+          <div class="toggle-row"><div><div class="toggle-label">Allow Messaging</div><div class="toggle-desc">Let other users message you</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label></div>
+        </div>
+        <div class="section-divider">
+          <button class="btn-teal" onclick="showToast('Privacy settings saved!')">Save Privacy Settings</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ════ DATA & STORAGE ════ -->
+    <div id="tab-data" class="tab-panel">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+          </div>
+          <div><div class="card-title">Data &amp; Storage</div><div class="card-sub">Manage your account data</div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+          <div class="sec-row">
+            <div class="sec-row-left">
+              <div class="sec-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg></div>
+              <div><div class="sec-title">Export Your Data</div><div class="sec-sub">Download a copy of all your data</div></div>
+            </div>
+            <button class="btn-sm-blue" onclick="showToast('Export initiated — check your email shortly.')">Export Data</button>
+          </div>
+          <div class="sec-row" style="flex-direction:column;align-items:flex-start;">
+            <div class="sec-row-left" style="width:100%;">
+              <div class="sec-icon teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg></div>
+              <div><div class="sec-title">Storage Usage</div><div class="sec-sub">You're using 45 MB of 1 GB</div></div>
+            </div>
+            <div style="padding-left:64px;width:100%;">
+              <div class="storage-bar-bg"><div class="storage-bar-fill" style="width:4.5%;"></div></div>
+            </div>
+          </div>
+          <div class="danger-zone">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:1rem;">
+                <div class="sec-icon red" style="width:48px;height:48px;border-radius:.75rem;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></div>
+                <div><div class="sec-title" style="color:#b91c1c;">Delete Account</div><div class="sec-sub" style="color:#dc2626;">Permanently delete your account and all data</div></div>
+              </div>
+              <button class="btn-sm-red" onclick="openModal('delModal')">Delete Account</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── Change Password Modal ── -->
+<div class="modal-overlay" id="pwModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span class="modal-title">Change Password</span>
+      <button class="modal-close" onclick="closeModal('pwModal');clearPwModal()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div id="pwError" class="modal-error"></div>
+    <div style="display:flex;flex-direction:column;gap:1rem;">
+      <div>
+        <label class="field-label">Current Password *</label>
+        <div class="pass-wrap">
+          <input type="password" id="pw-current" placeholder="Enter current password">
+          <button type="button" class="pass-toggle" onclick="togglePw('pw-current')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div>
+        <label class="field-label">New Password *</label>
+        <div class="pass-wrap">
+          <input type="password" id="pw-new" placeholder="Minimum 8 characters">
+          <button type="button" class="pass-toggle" onclick="togglePw('pw-new')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div>
+        <label class="field-label">Confirm New Password *</label>
+        <input type="password" id="pw-confirm" placeholder="Confirm new password">
+      </div>
+      <div class="modal-btn-row">
+        <button class="btn-full-teal" onclick="changePassword()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          Update Password
+        </button>
+        <button class="btn-full-outline" onclick="closeModal('pwModal');clearPwModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Delete Account Modal ── -->
+<div class="modal-overlay" id="delModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span class="modal-title red">Delete Account</span>
+      <button class="modal-close" onclick="closeModal('delModal')">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div style="text-align:center;margin-bottom:1.5rem;">
+      <div class="del-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      </div>
+      <p style="color:#374151;margin-bottom:.5rem;font-weight:600;">Are you absolutely sure?</p>
+      <p style="font-size:.875rem;color:#6b7280;">This action cannot be undone. All your data including dog profiles, appointments, and orders will be permanently deleted.</p>
+    </div>
+    <div class="modal-btn-row">
+      <button class="btn-full-red" onclick="showToast('Account deletion request submitted. Check your email.');closeModal('delModal')">Yes, Delete</button>
+      <button class="btn-full-outline" onclick="closeModal('delModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast notification ── -->
+<div id="toast" style="position:fixed;bottom:2rem;right:2rem;background:#333;color:#fff;padding:.875rem 1.5rem;border-radius:.75rem;font-size:.9rem;font-weight:500;opacity:0;transition:opacity .3s;z-index:300;pointer-events:none;">
+  Saved!
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // ── Tab switching ──────────────────────────────
+  function switchTab(id, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── Modal helpers ──────────────────────────────
+  function openModal(id)  { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('.modal-overlay').forEach(el => {
+    el.addEventListener('click', function(e){ if(e.target === this) closeModal(this.id); });
+  });
+
+  // ── Toast ──────────────────────────────────────
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.opacity = '1';
+    setTimeout(() => t.style.opacity = '0', 3000);
+  }
+
+  // ── Save profile via AJAX ──────────────────────
+  function saveProfile() {
+    const data = {
+      first_name: document.getElementById('first_name').value.trim(),
+      last_name:  document.getElementById('last_name').value.trim(),
+      username:   document.getElementById('username').value.trim(),
+      email:      document.getElementById('email').value.trim(),
+      phone:      document.getElementById('phone').value.trim(),
+      location:   document.getElementById('location').value.trim(),
+      bio:        document.getElementById('bio').value.trim(),
+    };
+
+    document.getElementById('acct-success').style.display = 'none';
+    document.getElementById('acct-error').style.display   = 'none';
+
+    fetch('{% url "update_user_profile_api" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        document.getElementById('acct-success').style.display = 'block';
+        // Update sidebar name live
+        const full = (data.first_name + ' ' + data.last_name).trim() || data.username;
+        document.getElementById('sidebar-name').textContent = full;
+        showToast('Profile updated successfully!');
+        setTimeout(() => document.getElementById('acct-success').style.display = 'none', 4000);
+      } else {
+        const errEl = document.getElementById('acct-error');
+        document.getElementById('acct-error-msg').textContent = res.error || 'Something went wrong.';
+        errEl.style.display = 'block';
+      }
+    })
+    .catch(() => {
+      document.getElementById('acct-error-msg').textContent = 'Network error. Please try again.';
+      document.getElementById('acct-error').style.display = 'block';
+    });
+  }
+
+  function resetProfile() {
+    document.getElementById('profile-form').reset();
+  }
+
+  // ── Avatar preview ─────────────────────────────
+  function previewAvatar(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const prev = document.getElementById('avatar-preview');
+        if (prev) { prev.src = e.target.result; }
+      };
+      reader.readAsDataURL(input.files[0]);
+      showToast('Photo selected. Save changes to upload.');
+    }
+  }
+
+  // ── Password modal ─────────────────────────────
+  function togglePw(inputId) {
+    const inp = document.getElementById(inputId);
+    inp.type  = inp.type === 'password' ? 'text' : 'password';
+  }
+
+  function clearPwModal() {
+    ['pw-current','pw-new','pw-confirm'].forEach(id => document.getElementById(id).value = '');
+    const errEl = document.getElementById('pwError');
+    errEl.style.display = 'none';
+    errEl.textContent   = '';
+  }
+
+  function changePassword() {
+    const cur  = document.getElementById('pw-current').value;
+    const nw   = document.getElementById('pw-new').value;
+    const conf = document.getElementById('pw-confirm').value;
+    const errEl = document.getElementById('pwError');
+    errEl.style.display = 'none';
+
+    if (!cur || !nw || !conf)  { errEl.textContent = 'All fields are required.'; errEl.style.display='block'; return; }
+    if (nw.length < 8)         { errEl.textContent = 'New password must be at least 8 characters.'; errEl.style.display='block'; return; }
+    if (nw !== conf)           { errEl.textContent = 'Passwords do not match.'; errEl.style.display='block'; return; }
+
+    fetch('{% url "update_user_profile_api" %}', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+      body: JSON.stringify({ current_password: cur, new_password: nw })
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        closeModal('pwModal');
+        clearPwModal();
+        showToast('Password changed successfully!');
+      } else {
+        errEl.textContent   = res.error || 'Incorrect current password.';
+        errEl.style.display = 'block';
+      }
+    })
+    .catch(() => { errEl.textContent = 'Network error.'; errEl.style.display='block'; });
+  }
+
+  // ── Theme selector ─────────────────────────────
+  function selectTheme(t) {
+    document.getElementById('theme-light').classList.toggle('selected', t === 'light');
+    document.getElementById('theme-dark').classList.toggle('selected',  t === 'dark');
+  }
+</script>
+{% endblock %}

@@ -603,8 +603,13 @@
 
           <div class="profile-info">
             <h1 class="doc-name">{{ vet.name }}</h1>
-            <p class="doc-specialty">{{ vet.specialty }}</p>
-
+            <p class="doc-specialty" style="color: #4FBDBA; font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem;">Specialization: {{ vet.specialty }}</p>
+            <div class="meta-item" style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+              <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+              <span>Available: {{ vet.available_time }}</span>
+            </div>
             <div class="profile-meta">
               <div class="meta-item">
                 <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">

@@ -419,7 +419,7 @@
 <div class="reminder-main">
   <div class="flex items-center justify-between mb-8">
     <div class="flex items-center gap-4">
-      <button class="bg-none border-none color-[#4b5563] flex items-center transition-colors hover:text-[#4FBDBA]"
+      <button class="bg-none border-none text-[#4b5563] flex items-center transition-colors hover:text-[#4FBDBA]"
         onclick="history.back()">
         <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -468,7 +468,7 @@
               <p class="reminder-name">{{ reminder.name }}</p>
               <p class="reminder-dog">Dog: {{ reminder.dog.name }}</p>
             </div>
-            <button class="toggle {% if reminder.is_active %}on{% endif %}" onclick="toggleReminder({{ reminder.id }}, this)" title="Toggle"></button>
+            <button class="toggle {% if reminder.is_active %}on{% endif %}" onclick="toggleReminder('{{ reminder.id }}', this)" title="Toggle"></button>
           </div>
           <div class="reminder-meta">
             <div class="meta-item">
@@ -516,7 +516,7 @@
               <p class="reminder-name">{{ reminder.name }}</p>
               <p class="reminder-dog">Dog: {{ reminder.dog.name }}</p>
             </div>
-            <button class="toggle {% if reminder.is_active %}on orange{% endif %}" onclick="toggleReminder({{ reminder.id }}, this, true)" title="Toggle"></button>
+            <button class="toggle {% if reminder.is_active %}on orange{% endif %}" onclick="toggleReminder('{{ reminder.id }}', this, true)" title="Toggle"></button>
           </div>
           <div class="reminder-meta">
             <div class="meta-item">
@@ -675,7 +675,7 @@
       method: "POST",
       headers: {
         "X-CSRFToken": "{{ csrf_token }}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       }
     })
     .then(response => response.json())

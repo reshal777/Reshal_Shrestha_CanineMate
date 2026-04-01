@@ -779,7 +779,9 @@
 
         // default date to today
         const today = new Date().toISOString().split('T')[0];
-        document.getElementById('booking-date').value = today;
+        const dateInput = document.getElementById('booking-date');
+        dateInput.value = today;
+        dateInput.min = today;
     }
 
     function openRescheduleModal(btn) {

@@ -1,0 +1,61 @@
+<div id="nav-filter" style="margin-bottom: 24px; padding: 0 16px;">
+    <input type="text" id="nav-filter-input" placeholder="Search Models..." 
+    style="width: 100%; font-size: 13px; background: rgba(255,255,255,0.04) !important; border: 1px solid var(--border) !important; border-radius: 10px; padding: 10px 14px; color: var(--text-main) !important; outline: none; transition: border-color 0.2s;"
+    onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+</div>
+
+{% if available_apps %}
+  {% for app in available_apps %}
+    <div class="module" style="background: transparent !important; border: none !important; margin-bottom: 24px !important; box-shadow: none !important;">
+      <h2 style="padding: 0 20px !important; margin-bottom: 12px !important; font-size: 11px !important; color: var(--text-muted) !important; font-weight: 700 !important; letter-spacing: 0.1em !important; background: transparent !important; border: none !important; text-transform: uppercase !important;">
+        {{ app.name }}
+      </h2>
+      <ul style="list-style: none; padding: 0 12px; margin: 0; display: flex; flex-direction: column; gap: 4px;">
+        {% for model in app.models %}
+          <li style="margin: 0;">
+            <a href="{{ model.admin_url }}" 
+               style="display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 10px; color: var(--text-muted); text-decoration: none; font-size: 13px; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);"
+               onmouseover="this.style.background='rgba(34, 211, 238, 0.08)'; this.style.color='var(--primary)'; this.style.transform='translateX(4px)'"
+               onmouseout="if(!this.classList.contains('active')) { this.style.background='transparent'; this.style.color='var(--text-muted)'; this.style.transform='none'; }">
+              <svg style="width: 16px; height: 16px; opacity: 0.6;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              {{ model.name }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endfor %}
+{% else %}
+  <p style="padding: 0 20px; color: var(--text-muted); font-size: 12px; font-style: italic;">No permissions available.</p>
+{% endif %}
+
+<script>
+    const filterInput = document.getElementById('nav-filter-input');
+    if (filterInput) {
+        filterInput.addEventListener('keyup', function() {
+            const term = this.value.toLowerCase();
+            const links = document.querySelectorAll('#new-sidebar .module ul li a');
+            links.forEach(link => {
+                const text = link.innerText.toLowerCase();
+                const parentModule = link.closest('.module');
+                if (text.includes(term)) {
+                    link.parentElement.style.display = 'block';
+                } else {
+                    link.parentElement.style.display = 'none';
+                }
+            });
+            
+            // Hide parent module if no children are visible
+            document.querySelectorAll('#new-sidebar .module').forEach(module => {
+                const visibleLinks = module.querySelectorAll('li[style="display: block;"]');
+                if (visibleLinks.length === 0 && term !== "") {
+                    module.style.display = 'none';
+                } else {
+                    module.style.display = 'block';
+                }
+            });
+        });
+    }
+</script>

@@ -1,0 +1,25 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ title }} | CanineMate Admin{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    /* Global Overrides for content modules in the new layout */
+    #content-main {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .module h2 {
+        background: rgba(255, 255, 255, 0.02) !important;
+        color: white !important;
+        font-weight: 700 !important;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{% url 'admin:index' %}" style="color: #4FBDBA; text-decoration: none;">Home</a>
+{% if title %} <span style="margin: 0 8px; color: #6b7280;">/</span> <span style="color: #fff;">{{ title }}</span> {% endif %}
+{% endblock %}

@@ -4,6 +4,8 @@ from veterinary.models import Appointment
 from grooming.models import GroomingBooking
 from pets.models import Vaccination, Medication, Dog
 
+from django.db.models import Q
+
 def notifications(request):
     notifications = []
     
@@ -12,11 +14,13 @@ def notifications(request):
         today = now.date()
         upcoming_limit = today + timedelta(days=7) # Look ahead 7 days for most items
         
+        now_time = now.time()
+        
         # 1. Upcoming Appointments
         appointments = Appointment.objects.filter(
+            Q(appointment_date__gt=today) | Q(appointment_date=today, appointment_time__gte=now_time),
             user=request.user, 
             status='Confirmed',
-            appointment_date__gte=today,
             appointment_date__lte=today + timedelta(days=30)
         ).order_by('appointment_date')
         
@@ -40,9 +44,9 @@ def notifications(request):
             
         # 2. Upcoming Grooming
         grooming = GroomingBooking.objects.filter(
+            Q(booking_date__gt=today) | Q(booking_date=today, booking_time__gte=now_time),
             user=request.user, 
             status='Confirmed',
-            booking_date__gte=today,
             booking_date__lte=today + timedelta(days=30)
         ).order_by('booking_date')
         
@@ -65,7 +69,7 @@ def notifications(request):
             })
             
         # 3. Vaccinations Due
-        user_dogs = Dog.objects.filter(owner=request.user)
+        user_dogs = Dog.objects.filter(owner=request.user, is_adoption_post=False)
         vaccinations = Vaccination.objects.filter(
             dog__in=user_dogs,
             next_due_date__gte=today,
@@ -116,9 +120,9 @@ def notifications(request):
         # 5. New Unified Reminders
         from pets.models import Reminder
         reminders = Reminder.objects.filter(
+            Q(start_date__gt=today) | Q(start_date=today, reminder_time__gte=now_time),
             dog__in=user_dogs,
             is_active=True,
-            start_date__gte=today,
             start_date__lte=today + timedelta(days=30)
         ).order_by('start_date')
         
@@ -152,10 +156,27 @@ def notifications(request):
         'notification_count': len(notifications)
     }
 def global_context(request):
-    from shop.models import CartItem
+    from shop.models import CartItem, Product, Order
+    from accounts.models import User
+    from django.db.models import Count
+    
     cart_count = 0
+    admin_stats = {}
+    
     if request.user.is_authenticated:
         cart_count = CartItem.objects.filter(user=request.user).count()
+        
+        # Add stats for admin dashboard if user is staff
+        if request.user.is_staff or request.user.is_superuser:
+            admin_stats = {
+                'product_count': Product.objects.count(),
+                'user_count': User.objects.count(),
+                'order_count': Order.objects.count(),
+                'recent_users': User.objects.annotate(dog_count=Count('dogs')).order_by('-date_joined')[:5],
+                'recent_orders': Order.objects.select_related('user').order_by('-date')[:5],
+            }
+            
     return {
-        'cart_count': cart_count
+        'cart_count': cart_count,
+        'admin_stats': admin_stats
     }
