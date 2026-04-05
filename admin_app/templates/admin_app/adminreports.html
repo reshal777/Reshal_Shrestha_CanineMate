@@ -1,0 +1,303 @@
+{% extends 'admin_app/admin_base.html' %}
+
+{% block title %}Admin Reports & Analytics{% endblock %}
+{% block page_title %}Business Reports{% endblock %}
+{% block page_subtitle %}Comprehensive analytics and insights{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* Summary Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      border: 1px solid #f3f4f6;
+    }
+    .stat-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px;
+    }
+    .stat-icon svg { width: 24px; height: 24px; color: #fff; }
+    .stat-value { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    .stat-label { font-size: 13px; color: #6b7280; margin-bottom: 8px; }
+    .stat-trend {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 13px; font-weight: 600;
+    }
+    .stat-trend svg { width: 16px; height: 16px; }
+    .trend-up { color: #16a34a; }
+    .trend-down { color: #dc2626; }
+
+    /* Cards */
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      margin-bottom: 32px;
+      border: 1px solid #f3f4f6;
+    }
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .card-header h2 { font-size: 22px; font-weight: 700; }
+    .card-header p { font-size: 13px; color: #6b7280; margin-top: 4px; }
+    .card-header svg { width: 24px; height: 24px; color: #4FBDBA; flex-shrink: 0; }
+
+    /* Monthly Revenue Bars */
+    .rev-row { margin-bottom: 24px; }
+    .rev-row:last-child { margin-bottom: 0; }
+    .rev-meta {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .rev-left { display: flex; align-items: center; gap: 12px; }
+    .rev-month { font-weight: 600; color: #333; width: 36px; }
+    .rev-orders { font-size: 14px; color: #6b7280; }
+    .rev-amount { font-weight: 700; color: #4FBDBA; font-size: 15px; }
+    .bar-track {
+      width: 100%; background: #e5e7eb;
+      border-radius: 99px; height: 16px; overflow: hidden;
+    }
+    .bar-fill {
+      background: linear-gradient(to right, #4FBDBA, #3da5a2);
+      height: 16px; border-radius: 99px;
+      transition: width 0.6s ease;
+    }
+
+    /* Two column */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+      margin-bottom: 32px;
+    }
+    @media (min-width: 1024px) {
+      .two-col { grid-template-columns: 1fr 1fr; }
+    }
+    .two-col .card { margin-bottom: 0; }
+
+    /* Category rows */
+    .cat-item {
+      border: 1px solid #f3f4f6;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .cat-top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .cat-name { font-weight: 600; color: #333; font-size: 15px; }
+    .cat-orders { font-size: 13px; color: #6b7280; }
+    .cat-mid {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .cat-rev { font-weight: 700; color: #4FBDBA; font-size: 15px; }
+    .cat-pct { font-size: 13px; font-weight: 600; color: #4b5563; }
+    .cat-bar-track {
+      width: 100%; background: #e5e7eb;
+      border-radius: 99px; height: 8px; overflow: hidden;
+    }
+    .cat-bar-fill {
+      background: linear-gradient(to right, #4FBDBA, #3da5a2);
+      height: 8px; border-radius: 99px;
+    }
+
+    /* Customer rows */
+    .cust-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px;
+      border: 1px solid #f3f4f6;
+      border-radius: 12px;
+      margin-bottom: 10px;
+    }
+    .cust-left { display: flex; align-items: center; gap: 12px; }
+    .cust-avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: linear-gradient(135deg, #4FBDBA, #3da5a2);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 20px; color: #fff; flex-shrink: 0;
+    }
+    .cust-name { font-weight: 600; color: #333; font-size: 15px; }
+    .cust-email { font-size: 13px; color: #6b7280; }
+    .cust-right { text-align: right; }
+    .cust-spent { font-weight: 700; color: #4FBDBA; font-size: 15px; }
+    .cust-orders-label { font-size: 12px; color: #6b7280; }
+
+    /* Performance Metrics */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+    }
+    .metric-card {
+      padding: 24px;
+      border: 2px solid #f3f4f6;
+      border-radius: 12px;
+    }
+    .metric-label { font-size: 13px; color: #4b5563; margin-bottom: 8px; }
+    .metric-value { font-size: 28px; font-weight: 700; color: #333; margin-bottom: 12px; }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+    .badge-excellent { background: #dcfce7; color: #15803d; }
+    .badge-good { background: #dbeafe; color: #1d4ed8; }
+    .badge-warning { background: #ffedd5; color: #c2410c; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="flex justify-end mb-6 gap-3">
+        <select id="dateRange" class="px-4 py-2 rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-[#4FBDBA]">
+          <option value="today">Today</option>
+          <option value="thisWeek">This Week</option>
+          <option value="thisMonth" selected>This Month</option>
+          <option value="lastMonth">Last Month</option>
+          <option value="thisYear">This Year</option>
+        </select>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="stats-grid" id="summaryStats"></div>
+
+    <!-- Monthly Revenue Chart -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Monthly Revenue Trend</h2>
+          <p>Last 3 months performance</p>
+        </div>
+        <i data-lucide="bar-chart-3"></i>
+      </div>
+      <div id="monthlyRevenue"></div>
+    </div>
+
+    <!-- Sales by Category + Top Customers -->
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2>Sales by Category</h2>
+            <p>Revenue distribution</p>
+          </div>
+          <i data-lucide="pie-chart"></i>
+        </div>
+        <div id="salesByCategory"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2>Top Customers</h2>
+            <p>Highest spending users</p>
+          </div>
+          <i data-lucide="users"></i>
+        </div>
+        <div id="topCustomers"></div>
+      </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const summaryStats = JSON.parse('{{ summary_stats_json|escapejs }}');
+    const statsContainer = document.getElementById('summaryStats');
+    summaryStats.forEach((stat) => {
+      const trendClass = stat.trend === 'up' ? 'trend-up' : 'trend-down';
+      const trendIcon = stat.trend === 'up' ? 'trending-up' : 'trending-down';
+      statsContainer.innerHTML += `
+        <div class="stat-card">
+          <div class="stat-icon" style="background:${stat.bg}">
+            <i data-lucide="${stat.icon}" class="w-6 h-6 text-white"></i>
+          </div>
+          <p class="stat-value">${stat.value}</p>
+          <p class="stat-label">${stat.label}</p>
+          <div class="stat-trend ${trendClass}">
+            <i data-lucide="${trendIcon}" class="w-4 h-4"></i>
+            <span>${stat.change}</span>
+          </div>
+        </div>`;
+    });
+
+    const monthlyRevenue = JSON.parse('{{ monthly_revenue_json|escapejs }}');
+    const revContainer = document.getElementById('monthlyRevenue');
+    monthlyRevenue.forEach(d => {
+      // Find max revenue dynamically to set proportion
+      const maxRev = Math.max(...monthlyRevenue.map(o => o.revenue)) || 500000;
+      const pct = maxRev > 0 ? ((d.revenue / maxRev) * 100).toFixed(1) : 0;
+      revContainer.innerHTML += `
+        <div class="rev-row">
+          <div class="rev-meta">
+            <div class="rev-left">
+              <span class="rev-month">${d.month}</span>
+              <span class="rev-orders text-xs text-gray-500">${d.orders} orders</span>
+            </div>
+            <span class="rev-amount">NPR ${d.revenue.toLocaleString()}</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${pct}%"></div>
+          </div>
+        </div>`;
+    });
+
+    const salesByCategory = JSON.parse('{{ category_sales_json|escapejs }}');
+    const catContainer = document.getElementById('salesByCategory');
+    salesByCategory.forEach(item => {
+      catContainer.innerHTML += `
+        <div class="cat-item">
+          <div class="cat-top">
+            <span class="cat-name">${item.category}</span>
+            <span class="cat-orders text-xs text-gray-500">${item.orders} orders</span>
+          </div>
+          <div class="cat-mid">
+            <span class="cat-rev">NPR ${item.revenue.toLocaleString()}</span>
+            <span class="cat-pct font-bold text-gray-700">${item.percentage}%</span>
+          </div>
+          <div class="cat-bar-track">
+            <div class="cat-bar-fill" style="width:${item.percentage}%"></div>
+          </div>
+        </div>`;
+    });
+
+    const topCustomers = JSON.parse('{{ top_customers_json|escapejs }}');
+
+    const custContainer = document.getElementById('topCustomers');
+    topCustomers.forEach(c => {
+      custContainer.innerHTML += `
+        <div class="cust-item flex items-center justify-between p-4 border border-gray-100 rounded-xl mb-3 hover:bg-gray-50">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-[#4FBDBA] text-white flex items-center justify-center font-bold font-sans">${c.name.charAt(0)}</div>
+            <div>
+              <p class="font-bold text-[#333333] text-sm">${c.name}</p>
+              <p class="text-xs text-gray-500">${c.email}</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <p class="font-bold text-[#4FBDBA]">NPR ${c.spent.toLocaleString()}</p>
+            <p class="text-[10px] text-gray-400 font-bold uppercase">${c.orders} orders</p>
+          </div>
+        </div>`;
+    });
+
+    lucide.createIcons();
+</script>
+{% endblock %}

@@ -40,6 +40,7 @@ urlpatterns = [
     path('chats/', views.chat_list_view, name='chat_list'),
     path('chatbot/', views.chatbot_proxy, name='chatbot_proxy'),
     path('profile/', views.user_profile_view, name='user_profile'),
+    path('pet-expenses/', views.pet_expenses_view, name='pet_expenses'),
     path('api/profile/', views.get_user_profile_api, name='get_user_profile_api'),
     path('api/profile/update/', views.update_user_profile_api, name='update_user_profile_api'),
     path('vet-checkout/<int:appointment_id>/', views.vet_checkout_view, name='vet_checkout'),

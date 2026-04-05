@@ -1,0 +1,83 @@
+{% extends 'admin_app/admin_base.html' %}
+
+{% block title %}Grooming Bookings – Admin Panel{% endblock %}
+{% block page_title %}Grooming Bookings{% endblock %}
+{% block page_subtitle %}Manage salon appointments and status{% endblock %}
+
+{% block content %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
+          <i data-lucide="scissors"></i>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Total Bookings</p>
+          <p class="text-2xl font-bold text-[#333333]">{{ total_bookings }}</p>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600">
+          <i data-lucide="clock"></i>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Pending Approvals</p>
+          <p class="text-2xl font-bold text-amber-600">{{ pending }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+      <table class="w-full text-left">
+        <thead class="bg-gray-50 border-b border-gray-100">
+          <tr>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Pet</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Service</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Date & Time</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600 text-right">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for booking in bookings %}
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 font-semibold text-[#333333]">{{ booking.dog.name }}</td>
+            <td class="px-6 py-4 text-sm text-gray-600">{{ booking.service.name }}</td>
+            <td class="px-6 py-4 text-sm text-gray-500">{{ booking.booking_date|date:"M d, Y" }} @ {{ booking.booking_time|time:"P" }}</td>
+            <td class="px-6 py-4 text-right">
+              <div class="flex justify-end gap-2">
+                {% if booking.status == 'Pending' %}
+                <form method="POST" class="inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="confirm">
+                    <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                    <button type="submit" class="p-2 text-green-600 hover:bg-green-50 rounded-xl transition-all" title="Confirm">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                    </button>
+                </form>
+                {% elif booking.status == 'Confirmed' %}
+                <form method="POST" class="inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="complete">
+                    <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                    <button type="submit" class="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-all" title="Mark Completed">
+                        <i data-lucide="check-check" class="w-4 h-4"></i>
+                    </button>
+                </form>
+                {% endif %}
+                <form method="POST" onsubmit="return confirm('Delete this booking?');" class="inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                    <button type="submit" class="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-all" title="Delete">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="px-6 py-12 text-center text-gray-500">No grooming bookings found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+{% endblock %}

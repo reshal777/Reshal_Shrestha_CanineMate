@@ -9,9 +9,14 @@ from django.contrib.auth.decorators import login_required
 def login_view(request):
     if request.user.is_authenticated:
         if request.user.is_staff:
-            return redirect("admin:index")
+            return redirect("admin_dashboard")
         return redirect("dashboard")
-        
+
+    # Clear any stale messages from previous sessions (e.g. admin panel messages)
+    if request.method == "GET":
+        storage = messages.get_messages(request)
+        storage.used = True  # marks them all as consumed so they won't render
+
     if request.method == "POST":
         login_input = request.POST.get("email", "").strip() # This field will now handle both email and username
         password = request.POST.get("password", "")
@@ -35,9 +40,9 @@ def login_view(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
-                # Redirect admin/staff users to the standard Django admin
+                # Redirect admin/staff users to the new admin dashboard
                 if user.is_staff:
-                    return redirect("admin:index")
+                    return redirect("admin_dashboard")
                 else:
                     return redirect("dashboard")
             else:
@@ -63,7 +68,7 @@ from django.views.decorators.cache import never_cache
 def dashboard_view(request):
     # Prevent admin users from accessing regular dashboard
     if request.user.is_staff:
-        return redirect("admin:index")
+        return redirect("admin_dashboard")
         
     user_dogs = Dog.objects.filter(owner=request.user, is_adoption_post=False)
     now = timezone.now()

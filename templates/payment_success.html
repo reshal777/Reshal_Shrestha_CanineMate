@@ -15,15 +15,15 @@
         <p class="text-gray-500 text-lg mb-10 leading-relaxed">{{ message|default:"Your transation has been completed successfully." }}</p>
 
         <div class="space-y-4">
-            <a href="{% url 'vetappointment' %}" class="block w-full bg-[#4FBDBA] text-white py-4 rounded-2xl font-bold text-lg hover:bg-[#3da5a2] transition-all transform hover:-translate-y-1 shadow-xl shadow-teal-100">
-                View Appointments
+            <a href="{% url redirect_url|default:'dashboard' %}" class="block w-full bg-[#4FBDBA] text-white py-4 rounded-2xl font-bold text-lg hover:bg-[#3da5a2] transition-all transform hover:-translate-y-1 shadow-xl shadow-teal-100">
+                {{ button_text|default:"View Appointments" }}
             </a>
             <a href="{% url 'dashboard' %}" class="block w-full py-4 text-gray-400 font-bold hover:text-[#4FBDBA] transition-colors">
                 Back to Dashboard
             </a>
         </div>
         
-        <div class="mt-12 pt-8 border-t border-gray-100 italic text-gray-400 text-sm">
+        <div class="mt-12 pt-8 border-t border-gray-100 text-gray-400 text-sm">
             Thank you for choosing Canine Mate! 🐾
         </div>
     </div>

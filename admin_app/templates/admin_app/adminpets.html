@@ -1,0 +1,304 @@
+{% extends 'admin_app/admin_base.html' %}
+
+{% block title %}Pet Management – Admin Panel{% endblock %}
+{% block page_title %}Pet List{% endblock %}
+{% block page_subtitle %}Manage all registered dogs and their health status{% endblock %}
+
+{% block content %}
+      <!-- Stats Summary -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+            <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+                <i data-lucide="dog" class="w-8 h-8"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500">Total Pets</p>
+                <p class="text-2xl font-bold text-[#333333]">{{ total_pets }}</p>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+            <div class="w-14 h-14 bg-green-100 text-green-600 rounded-xl flex items-center justify-center">
+                <i data-lucide="check-circle" class="w-8 h-8"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500">Healthy</p>
+                <p class="text-2xl font-bold text-[#333333]">{{ healthy_pets }}</p>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+            <div class="w-14 h-14 bg-red-100 text-red-600 rounded-xl flex items-center justify-center">
+                <i data-lucide="calendar" class="w-8 h-8"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500">Vaccination Due</p>
+                <p class="text-2xl font-bold text-[#333333]">0</p>
+            </div>
+        </div>
+      </div>
+
+      <!-- Filters & Search -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+        <form method="GET" action="{% url 'admin_pets' %}" class="flex flex-col md:flex-row gap-4 items-center">
+            <div class="relative flex-1">
+                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Search pet name or breed..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA] transition-all bg-gray-50">
+            </div>
+            <select name="breed" class="w-full md:w-48 pl-4 pr-10 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA] bg-gray-50">
+                <option value="all">All Breeds</option>
+                {% for breed in breeds %}
+                <option value="{{ breed }}" {% if breed_filter == breed %}selected{% endif %}>{{ breed }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="px-6 py-2.5 bg-[#4FBDBA] text-white rounded-xl hover:bg-[#3da5a2] transition-colors font-semibold">Apply Filters</button>
+        </form>
+      </div>
+
+      <!-- Table Content -->
+      <div class="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-x-auto">
+        <table class="w-full text-left">
+            <thead class="bg-gray-50 border-b border-gray-100">
+                <tr>
+                    <th class="px-6 py-5 text-sm font-bold text-gray-600">ID</th>
+                    <th class="px-6 py-5 text-sm font-bold text-gray-600">Dog</th>
+                    <th class="px-6 py-5 text-sm font-bold text-gray-600">Breed</th>
+                    <th class="px-6 py-5 text-sm font-bold text-gray-600">Owner</th>
+                    <th class="px-6 py-5 text-sm font-bold text-gray-600">Age</th>
+                    <th class="px-6 py-5 text-sm font-bold text-gray-600 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for p in pets %}
+                <tr class="hover:bg-gray-50 transition-colors group">
+                    <td class="px-6 py-5 text-sm text-gray-500 font-medium">#{{ p.id }}</td>
+                    <td class="px-6 py-5">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl overflow-hidden shadow-sm border border-gray-200">
+                                {% if p.image %}
+                                <img src="{{ p.image.url }}" class="w-full h-full object-cover">
+                                {% else %}
+                                <div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
+                                    <i data-lucide="camera" class="w-6 h-6"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <p class="font-bold text-[#333333] mb-0.5">{{ p.name }}</p>
+                                <p class="text-xs text-gray-500 flex items-center gap-1">
+                                    <span class="w-2 h-2 rounded-full {% if p.is_vaccinated %}bg-green-500{% else %}bg-amber-500{% endif %}"></span>
+                                    {% if p.is_vaccinated %}Vaccinated{% else %}Not Vaccinated{% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-5 text-sm text-gray-600">{{ p.breed }}</td>
+                    <td class="px-6 py-5">
+                        <div class="text-sm">
+                            <p class="font-semibold text-gray-800">{{ p.owner.get_full_name|default:p.owner.username }}</p>
+                            <p class="text-xs text-gray-500">{{ p.owner.email }}</p>
+                        </div>
+                    </td>
+                    <td class="px-6 py-5 text-sm text-gray-600 font-medium">{{ p.age }}</td>
+                    <td class="px-6 py-5 text-right">
+                        <div class="flex justify-end gap-2 transition-all">
+                            <button onclick="openViewPetModal('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.breed|escapejs }}', '{{ p.age|escapejs }}', '{{ p.gender|escapejs }}', '{{ p.location|escapejs }}', '{{ p.is_vaccinated }}', '{{ p.owner.get_full_name|default:p.owner.username|escapejs }}', '{{ p.owner.email|escapejs }}', '{% if p.image %}{{ p.image.url|escapejs }}{% endif %}', '{{ p.description|escapejs }}')" class="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-all" title="View Details">
+                                <i data-lucide="eye" class="w-5 h-5"></i>
+                            </button>
+                            <button onclick="openEditPetModal('{{ p.id }}', '{{ p.name|escapejs }}', '{{ p.breed|escapejs }}', '{{ p.age|escapejs }}', '{{ p.gender|escapejs }}', '{{ p.location|escapejs }}', '{{ p.is_vaccinated }}')" class="p-2 text-teal-600 hover:bg-teal-50 rounded-xl transition-all" title="Edit Pet">
+                                <i data-lucide="edit-3" class="w-5 h-5"></i>
+                            </button>
+                            <form method="POST" onsubmit="return confirm('Delete this pet profile permanently?');" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="pet_id" value="{{ p.id }}">
+                                <button type="submit" class="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-all" title="Delete Pet">
+                                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-20 text-center text-gray-400 text-sm">
+                        <i data-lucide="search-x" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
+                        No pets found recorded in the system.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+      </div>
+
+      <!-- View Pet Modal -->
+      <div id="view-pet-modal" class="hidden fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-300">
+            <!-- Modal Header with Profile Background -->
+            <div class="h-44 bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] relative">
+                <button onclick="document.getElementById('view-pet-modal').classList.add('hidden')" class="absolute top-6 right-6 w-12 h-12 bg-black/10 hover:bg-black/20 text-white rounded-2xl flex items-center justify-center transition-all">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="px-10 pb-10">
+                <!-- Profile Header -->
+                <div class="relative flex items-end gap-6 -mt-16 mb-8">
+                    <div class="w-40 h-40 rounded-[2rem] bg-white p-1.5 shadow-2xl border border-gray-100 flex-shrink-0">
+                        <img id="view-image" src="" alt="Pet Profile" class="w-full h-full object-cover rounded-[1.75rem]">
+                    </div>
+                    <div class="pb-4">
+                        <h3 id="view-name" class="text-4xl font-black text-[#333333] tracking-tight mb-1"></h3>
+                        <div class="flex items-center gap-2">
+                            <span id="view-breed-gender" class="text-gray-500 font-bold uppercase tracking-widest text-[11px] bg-gray-100 px-3 py-1 rounded-lg"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Information Grid -->
+                <div class="grid grid-cols-2 gap-10 mb-10">
+                    <div class="space-y-6">
+                        <div>
+                            <p class="text-[11px] text-gray-400 font-black uppercase tracking-[0.15em] mb-2">Owner Information</p>
+                            <p id="view-owner-name" class="font-bold text-[#333333] text-lg mb-0.5"></p>
+                            <div class="flex items-center gap-2 text-gray-500">
+                                <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+                                <p id="view-owner-email" class="text-sm font-medium"></p>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-[11px] text-gray-400 font-black uppercase tracking-[0.15em] mb-2">Location</p>
+                            <div class="flex items-center gap-2 text-[#333333]">
+                                <i data-lucide="map-pin" class="w-4 h-4 text-[#4FBDBA]"></i>
+                                <p id="view-location" class="font-bold"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div>
+                            <p class="text-[11px] text-gray-400 font-black uppercase tracking-[0.15em] mb-2">Health & Age</p>
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-3">
+                                    <span id="view-vaccination-badge" class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest"></span>
+                                </div>
+                                <p class="text-sm text-gray-500 font-medium">
+                                    Current Age: <span id="view-age" class="text-[#333333] font-bold"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description Card -->
+                <div class="bg-gray-50 rounded-[2rem] p-7 border border-gray-100 relative">
+                    <div class="absolute -top-3 left-6 px-3 py-1 bg-white border border-gray-100 rounded-lg shadow-sm">
+                        <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Profile Notes</p>
+                    </div>
+                    <p id="view-description" class="text-sm text-gray-600 leading-relaxed font-medium"></p>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <!-- Edit Pet Modal -->
+      <div id="edit-pet-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden my-8">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="text-xl font-bold text-[#333333]">Edit Pet Profile</h3>
+                <button onclick="document.getElementById('edit-pet-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <form method="POST" enctype="multipart/form-data" class="p-8 space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="edit">
+                <input type="hidden" name="pet_id" id="edit-pet-id">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Pet Name</label>
+                        <input type="text" name="name" id="edit-name" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#4FBDBA]">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Breed</label>
+                        <input type="text" name="breed" id="edit-breed" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#4FBDBA]">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Age</label>
+                        <input type="text" name="age" id="edit-age" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#4FBDBA]">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Gender</label>
+                        <select name="gender" id="edit-gender" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#4FBDBA]">
+                            <option>Male</option>
+                            <option>Female</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Location</label>
+                        <input type="text" name="location" id="edit-location" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#4FBDBA]">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 py-2">
+                    <input type="checkbox" name="is_vaccinated" id="edit-vaccinated" class="w-5 h-5 text-[#4FBDBA] rounded border-gray-300 focus:ring-[#4FBDBA]">
+                    <label for="edit-vaccinated" class="text-sm font-bold text-gray-700">Fully Vaccinated</label>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Update Photo</label>
+                    <input type="file" name="image" accept="image/*" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none">
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="document.getElementById('edit-pet-modal').classList.add('hidden')" class="flex-1 py-3 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition-all">Cancel</button>
+                    <button type="submit" class="flex-1 py-3 bg-[#4FBDBA] text-white font-bold rounded-xl shadow-lg hover:bg-[#3da5a2] transition-all">Save Changes</button>
+                </div>
+            </form>
+        </div>
+      </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function openViewPetModal(id, name, breed, age, gender, location, vaccinated, ownerName, ownerEmail, imageUrl, description) {
+        document.getElementById('view-name').textContent = name;
+        document.getElementById('view-breed-gender').textContent = `${breed} • ${gender}`;
+        document.getElementById('view-owner-name').textContent = ownerName;
+        document.getElementById('view-owner-email').textContent = ownerEmail;
+        document.getElementById('view-location').textContent = location || 'Not Specified';
+        document.getElementById('view-age').textContent = age;
+        document.getElementById('view-description').textContent = description || 'No additional notes provided for this pet.';
+        
+        const img = document.getElementById('view-image');
+        if (imageUrl) {
+            img.src = imageUrl;
+            img.classList.remove('hidden');
+        } else {
+            img.src = 'https://via.placeholder.com/150?text=No+Image';
+        }
+
+        const badge = document.getElementById('view-vaccination-badge');
+        if (vaccinated === 'True') {
+            badge.textContent = 'Fully Vaccinated';
+            badge.className = 'px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-widest bg-green-100 text-green-700';
+        } else {
+            badge.textContent = 'Not Vaccinated';
+            badge.className = 'px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-widest bg-amber-100 text-amber-700';
+        }
+
+        document.getElementById('view-pet-modal').classList.remove('hidden');
+        lucide.createIcons();
+    }
+
+    function openEditPetModal(id, name, breed, age, gender, location, vaccinated) {
+        document.getElementById('edit-pet-id').value = id;
+        document.getElementById('edit-name').value = name;
+        document.getElementById('edit-breed').value = breed;
+        document.getElementById('edit-age').value = age;
+        document.getElementById('edit-gender').value = gender;
+        document.getElementById('edit-location').value = location;
+        document.getElementById('edit-vaccinated').checked = (vaccinated === 'True');
+        document.getElementById('edit-pet-modal').classList.remove('hidden');
+    }
+</script>
+{% endblock %}

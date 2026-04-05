@@ -1,0 +1,373 @@
+{% extends 'admin_app/admin_base.html' %}
+
+{% block title %}Adoption Management – Admin Panel{% endblock %}
+{% block page_title %}Adoption System{% endblock %}
+{% block page_subtitle %}Review requests and manage dog listings for adoption{% endblock %}
+
+{% block content %}
+    <!-- Stats Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+            <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+                <i data-lucide="list" class="w-8 h-8"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500 text-nowrap">Total Listings</p>
+                <p class="text-2xl font-bold text-[#333333]">{{ total_listings }}</p>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+            <div class="w-14 h-14 bg-green-100 text-green-600 rounded-xl flex items-center justify-center">
+                <i data-lucide="heart" class="w-8 h-8"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500 text-nowrap">Booked Dogs</p>
+                <p class="text-2xl font-bold text-[#333333]">{{ booked_count }}</p>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+            <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center">
+                <i data-lucide="clock" class="w-8 h-8"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500 text-nowrap">Pending Req</p>
+                <p class="text-2xl font-bold text-[#333333]">{{ pending_count }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="flex justify-end mb-8">
+        <button onclick="document.getElementById('add-listing-modal').classList.remove('hidden')" class="px-8 py-3 bg-[#4FBDBA] text-white rounded-2xl hover:bg-[#3da5a2] shadow-lg shadow-[#4FBDBA]/20 transition-all font-bold flex items-center gap-3">
+            <i data-lucide="plus" class="w-6 h-6"></i>
+            Post Dog for Adoption
+        </button>
+    </div>
+
+    <!-- TABS -->
+    <div class="flex gap-4 mb-6 border-b border-gray-100">
+        <button onclick="switchTab('requests')" id="tab-btn-requests" class="pb-4 px-2 font-bold text-sm border-b-2 border-[#4FBDBA] text-[#4FBDBA] transition-all">
+            Adoption Requests
+        </button>
+        <button onclick="switchTab('listings')" id="tab-btn-listings" class="pb-4 px-2 font-bold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-all">
+            Active Listings
+        </button>
+    </div>
+
+    <!-- SLIDE 1: REQUESTS -->
+    <div id="tab-content-requests" class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+            <table class="w-full text-left table-auto">
+                <thead class="bg-gray-50/50 border-b border-gray-100">
+                    <tr>
+                        <th class="px-6 py-5 text-xs uppercase font-bold text-gray-400">Dog</th>
+                        <th class="px-6 py-5 text-xs uppercase font-bold text-gray-400">Applicant</th>
+                        <th class="px-6 py-5 text-xs uppercase font-bold text-gray-400">Contact</th>
+                        <th class="px-6 py-5 text-xs uppercase font-bold text-gray-400">Status</th>
+                        <th class="px-6 py-5 text-xs uppercase font-bold text-gray-400 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for req in requests %}
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="px-6 py-5">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl overflow-hidden bg-gray-100">
+                                    {% if req.dog.image %}<img src="{{ req.dog.image.url }}" class="w-full h-full object-cover">{% endif %}
+                                </div>
+                                <span class="font-bold text-gray-800">{{ req.dog.name }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-5">
+                            <p class="font-bold text-gray-800">{{ req.full_name }}</p>
+                            <p class="text-[10px] text-gray-400">@{{ req.user.username }}</p>
+                        </td>
+                        <td class="px-6 py-5 text-sm font-medium text-gray-600">{{ req.phone }}</td>
+                        <td class="px-6 py-5">
+                            <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider 
+                                {% if req.status == 'Approved' %}bg-green-100 text-green-700
+                                {% elif req.status == 'Rejected' %}bg-red-100 text-red-700
+                                {% else %}bg-amber-100 text-amber-700{% endif %}">
+                                {{ req.status }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-5 text-right">
+                            <div class="flex justify-end gap-2">
+                                {% if req.status == 'Pending' %}
+                                <form method="POST" class="inline">
+                                    {% csrf_token %}<input type="hidden" name="action" value="approve"><input type="hidden" name="req_id" value="{{ req.id }}">
+                                    <button type="submit" class="p-2 text-green-600 hover:bg-green-50 rounded-xl transition-all"><i data-lucide="check" class="w-5 h-5"></i></button>
+                                </form>
+                                <form method="POST" class="inline">
+                                    {% csrf_token %}<input type="hidden" name="action" value="reject"><input type="hidden" name="req_id" value="{{ req.id }}">
+                                    <button type="submit" class="p-2 text-amber-600 hover:bg-amber-50 rounded-xl transition-all"><i data-lucide="x" class="w-5 h-5"></i></button>
+                                </form>
+                                {% endif %}
+                                <form method="POST" onsubmit="return confirm('Delete record?');" class="inline">
+                                    {% csrf_token %}<input type="hidden" name="action" value="delete"><input type="hidden" name="req_id" value="{{ req.id }}">
+                                    <button type="submit" class="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-all"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="px-6 py-20 text-center text-gray-400">No requests found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SLIDE 2: LISTINGS -->
+    <div id="tab-content-listings" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for pet in listings %}
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all group relative">
+            <div class="h-48 overflow-hidden relative">
+                {% if pet.image %}<img src="{{ pet.image.url }}" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500">{% endif %}
+                <div class="absolute top-4 right-4 flex gap-2">
+                    <button onclick="openEditListingModal('{{ pet.id }}', '{{ pet.name }}', '{{ pet.breed }}', '{{ pet.age }}', '{{ pet.gender }}', '{{ pet.location }}', '{{ pet.description|escapejs }}', '{{ pet.is_vaccinated }}', '{{ pet.weight }}', '{{ pet.color }}')" class="p-2 bg-white/90 backdrop-blur rounded-xl text-teal-600 shadow-sm hover:bg-teal-600 hover:text-white transition-all">
+                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                    </button>
+                    <form method="POST" onsubmit="return confirm('Delete listing?');" class="inline">
+                        {% csrf_token %}<input type="hidden" name="action" value="delete_listing"><input type="hidden" name="dog_id" value="{{ pet.id }}">
+                        <button type="submit" class="p-2 bg-white/90 backdrop-blur rounded-xl text-rose-600 shadow-sm hover:bg-rose-600 hover:text-white transition-all">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="p-5">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-bold text-gray-800 text-lg">{{ pet.name }}</h3>
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ pet.breed }}</span>
+                </div>
+                <div class="flex items-center gap-4 text-xs font-bold text-gray-500 mb-4">
+                    <span class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i>{{ pet.location }}</span>
+                    <span class="flex items-center gap-1">{% if pet.gender == 'Male' %}<i data-lucide="mars" class="w-3 h-3 text-blue-500"></i>{% else %}<i data-lucide="venus" class="w-3 h-3 text-pink-500"></i>{% endif %}{{ pet.gender }}</span>
+                </div>
+                <p class="text-xs text-gray-400 line-clamp-2">{{ pet.description }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- MODALS (Creation & Edit) - Using User-Facing UI Style -->
+    <!-- Add Listing Modal -->
+    <div id="add-listing-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl my-8 overflow-hidden">
+            <div class="bg-gradient-to-r from-[#4FBDBA] to-[#3da5a2] p-8 text-center relative">
+                <button onclick="document.getElementById('add-listing-modal').classList.add('hidden')" class="absolute top-6 right-6 w-10 h-10 rounded-2xl bg-white/20 text-white flex items-center justify-center hover:bg-white/30 transition-all">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+                <h3 class="text-3xl font-bold text-white mb-2">Post for Adoption</h3>
+                <p class="text-white/80 text-sm">Find a forever home for a furry friend</p>
+            </div>
+            <form method="POST" enctype="multipart/form-data" class="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
+                {% csrf_token %}<input type="hidden" name="action" value="create_listing">
+                
+                <!-- Section 1 -->
+                <div>
+                    <h4 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2 border-b pb-3">
+                        <i data-lucide="info" class="w-5 h-5 text-[#4FBDBA]"></i> Basic Information
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Dog's Name</label>
+                            <input type="text" name="name" required class="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 outline-none focus:ring-2 focus:ring-[#4FBDBA] transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Breed</label>
+                            <input type="text" name="breed" required class="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 outline-none focus:ring-2 focus:ring-[#4FBDBA] transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Age</label>
+                            <input type="text" name="age" required class="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 outline-none focus:ring-2 focus:ring-[#4FBDBA] transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Gender</label>
+                            <select name="gender" required class="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 outline-none focus:ring-2 focus:ring-[#4FBDBA] transition-all">
+                                <option>Male</option><option>Female</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Weight</label>
+                            <input type="text" name="weight" class="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 outline-none focus:ring-2 focus:ring-[#4FBDBA] transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Color</label>
+                            <input type="text" name="color" class="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 outline-none focus:ring-2 focus:ring-[#4FBDBA] transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2 -->
+                <div>
+                    <h4 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2 border-b pb-3">
+                        <i data-lucide="heart" class="w-5 h-5 text-[#4FBDBA]"></i> Adoption Details
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Location</label>
+                            <input type="text" name="location" required class="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 outline-none focus:ring-2 focus:ring-[#4FBDBA] transition-all">
+                        </div>
+                        <div class="flex items-end">
+                            <label class="flex items-center gap-3 cursor-pointer p-3 bg-gray-50 rounded-xl border border-gray-100 w-full">
+                                <input type="checkbox" name="is_vaccinated" class="w-5 h-5 text-[#4FBDBA] rounded border-gray-300 focus:ring-[#4FBDBA]">
+                                <span class="font-bold text-gray-700">Fully Vaccinated</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-2">About the Dog</label>
+                        <textarea name="description" required rows="3" class="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 outline-none focus:ring-2 focus:ring-[#4FBDBA] transition-all"></textarea>
+                    </div>
+                </div>
+
+                <!-- Section 3 -->
+                <div>
+                    <h4 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2 border-b pb-3">
+                        <i data-lucide="camera" class="w-5 h-5 text-[#4FBDBA]"></i> Photo
+                    </h4>
+                    <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-200 border-dashed rounded-2xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-all">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <i data-lucide="upload-cloud" class="w-8 h-8 mb-2 text-gray-400"></i>
+                            <p class="text-xs text-gray-500 font-bold">CLICK TO UPLOAD PHOTO</p>
+                        </div>
+                        <input type="file" name="image" class="hidden" accept="image/*" />
+                    </label>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="w-full py-5 bg-[#4FBDBA] hover:bg-[#3da5a2] text-white rounded-2xl font-bold text-lg shadow-xl shadow-[#4FBDBA]/20 transition-all flex items-center justify-center gap-3">
+                        <i data-lucide="plus" class="w-6 h-6"></i>
+                        Post Dog for Adoption
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Listing Modal -->
+    <div id="edit-listing-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl my-8 overflow-hidden">
+            <div class="bg-gradient-to-r from-teal-600 to-teal-700 p-8 text-center relative">
+                <button onclick="document.getElementById('edit-listing-modal').classList.add('hidden')" class="absolute top-6 right-6 w-10 h-10 rounded-2xl bg-white/20 text-white flex items-center justify-center hover:bg-white/30 transition-all">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+                <h3 class="text-3xl font-bold text-white mb-2">Edit Listing</h3>
+                <p class="text-white/80 text-sm">Update your furry friend's information</p>
+            </div>
+            <form method="POST" enctype="multipart/form-data" class="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
+                {% csrf_token %}<input type="hidden" name="action" value="edit_listing"><input type="hidden" name="dog_id" id="edit-dog-id">
+                
+                <div>
+                    <h4 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2 border-b pb-3">
+                        <i data-lucide="info" class="w-5 h-5 text-teal-600"></i> Basic Information
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Dog's Name</label>
+                            <input type="text" name="name" id="edit-name" required class="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 outline-none focus:ring-2 focus:ring-teal-600 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Breed</label>
+                            <input type="text" name="breed" id="edit-breed" required class="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 outline-none focus:ring-2 focus:ring-teal-600 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Age</label>
+                            <input type="text" name="age" id="edit-age" required class="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 outline-none focus:ring-2 focus:ring-teal-600 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Gender</label>
+                            <select name="gender" id="edit-gender" required class="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 outline-none focus:ring-2 focus:ring-teal-600 transition-all">
+                                <option>Male</option><option>Female</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Weight</label>
+                            <input type="text" name="weight" id="edit-weight" class="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 outline-none focus:ring-2 focus:ring-teal-600 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Color</label>
+                            <input type="text" name="color" id="edit-color" class="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 outline-none focus:ring-2 focus:ring-teal-600 transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2 border-b pb-3">
+                        <i data-lucide="heart" class="w-5 h-5 text-teal-600"></i> Adoption Details
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Location</label>
+                            <input type="text" name="location" id="edit-location" required class="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 outline-none focus:ring-2 focus:ring-teal-600 transition-all">
+                        </div>
+                        <div class="flex items-end">
+                            <label class="flex items-center gap-3 cursor-pointer p-3 bg-gray-50 rounded-xl border border-gray-100 w-full">
+                                <input type="checkbox" name="is_vaccinated" id="edit-vaccinated" class="w-5 h-5 text-teal-600 rounded border-gray-300 focus:ring-teal-600">
+                                <span class="font-bold text-gray-700">Fully Vaccinated</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-2">About the Dog</label>
+                        <textarea name="description" id="edit-desc" required rows="3" class="w-full px-5 py-3 rounded-xl bg-gray-50 border border-gray-100 outline-none focus:ring-2 focus:ring-teal-600 transition-all"></textarea>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2 border-b pb-3">
+                        <i data-lucide="camera" class="w-5 h-5 text-teal-600"></i> Photo
+                    </h4>
+                    <input type="file" name="image" accept="image/*" class="w-full px-5 py-3 rounded-2xl bg-gray-50">
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="w-full py-5 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl font-bold text-lg shadow-xl shadow-teal-600/20 transition-all">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            const reqContent = document.getElementById('tab-content-requests');
+            const listContent = document.getElementById('tab-content-listings');
+            const reqBtn = document.getElementById('tab-btn-requests');
+            const listBtn = document.getElementById('tab-btn-listings');
+
+            if (tab === 'requests') {
+                reqContent.classList.remove('hidden');
+                listContent.classList.add('hidden');
+                reqBtn.classList.add('border-[#4FBDBA]', 'text-[#4FBDBA]');
+                reqBtn.classList.remove('border-transparent', 'text-gray-500');
+                listBtn.classList.remove('border-[#4FBDBA]', 'text-[#4FBDBA]');
+                listBtn.classList.add('border-transparent', 'text-gray-500');
+            } else {
+                reqContent.classList.add('hidden');
+                listContent.classList.remove('hidden');
+                listBtn.classList.add('border-[#4FBDBA]', 'text-[#4FBDBA]');
+                listBtn.classList.remove('border-transparent', 'text-gray-500');
+                reqBtn.classList.remove('border-[#4FBDBA]', 'text-[#4FBDBA]');
+                reqBtn.classList.add('border-transparent', 'text-gray-500');
+            }
+        }
+
+        function openEditListingModal(id, name, breed, age, gender, location, desc, vaccinated, weight, color) {
+            document.getElementById('edit-dog-id').value = id;
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-breed').value = breed;
+            document.getElementById('edit-age').value = age;
+            document.getElementById('edit-gender').value = gender;
+            document.getElementById('edit-location').value = location;
+            document.getElementById('edit-desc').value = desc;
+            document.getElementById('edit-weight').value = weight;
+            document.getElementById('edit-color').value = color;
+            document.getElementById('edit-vaccinated').checked = (vaccinated === 'True');
+            document.getElementById('edit-listing-modal').classList.remove('hidden');
+        }
+    </script>
+{% endblock %}

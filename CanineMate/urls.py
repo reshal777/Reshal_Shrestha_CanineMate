@@ -10,7 +10,8 @@ from django.conf.urls.static import static
 from django.shortcuts import redirect
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("django-admin/", admin.site.urls),
+    path("admin/", include("admin_app.urls")),
     path("", home_views.index_view, name="index"),
     path("home/", include("home.urls")),
     path("", include("accounts.urls")),

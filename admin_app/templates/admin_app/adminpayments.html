@@ -1,0 +1,66 @@
+{% extends 'admin_app/admin_base.html' %}
+
+{% block title %}Payments & Transactions – Admin Panel{% endblock %}
+{% block page_title %}Financial Overview{% endblock %}
+{% block page_subtitle %}Review all transaction histories and revenue analytics{% endblock %}
+
+{% block content %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600">
+          <i data-lucide="credit-card"></i>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Net Revenue</p>
+          <p class="text-2xl font-bold text-green-600">NPR {{ total_revenue|floatformat:2 }}</p>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
+          <i data-lucide="trending-up"></i>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Total Transactions</p>
+          <p class="text-2xl font-bold text-[#333333]">{{ payments|length }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden text-sm">
+      <table class="w-full text-left">
+        <thead class="bg-gray-50 border-b border-gray-100">
+          <tr>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">ID</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Customer</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Type</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Amount</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Date/Time</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600 text-right">Method</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for payment in payments %}
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 font-bold text-[#333333]">{{ forloop.counter }}</td>
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm">
+                  {{ payment.user.username|slice:":1"|upper }}
+                </div>
+                <span class="text-gray-700 font-medium">{{ payment.user.get_full_name|default:payment.user.username }}</span>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-gray-600">{{ payment.type }}</td>
+            <td class="px-6 py-4 font-bold text-green-600">NPR {{ payment.amount|floatformat:2 }}</td>
+            <td class="px-6 py-4 text-gray-500">{{ payment.date|date:"N d, Y" }} {{ payment.date|time:"P" }}</td>
+            <td class="px-6 py-4 text-right">
+              <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold">{{ payment.method }}</span>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="px-6 py-12 text-center text-gray-500 italic">No confirmed payments currently found in records.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+{% endblock %}

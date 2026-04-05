@@ -57,6 +57,7 @@
             transition: margin-left 0.3s ease;
         }
     </style>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     {% block extra_head %}{% endblock %}
 </head>
 
@@ -65,14 +66,23 @@
 
     <main class="pt-20">
         {% if messages %}
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        <div id="django-messages" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" style="transition: opacity 0.5s ease, transform 0.5s ease;">
             {% for message in messages %}
-            <div
-                class="p-4 rounded-md {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %} mb-4">
+            <div class="p-4 rounded-md {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %} mb-4">
                 {{ message }}
             </div>
             {% endfor %}
         </div>
+        <script>
+            setTimeout(function() {
+                const msgs = document.getElementById('django-messages');
+                if (msgs) {
+                    msgs.style.opacity = '0';
+                    msgs.style.transform = 'translateY(-8px)';
+                    setTimeout(function() { msgs.remove(); }, 500);
+                }
+            }, 3000);
+        </script>
         {% endif %}
         {% block content %}{% endblock %}
     </main>
@@ -156,6 +166,7 @@
     </div>
 
     <script>
+        lucide.createIcons();
         document.addEventListener('DOMContentLoaded', () => {
             const bubble = document.getElementById('chatbot-bubble');
             const window = document.getElementById('chatbot-window');

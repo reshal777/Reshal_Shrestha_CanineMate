@@ -56,6 +56,20 @@ class Order(models.Model):
             self.order_id = f"ORD-{uuid.uuid4().hex[:6].upper()}"
         super().save(*args, **kwargs)
 
+    @property
+    def get_categories(self):
+        if self.product:
+            return self.product.category
+        cats = self.items.values_list('product__category', flat=True).distinct()
+        return ", ".join(list(cats))
+
+    @property
+    def get_product_names(self):
+        if self.product:
+            return self.product.name
+        names = self.items.values_list('product__name', flat=True)
+        return ", ".join(list(names))
+
     def __str__(self):
         return f"{self.order_id} by {self.user.username}"
 

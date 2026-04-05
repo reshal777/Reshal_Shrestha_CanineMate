@@ -710,8 +710,7 @@
                     <label>Select Service</label>
                     <select name="service" required>
                         {% for service in services %}
-                        <option value="{{ service.id }}">{{ service.name }} ({{ service.duration }}) - Rs. {{
-                            service.price }}</option>
+                        <option value="{{ service.id }}">{{ service.name }} ({{ service.duration }}) - Rs. {{ service.price }}</option>
                         {% endfor %}
                     </select>
                 </div>

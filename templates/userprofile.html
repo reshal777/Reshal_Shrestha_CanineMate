@@ -525,21 +525,9 @@
         <!-- Right Side -->
         <div class="flex flex-col gap-6">
 
-            <!-- Stats -->
+            <!-- Dynamic Stats Container -->
             <div id="statsContainer" class="flex flex-col gap-4">
-                <!-- Total Spent Card -->
-                <div class="stat-box !text-white"
-                    style="background: linear-gradient(135deg, var(--primary), var(--secondary));">
-                    <div class="stat-details">
-                        <p class="!text-white opacity-80">Total Investment in Pets</p>
-                        <h3 id="totalSpent">NPR 0</h3>
-                    </div>
-                    <div class="stat-icon bg-white/20 backdrop-blur-md">
-                        <i data-lucide="wallet"></i>
-                    </div>
-                </div>
-
-                <!-- Dynamic Stats Cards -->
+                <!-- Dynamic Content -->
             </div>
 
             <!-- Upcoming Events -->
@@ -557,6 +545,12 @@
             <div class="section-card !p-6">
                 <h3 class="font-bold text-lg mb-4">Quick Links</h3>
                 <div class="flex flex-col gap-2">
+                    <a href="{% url 'pet_expenses' %}"
+                        class="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-teal-50 hover:text-primary transition-all group">
+                        <span class="font-semibold text-sm">Pet Expenses</span>
+                        <i data-lucide="wallet" style="width:16px"
+                            class="text-muted group-hover:text-primary"></i>
+                    </a>
                     <a href="{% url 'shop' %}"
                         class="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-teal-50 hover:text-primary transition-all group">
                         <span class="font-semibold text-sm">Shop Marketplace</span>
@@ -620,7 +614,6 @@
             setSafe('phoneView', data.phone || 'Not provided');
             setSafe('locationView', data.location || 'Not provided');
             setSafe('fullNameView', data.name);
-            setSafe('totalSpent', data.totalSpent);
 
             try { renderStats(data.stats); } catch (e) { }
             try { renderDogs(data.dogs); } catch (e) { }
@@ -639,10 +632,7 @@
         const container = document.getElementById('statsContainer');
         if (!container) return;
 
-        // Keep the total spent card
-        const spentCard = container.firstElementChild;
         container.innerHTML = '';
-        if (spentCard) container.appendChild(spentCard);
 
         if (!stats || !Array.isArray(stats)) return;
 

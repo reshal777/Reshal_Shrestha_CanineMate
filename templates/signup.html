@@ -5,9 +5,12 @@
 {% block content %}
 <div class="min-h-[80vh] flex items-center justify-center p-8">
     <div class="max-w-md w-full">
-        <a href="{% url 'index' %}" class="flex items-center justify-center gap-2 mb-8">
-            <img src="/static/logo.png" alt="Canine Mate Logo" class="h-10">
-            <span class="text-3xl font-semibold text-[#333333]">Canine Mate</span>
+        <a href="{% url 'index' %}" class="flex flex-col items-center justify-center mb-8 group">
+            <div class="w-16 h-16 bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] rounded-2xl flex items-center justify-center mb-3 shadow-lg group-hover:scale-105 transition-transform">
+                <i data-lucide="paw-print" class="w-10 h-10 text-white"></i>
+            </div>
+            <span class="text-2xl font-bold text-[#333333]">Canine Mate</span>
+            <p class="text-xs text-gray-400 mt-1">Your Pet Companion</p>
         </a>
 
         <div class="bg-white rounded-2xl shadow-xl p-8">
@@ -62,7 +65,11 @@
                 {% if messages %}
                 <div class="space-y-2">
                     {% for message in messages %}
-                    <div class="p-4 rounded-xl bg-red-50 text-red-700 text-sm">{{ message }}</div>
+                        {% if "Product created successfully" not in message.message %}
+                        <div class="p-4 rounded-xl {% if message.tags == 'success' %}bg-green-50 text-green-700{% else %}bg-red-50 text-red-700{% endif %} text-sm">
+                            {{ message }}
+                        </div>
+                        {% endif %}
                     {% endfor %}
                 </div>
                 {% endif %}

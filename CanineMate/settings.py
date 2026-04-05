@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "veterinary",
     "grooming",
     "chat",
+    "admin_app",
 ]
 
 MIDDLEWARE = [
@@ -158,10 +159,20 @@ AUTH_USER_MODEL = 'accounts.User'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'index'
+
 # Khalti Configuration
 KHALTI_PUBLIC_KEY = "341eb052d8214489a5639eed3495aa61"
 KHALTI_SECRET_KEY = "6f207e29a0c34eb4b36b27dbd244b360"
-KHALTI_API_URL = "https://a.khalti.com/api/v2/" # Production URL since keys were given as live? No, user said live but requested sandbox.
-# Actually sandbox URL is dev.khalti.com as per docs.
+KHALTI_API_URL = "https://a.khalti.com/api/v2/" 
 KHALTI_SANDBOX_API_URL = "https://dev.khalti.com/api/v2/epayment/initiate/"
 KHALTI_SANDBOX_LOOKUP_URL = "https://dev.khalti.com/api/v2/epayment/lookup/"
+
+# SMTP Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+# IMPORTANT: Use an "App Password" if you have 2FA enabled on your Gmail account.
+EMAIL_HOST_USER = 'your-email@gmail.com' # Replace with your gmail address
+EMAIL_HOST_PASSWORD = 'your-app-password' # Replace with your gmail app password
+DEFAULT_FROM_EMAIL = 'CanineMate <your-email@gmail.com>' # Replace with your gmail address

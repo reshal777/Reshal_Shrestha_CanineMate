@@ -1,0 +1,65 @@
+{% extends 'admin_app/admin_base.html' %}
+
+{% block title %}Pet Health History – Admin Panel{% endblock %}
+{% block page_title %}Health History{% endblock %}
+{% block page_subtitle %}Centralized dog medical and wellness records{% endblock %}
+
+{% block content %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
+          <i data-lucide="activity"></i>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Total Health Records</p>
+          <p class="text-2xl font-bold text-[#333333]">{{ total_records }}</p>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600">
+          <i data-lucide="shield-check"></i>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Verified Records</p>
+          <p class="text-2xl font-bold text-green-600">{{ total_records }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden text-sm">
+      <table class="w-full text-left">
+        <thead class="bg-gray-50 border-b border-gray-100">
+          <tr>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Dog</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Type</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Date Checked</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Notes/Summary</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for record in records %}
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 font-semibold text-[#333333]">{{ record.dog.name }}</td>
+            <td class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400">{{ record.record_type }}</td>
+            <td class="px-6 py-4 text-gray-500 font-medium">{{ record.date|date:"M d, Y" }}</td>
+            <td class="px-6 py-4 text-gray-600 leading-relaxed">{{ record.notes|truncatewords:15 }}</td>
+            <td class="px-6 py-4 text-right">
+              <form method="POST" onsubmit="return confirm('Delete this health record?');" class="inline">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="record_id" value="{{ record.id }}">
+                <input type="hidden" name="model" value="{{ record.model }}">
+                <button type="submit" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="px-6 py-12 text-center text-gray-500 italic">No health records currently found in the system.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+{% endblock %}

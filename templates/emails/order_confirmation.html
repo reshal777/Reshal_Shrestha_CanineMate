@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px; }
+        .header { background: #4FBDBA; color: white; padding: 20px; text-align: center; border-top-left-radius: 10px; border-top-right-radius: 10px; }
+        .content { padding: 30px; }
+        .order-id { font-weight: bold; color: #4FBDBA; }
+        .footer { text-align: center; padding: 20px; font-size: 0.8em; color: #777; }
+        .btn { display: inline-block; padding: 12px 24px; background-color: #4FBDBA; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+        .item-list { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .item-list th, .item-list td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+        .total { font-weight: bold; font-size: 1.2em; text-align: right; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Order Confirmed! 🐾</h1>
+        </div>
+        <div class="content">
+            <p>Hi {{ user.username }},</p>
+            <p>Thank you for shopping at <strong>CanineMate</strong>. Your order has been placed successfully and is being processed.</p>
+            
+            <p><strong>Order ID:</strong> <span class="order-id">{{ order.order_id }}</span></p>
+            <p><strong>Order Date:</strong> {{ order.date|date:"F d, Y" }}</p>
+
+            <h3>Items Summary:</h3>
+            <table class="item-list">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if order.product %}
+                    <tr>
+                        <td>{{ order.product.name }}</td>
+                        <td>1</td>
+                        <td>NPR {{ order.product.price }}</td>
+                    </tr>
+                    {% else %}
+                        {% for item in items %}
+                        <tr>
+                            <td>{{ item.product.name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>NPR {{ item.price }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+
+            <div class="total">
+                Total Amount Paid: NPR {{ order.amount }}
+            </div>
+
+            <p style="text-align: center;">                
+                <a href="http://localhost:8000/home/pet-expenses/" class="btn">View Order Details</a>
+            </p>
+            
+            <p>We'll notify you as soon as your items are shipped!</p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2026 CanineMate. All rights reserved.<br>Kathmandu, Nepal</p>
+        </div>
+    </div>
+</body>
+</html>

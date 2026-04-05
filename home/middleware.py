@@ -3,24 +3,33 @@ from django.http import Http404
 
 class NoCacheMiddleware:
     """
-    Middleware to prevent the browser from caching pages when a user is logged in.
-    This ensures that when a user logs out and clicks the browser's "Back" button, 
-    they cannot see the cached authenticated pages (like the dashboard).
-    Unauthenticated pages are allowed to cache normally for regular browser "Back" behavior.
+    Only prevent caching on sensitive authenticated pages (dashboard, profile, admin, payments).
+    Public pages and regular browsing pages cache normally so the back button works correctly.
     """
+    # Only these URL prefixes need no-cache protection
+    SENSITIVE_PATHS = (
+        '/dashboard',
+        '/profile',
+        '/admin/',
+        '/payment',
+        '/checkout',
+        '/cart',
+        '/logout',
+        '/accounts/',
+    )
+
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
         response = self.get_response(request)
-        
-        # Only prevent caching for authenticated users
-        # This protects dashboard data while allowing normal "Back" functionality on public pages
-        if hasattr(request, 'user') and request.user.is_authenticated:
-            # We don't want to prevent caching for static/media files
-            if not request.path.startswith('/static/') and not request.path.startswith('/media/'):
-                add_never_cache_headers(response)
-                
+
+        if (hasattr(request, 'user') and request.user.is_authenticated
+                and not request.path.startswith('/static/')
+                and not request.path.startswith('/media/')
+                and any(request.path.startswith(p) for p in self.SENSITIVE_PATHS)):
+            add_never_cache_headers(response)
+
         return response
 
 class Admin404Middleware:

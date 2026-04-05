@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px; }
+        .header { background: #3da5a2; color: white; padding: 20px; text-align: center; border-top-left-radius: 10px; border-top-right-radius: 10px; }
+        .content { padding: 30px; }
+        .appt-type { font-weight: bold; color: #3da5a2; font-size: 1.5em; text-align: center; margin-bottom: 20px; }
+        .footer { text-align: center; padding: 20px; font-size: 0.8em; color: #777; }
+        .btn { display: inline-block; padding: 12px 24px; background-color: #3da5a2; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; font-weight: bold; }
+        .details-box { background: #f9f9f9; padding: 20px; border-radius: 10px; margin-top: 20px; }
+        .details-box p { margin: 5px 0; }
+        .icon { width: 24px; margin-right: 10px; vertical-align: middle; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Appointment Confirmed! 🐾</h1>
+        </div>
+        <div class="content">
+            <p>Hi {{ user.username }},</p>
+            <p>Your veterinary appointment has been successfully booked through <strong>CanineMate</strong>. Here are the details for your upcoming visit:</p>
+            
+            <div class="appt-type">{{ appointment.service_type }}</div>
+
+            <div class="details-box">
+                <p><strong>Dog Name:</strong> {{ appointment.dog.name }}</p>
+                <p><strong>Veterinarian:</strong> {{ appointment.veterinarian.name }}</p>
+                <p><strong>Date:</strong> {{ appointment.appointment_date|date:"F d, Y" }}</p>
+                <p><strong>Time:</strong> {{ appointment.appointment_time|time:"f a" }}</p>
+                {% if appointment.notes %}<p><strong>Notes:</strong> {{ appointment.notes }}</p>{% endif %}
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="http://localhost:8000/home/vet-appointment/" class="btn">View Appointments</a>
+            </div>
+
+            <p style="margin-top: 30px; text-align: center;">Please ensure you arrive at least 10 minutes before your scheduled time.</p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2026 CanineMate. All rights reserved.<br>Kathmandu, Nepal</p>
+        </div>
+    </div>
+</body>
+</html>

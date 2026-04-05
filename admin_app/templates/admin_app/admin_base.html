@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Admin Panel – Canine Mate{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+          },
+          colors: {
+            'primary': '#4FBDBA',
+            'primary-dark': '#3da5a2',
+            'secondary': '#F4A261',
+            'secondary-dark': '#e89451',
+            'dark': '#333333',
+          },
+          transitionProperty: { 'width': 'width' }
+        }
+      }
+    }
+  </script>
+  <style>
+    #sidebar { transition: width 0.3s ease; }
+    #main    { transition: margin-left 0.3s ease; }
+    #admin-notif-dropdown { display: none; }
+    #admin-notif-dropdown.show { display: block; animation: slideIn 0.2s ease-out; }
+    @keyframes slideIn { from { opacity:0; transform: translateY(-10px); } to { opacity:1; transform: translateY(0); } }
+    .notif-pulse { animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(244, 162, 97, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(244, 162, 97, 0); } 100% { box-shadow: 0 0 0 0 rgba(244, 162, 97, 0); } }
+  </style>
+  {% block extra_style %}{% endblock %}
+</head>
+<body class="bg-[#FAFAF7] font-sans">
+
+<div class="min-h-screen flex">
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed top-0 left-0 h-full bg-white shadow-xl z-50 w-64 flex flex-col">
+
+    <!-- Logo -->
+    <div class="h-16 flex items-center justify-between px-4 border-b border-gray-200 shrink-0">
+      <div id="logo-full" class="flex items-center gap-2">
+        <div class="w-10 h-10 bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] rounded-xl flex items-center justify-center">
+          <i data-lucide="paw-print" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <p class="font-bold text-[#333333] text-sm">Canine Mate</p>
+          <p class="text-xs text-gray-500">Admin Panel</p>
+        </div>
+      </div>
+      <div id="logo-mini" class="hidden w-10 h-10 bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] rounded-xl items-center justify-center mx-auto">
+        <i data-lucide="paw-print" class="w-6 h-6 text-white"></i>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="p-4 space-y-2 overflow-y-auto flex-1">
+      <a href="{% url 'admin_dashboard' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'admin_dashboard' %}bg-gradient-to-r from-[#4FBDBA] to-[#3da5a2] text-white shadow-lg{% else %}text-gray-600 hover:bg-gray-100{% endif %} transition-all nav-link" data-label="Dashboard">
+        <i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i>
+        <span class="font-medium nav-label">Dashboard</span>
+      </a>
+      <a href="{% url 'admin_users' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'admin_users' or request.resolver_match.url_name == 'admin_user_edit' or request.resolver_match.url_name == 'admin_user_create' %}bg-gradient-to-r from-[#4FBDBA] to-[#3da5a2] text-white shadow-lg{% else %}text-gray-600 hover:bg-gray-100{% endif %} transition-all nav-link" data-label="Users">
+        <i data-lucide="users" class="w-5 h-5 shrink-0"></i>
+        <span class="font-medium nav-label">Users</span>
+      </a>
+      <a href="{% url 'admin_pets' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'admin_pets' %}bg-gradient-to-r from-[#4FBDBA] to-[#3da5a2] text-white shadow-lg{% else %}text-gray-600 hover:bg-gray-100{% endif %} transition-all nav-link" data-label="Pets">
+        <i data-lucide="paw-print" class="w-5 h-5 shrink-0"></i>
+        <span class="font-medium nav-label">Pets</span>
+      </a>
+      <a href="{% url 'admin_health' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'admin_health' %}bg-gradient-to-r from-[#4FBDBA] to-[#3da5a2] text-white shadow-lg{% else %}text-gray-600 hover:bg-gray-100{% endif %} transition-all nav-link" data-label="Health Records">
+        <i data-lucide="activity" class="w-5 h-5 shrink-0"></i>
+        <span class="font-medium nav-label">Health Records</span>
+      </a>
+      <a href="{% url 'admin_veterinary' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'admin_veterinary' %}bg-gradient-to-r from-[#4FBDBA] to-[#3da5a2] text-white shadow-lg{% else %}text-gray-600 hover:bg-gray-100{% endif %} transition-all nav-link" data-label="Veterinary">
+        <i data-lucide="stethoscope" class="w-5 h-5 shrink-0"></i>
+        <span class="font-medium nav-label">Veterinary</span>
+      </a>
+      <a href="{% url 'admin_grooming' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'admin_grooming' %}bg-gradient-to-r from-[#4FBDBA] to-[#3da5a2] text-white shadow-lg{% else %}text-gray-600 hover:bg-gray-100{% endif %} transition-all nav-link" data-label="Grooming">
+        <i data-lucide="scissors" class="w-5 h-5 shrink-0"></i>
+        <span class="font-medium nav-label">Grooming</span>
+      </a>
+      <a href="{% url 'admin_products' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'admin_products' %}bg-gradient-to-r from-[#4FBDBA] to-[#3da5a2] text-white shadow-lg{% else %}text-gray-600 hover:bg-gray-100{% endif %} transition-all nav-link" data-label="Products">
+        <i data-lucide="package" class="w-5 h-5 shrink-0"></i>
+        <span class="font-medium nav-label">Products</span>
+      </a>
+      <a href="{% url 'admin_orders' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'admin_orders' %}bg-gradient-to-r from-[#4FBDBA] to-[#3da5a2] text-white shadow-lg{% else %}text-gray-600 hover:bg-gray-100{% endif %} transition-all nav-link" data-label="Orders">
+        <i data-lucide="shopping-bag" class="w-5 h-5 shrink-0"></i>
+        <span class="font-medium nav-label">Orders</span>
+      </a>
+      <a href="{% url 'admin_adoption' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'admin_adoption' %}bg-gradient-to-r from-[#4FBDBA] to-[#3da5a2] text-white shadow-lg{% else %}text-gray-600 hover:bg-gray-100{% endif %} transition-all nav-link" data-label="Adoptions">
+        <i data-lucide="heart" class="w-5 h-5 shrink-0"></i>
+        <span class="font-medium nav-label">Adoptions</span>
+      </a>
+      <a href="{% url 'admin_payments' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'admin_payments' %}bg-gradient-to-r from-[#4FBDBA] to-[#3da5a2] text-white shadow-lg{% else %}text-gray-600 hover:bg-gray-100{% endif %} transition-all nav-link" data-label="Payments">
+        <i data-lucide="credit-card" class="w-5 h-5 shrink-0"></i>
+        <span class="font-medium nav-label">Payments</span>
+      </a>
+      <a href="{% url 'admin_reports' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'admin_reports' %}bg-gradient-to-r from-[#4FBDBA] to-[#3da5a2] text-white shadow-lg{% else %}text-gray-600 hover:bg-gray-100{% endif %} transition-all nav-link" data-label="Reports">
+        <i data-lucide="file-text" class="w-5 h-5 shrink-0"></i>
+        <span class="font-medium nav-label">Reports</span>
+      </a>
+    </nav>
+
+    <!-- User Info Bottom -->
+    <div id="sidebar-user" class="p-4 border-t border-gray-200 shrink-0 space-y-3">
+      <div class="flex items-center gap-3 px-3 py-2 rounded-xl bg-gray-50">
+        <div class="w-10 h-10 bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] rounded-full flex items-center justify-center">
+          <i data-lucide="user" class="w-5 h-5 text-white"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-[#333333] truncate">{{ user.get_full_name|default:user.username }}</p>
+          <p class="text-xs text-gray-500 truncate">{{ user.email }}</p>
+        </div>
+      </div>
+      <form action="{% url 'admin_logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-red-50 hover:bg-red-100 text-red-600 font-medium rounded-xl transition-colors">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+          <span class="text-sm">Log Out</span>
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <!-- ══ Main ══ -->
+  <div id="main" class="flex-1 ml-64 flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-40">
+      <div class="px-8 flex justify-between items-center h-16">
+        <div class="flex items-center gap-4">
+          <button id="sidebar-toggle" class="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600">
+            <i data-lucide="menu" id="toggle-icon" class="w-6 h-6"></i>
+          </button>
+          <div>
+            <h1 class="text-xl font-bold text-[#333333]">{% block page_title %}Dashboard Overview{% endblock %}</h1>
+            <p class="text-xs text-gray-500">{% block page_subtitle %}Welcome back, Administrator{% endblock %}</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <!-- Notification Bell -->
+          <div class="relative">
+            <button id="notif-bell" class="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600 relative">
+              <i data-lucide="bell" class="w-6 h-6"></i>
+              <span id="notif-dot" class="hidden absolute top-2 right-2 w-3 h-3 bg-secondary rounded-full border-2 border-white notif-pulse"></span>
+            </button>
+            
+            <!-- Notification Dropdown -->
+            <div id="admin-notif-dropdown" class="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
+              <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                <h3 class="font-bold text-dark text-sm">Notifications</h3>
+                <span id="notif-count" class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">0 New</span>
+              </div>
+              <div id="notif-items" class="max-h-80 overflow-y-auto py-2">
+                <!-- Items populated by JS -->
+                <div id="no-notif" class="p-8 text-center text-gray-400 italic text-sm">
+                  <i data-lucide="bell-off" class="w-8 h-8 mx-auto mb-2 opacity-20"></i>
+                  No new notifications
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="w-8 h-8 bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] rounded-full flex items-center justify-center shadow-sm">
+            <i data-lucide="user" class="w-5 h-5 text-white"></i>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="p-8">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+  <!-- Hidden messages for JS notification bell -->
+  <div id="admin-messages-wrapper" class="hidden">
+    {% if messages %}
+      {% for message in messages %}
+        <span class="admin-django-message" data-tags="{{ message.tags|default:'info' }}">{{ message }}</span>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  // Sidebar toggle
+  const sidebar = document.getElementById('sidebar');
+  const main    = document.getElementById('main');
+  const toggleBtn  = document.getElementById('sidebar-toggle');
+  const toggleIcon = document.getElementById('toggle-icon');
+  const logoFull   = document.getElementById('logo-full');
+  const logoMini   = document.getElementById('logo-mini');
+  const sidebarUser = document.getElementById('sidebar-user');
+  const navLabels  = document.querySelectorAll('.nav-label');
+  let collapsed = false;
+
+  toggleBtn.addEventListener('click', () => {
+    collapsed = !collapsed;
+    if (collapsed) {
+      sidebar.style.width = '80px';
+      main.style.marginLeft = '80px';
+      logoFull.classList.add('hidden');
+      logoMini.classList.remove('hidden');
+      logoMini.classList.add('flex');
+      sidebarUser.classList.add('hidden');
+      navLabels.forEach(l => l.classList.add('hidden'));
+      toggleIcon.setAttribute('data-lucide', 'chevrons-right');
+    } else {
+      sidebar.style.width = '256px';
+      main.style.marginLeft = '256px';
+      logoFull.classList.remove('hidden');
+      logoMini.classList.add('hidden');
+      logoMini.classList.remove('flex');
+      sidebarUser.classList.remove('hidden');
+      navLabels.forEach(l => l.classList.remove('hidden'));
+      toggleIcon.setAttribute('data-lucide', 'chevrons-left');
+    }
+    lucide.createIcons();
+  });
+
+  // Notification logic
+  const notifBell = document.getElementById('notif-bell');
+  const notifDot = document.getElementById('notif-dot');
+  const notifDropdown = document.getElementById('admin-notif-dropdown');
+  const notifItems = document.getElementById('notif-items');
+  const notifCount = document.getElementById('notif-count');
+  const noNotif = document.getElementById('no-notif');
+
+  // Read messages from the hidden wrapper to avoid IDE lint errors with template tags in JS
+  const messageElements = document.querySelectorAll('.admin-django-message');
+  
+  if (messageElements.length > 0) {
+    notifDot.classList.remove('hidden');
+    noNotif.classList.add('hidden');
+    notifCount.innerText = `${messageElements.length} New`;
+    
+    messageElements.forEach(el => {
+      const text = el.innerText;
+      const tags = el.getAttribute('data-tags') || 'info';
+      
+      const div = document.createElement('div');
+      div.className = 'px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0 flex gap-3 items-start';
+      
+      const icon = tags === 'success' ? 'check-circle' : 'alert-circle';
+      const color = tags === 'success' ? 'text-green-500' : 'text-red-500';
+      
+      div.innerHTML = `
+        <i data-lucide="${icon}" class="w-5 h-5 ${color} shrink-0 mt-0.5"></i>
+        <div>
+          <p class="text-sm font-medium text-dark">${text}</p>
+          <p class="text-[10px] text-gray-400 mt-0.5">Just now</p>
+        </div>
+      `;
+      notifItems.prepend(div);
+    });
+    lucide.createIcons();
+  }
+
+  notifBell.addEventListener('click', (e) => {
+    e.stopPropagation();
+    notifDropdown.classList.toggle('show');
+    notifDot.classList.add('hidden'); // Hide dot after viewing
+  });
+
+  document.addEventListener('click', () => {
+    notifDropdown.classList.remove('show');
+  });
+
+  notifDropdown.addEventListener('click', (e) => e.stopPropagation());
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

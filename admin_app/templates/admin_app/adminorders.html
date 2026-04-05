@@ -1,0 +1,94 @@
+{% extends 'admin_app/admin_base.html' %}
+
+{% block title %}Order Management – Admin Panel{% endblock %}
+{% block page_title %}Order Management{% endblock %}
+{% block page_subtitle %}Review and manage customer orders and sales histories{% endblock %}
+
+{% block content %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
+          <i data-lucide="shopping-bag"></i>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Total Orders</p>
+          <p class="text-2xl font-bold text-[#333333]">{{ total_orders }}</p>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600">
+          <i data-lucide="indian-rupee"></i>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Total Revenue</p>
+          <p class="text-2xl font-bold text-green-600">NPR {{ total_revenue|floatformat:2 }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+      <table class="w-full text-left">
+        <thead class="bg-gray-50 border-b border-gray-100">
+          <tr>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Order ID</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Customer</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Product</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Category</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Date</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Amount</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600 text-right">Payment Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for order in orders %}
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 font-semibold text-[#333333]">#{{ order.id }}</td>
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-[#4FBDBA] rounded-full flex items-center justify-center text-white font-bold">
+                  {{ order.user.username|slice:":1"|upper }}
+                </div>
+                <span class="font-medium text-[#333333]">{{ order.user.get_full_name|default:order.user.username }}</span>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <span class="text-sm font-medium text-[#333333] block truncate max-w-[200px]" title="{{ order.get_product_names }}">{{ order.get_product_names }}</span>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-500">{{ order.get_categories|default:"Various" }}</td>
+            <td class="px-6 py-4 text-sm text-gray-500">{{ order.date|date:"M d, Y" }} {{ order.date|time:"P" }}</td>
+            <td class="px-6 py-4 text-sm font-bold text-[#4FBDBA]">NPR {{ order.amount|floatformat:2 }}</td>
+            <td class="px-6 py-4 text-right">
+              <div class="flex items-center justify-end gap-3">
+                <form method="POST" class="inline-flex items-center gap-2">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="update_status">
+                  <input type="hidden" name="order_id" value="{{ order.id }}">
+                  <select name="status" onchange="this.form.submit()" class="text-xs border border-gray-200 rounded-lg px-2 py-1 focus:ring-1 focus:ring-[#4FBDBA] outline-none">
+                    <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
+                    <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>Processing</option>
+                    <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                    <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                    <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                  </select>
+                </form>
+                <span class="px-3 py-1 bg-{% if order.paid %}green{% else %}red{% endif %}-100 text-{% if order.paid %}green{% else %}red{% endif %}-700 rounded-full text-xs font-semibold">
+                  {% if order.paid %}Paid{% else %}Unpaid{% endif %}
+                </span>
+                <form method="POST" onsubmit="return confirm('Delete this order?');" class="inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="delete">
+                  <input type="hidden" name="order_id" value="{{ order.id }}">
+                  <button type="submit" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7" class="px-6 py-12 text-center text-gray-500">No orders found in the system.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+{% endblock %}

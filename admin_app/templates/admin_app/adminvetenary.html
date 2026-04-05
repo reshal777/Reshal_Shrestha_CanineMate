@@ -1,0 +1,85 @@
+{% extends 'admin_app/admin_base.html' %}
+
+{% block title %}Veterinary Appointments – Admin Panel{% endblock %}
+{% block page_title %}Vet Appointments{% endblock %}
+{% block page_subtitle %}Review and manage clinic appointments{% endblock %}
+
+{% block content %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
+          <i data-lucide="stethoscope"></i>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Total Appointments</p>
+          <p class="text-2xl font-bold text-[#333333]">{{ total_appointments }}</p>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600">
+          <i data-lucide="check-circle-2"></i>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Completed Visits</p>
+          <p class="text-2xl font-bold text-green-600">0</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden text-sm">
+      <table class="w-full text-left">
+        <thead class="bg-gray-50 border-b border-gray-100">
+          <tr>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Pet</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Owner</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Service</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Date/Time</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600 text-right">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for app in appointments %}
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 font-semibold text-[#333333]">{{ app.dog.name }}</td>
+            <td class="px-6 py-4 text-gray-600">{{ app.user.get_full_name|default:app.user.username }}</td>
+            <td class="px-6 py-4 font-medium text-[#4FBDBA]">{{ app.service_type }}</td>
+            <td class="px-6 py-4 text-gray-500">{{ app.appointment_date|date:"M d, Y" }} {{ app.appointment_time|time:"P" }}</td>
+            <td class="px-6 py-4 text-right">
+              <div class="flex justify-end gap-2">
+                {% if app.status == 'Pending' %}
+                <form method="POST" class="inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="confirm">
+                    <input type="hidden" name="appointment_id" value="{{ app.id }}">
+                    <button type="submit" class="p-2 text-green-600 hover:bg-green-50 rounded-xl transition-all" title="Confirm">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                    </button>
+                </form>
+                {% elif app.status == 'Confirmed' %}
+                <form method="POST" class="inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="complete">
+                    <input type="hidden" name="appointment_id" value="{{ app.id }}">
+                    <button type="submit" class="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-all" title="Mark Completed">
+                        <i data-lucide="check-check" class="w-4 h-4"></i>
+                    </button>
+                </form>
+                {% endif %}
+                <form method="POST" onsubmit="return confirm('Delete this appointment?');" class="inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="appointment_id" value="{{ app.id }}">
+                    <button type="submit" class="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-all" title="Delete">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="px-6 py-12 text-center text-gray-500 italic">No veterinary appointments currently found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+{% endblock %}

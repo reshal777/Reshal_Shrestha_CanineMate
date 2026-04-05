@@ -326,13 +326,13 @@
     const cartItems = [
         {% for item in cart_items %}
         { 
-            id: {{ item.id }}, 
+            id: Number("{{ item.id }}"), 
             name: "{{ item.product.name|escapejs }}", 
             category: "{{ item.product.category|escapejs }}", 
-            price: {{ item.product.price }}, 
-            quantity: {{ item.quantity }}, 
+            price: Number("{{ item.product.price }}"), 
+            quantity: Number("{{ item.quantity }}"), 
             image: "{% if item.product.image %}{{ item.product.image.url }}{% else %}https://via.placeholder.com/96?text=No+Image{% endif %}" 
-        }{% if not forloop.last %},{% endif %}
+        },
         {% endfor %}
     ];
 
@@ -345,8 +345,8 @@
             app.innerHTML = `
       <div class="empty-state">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
-          <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
         </svg>
         <h2>Your cart is empty</h2>
         <p>Add some products to get started!</p>

@@ -15,11 +15,12 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from payment.khalti_utils import initiate_khalti_payment, verify_khalti_payment
+from .email_utils import send_order_email, send_appointment_email, send_grooming_email
 
 def index_view(request):
     if request.user.is_authenticated:
         if request.user.is_staff:
-            return redirect('admin:index')
+            return redirect('admin_dashboard')
         return redirect('dashboard')
         
     vets = Veterinarian.objects.exclude(specialty__icontains='Grooming')[:4]
@@ -370,9 +371,21 @@ def checkout_view(request):
                 return redirect('checkout')
         else:
             # Cash on Delivery
+            # Update Product Sales and Stock
+            for cart_item in cart_items:
+                product = cart_item.product
+                product.sales += cart_item.quantity
+                product.stock -= cart_item.quantity
+                product.save()
+            
             cart_items.delete()
+            send_order_email(order)
             messages.success(request, "Order placed successfully! We will contact you soon for delivery.")
-            return render(request, "payment_success.html", {"message": "Your order has been placed successfully! 🐾"})
+            return render(request, "payment_success.html", {
+                "message": "Your order has been placed successfully! 🐾",
+                "redirect_url": "pet_expenses",
+                "button_text": "View Product"
+            })
 
     context = {
         'cart_items': cart_items,
@@ -850,6 +863,9 @@ def get_user_profile_api(request):
             spent_grooming = GroomingBooking.objects.filter(user=user, paid=True).aggregate(total=Sum('amount'))['total'] or 0
             total_spent = spent_orders + spent_appts + spent_grooming
             
+            # Update Investment label to Expenses in the stats if it exists
+            # This is already handled by template now.
+            
             # Upcoming Events
             upcoming_appts = Appointment.objects.filter(
                 Q(appointment_date__gt=today) | Q(appointment_date=today, appointment_time__gte=now_time),
@@ -1132,66 +1148,114 @@ def khalti_callback_view(request):
     from payment.khalti_utils import verify_khalti_payment
     verification = verify_khalti_payment(pidx)
     
-    # Khalti status can be 'Completed' or check for successful verification status code or return values
     if verification.get('status') == 'Completed':
         try:
-             appointment = None
-             # Try finding by purchase_order_id first
-             if purchase_order_id and purchase_order_id.startswith('APPT-'):
-                try:
-                    appt_id = purchase_order_id.split('-')[1]
-                    appointment = Appointment.objects.get(id=appt_id)
-                except:
-                    pass
-             
-             # Fallback to pidx if not found
-             if not appointment:
-                appointment = Appointment.objects.get(pidx=pidx)
-             
-             appointment.paid = True
-             appointment.status = 'Confirmed'
-             appointment.save()
-             
-             messages.success(request, "Payment successful! Your appointment is confirmed.")
-             return render(request, "payment_success.html", {"message": "Your appointment has been confirmed! 🐾"})
+            # 1. Try for Appointment
+            if purchase_order_id and purchase_order_id.startswith('APPT-'):
+                appt_id = purchase_order_id.split('-')[1]
+                appointment = Appointment.objects.get(id=appt_id)
+                appointment.paid = True
+                appointment.status = 'Confirmed'
+                appointment.save()
+                send_appointment_email(appointment)
+                messages.success(request, "Payment successful! Your appointment is confirmed.")
+                return render(request, "payment_success.html", {
+                    "message": "Your appointment has been confirmed! 🐾",
+                    "redirect_url": "vetappointment",
+                    "button_text": "View Appointment"
+                })
+            
+            # 2. Try for Grooming
+            elif purchase_order_id and purchase_order_id.startswith('GRM-'):
+                booking_id = purchase_order_id.split('-')[1]
+                booking = GroomingBooking.objects.get(id=booking_id)
+                booking.paid = True
+                booking.status = 'Confirmed'
+                booking.save()
+                send_grooming_email(booking)
+                messages.success(request, "Payment successful! Your grooming booking is confirmed.")
+                return render(request, "payment_success.html", {
+                    "message": "Your grooming session is scheduled! 🐾",
+                    "redirect_url": "groomingbooking",
+                    "button_text": "View Grooming"
+                })
+            
+            # 3. Try for Shop Order
+            elif purchase_order_id and purchase_order_id.startswith('ORD-'):
+                order_id_pk = purchase_order_id.split('-')[1]
+                order = Order.objects.get(id=order_id_pk)
+                order.paid = True
+                order.status = 'Processing'
+                order.save()
+                
+                # Update Product Sales and Stock
+                for item in order.items.all():
+                    product = item.product
+                    product.sales += item.quantity
+                    product.stock -= item.quantity
+                    product.save()
+                
+                # Clear Cart
+                CartItem.objects.filter(user=order.user).delete()
+                send_order_email(order)
+                messages.success(request, "Payment successful! Your order is being processed.")
+                return render(request, "payment_success.html", {
+                    "message": "Your order has been placed successfully! 🐾",
+                    "redirect_url": "pet_expenses",
+                    "button_text": "View Product"
+                })
+                
+            # Fallback for old style or non-prefixed IDs
+            else:
+                # Fallback check by pidx for all models
+                if Appointment.objects.filter(pidx=pidx).exists():
+                    obj = Appointment.objects.get(pidx=pidx)
+                    obj.paid = True
+                    obj.status = 'Confirmed'
+                    obj.save()
+                    send_appointment_email(obj)
+                elif GroomingBooking.objects.filter(pidx=pidx).exists():
+                    obj = GroomingBooking.objects.get(pidx=pidx)
+                    obj.paid = True
+                    obj.status = 'Confirmed'
+                    obj.save()
+                    send_grooming_email(obj)
+                elif Order.objects.filter(pidx=pidx).exists():
+                    obj = Order.objects.get(pidx=pidx)
+                    obj.paid = True
+                    obj.status = 'Processing'
+                    obj.save()
+                    send_order_email(obj)
+                    for item in obj.items.all():
+                        item.product.sales += item.quantity
+                        item.product.stock -= item.quantity
+                        item.product.save()
+                    CartItem.objects.filter(user=obj.user).delete()
+                
+                messages.success(request, "Payment verified successfully!")
+                # Determine redirect based on object
+                redirect_url = "dashboard"
+                button_text = "Go to Dashboard"
+                
+                if Appointment.objects.filter(pidx=pidx).exists():
+                    redirect_url = "vetappointment"
+                    button_text = "View Appointment"
+                elif GroomingBooking.objects.filter(pidx=pidx).exists():
+                    redirect_url = "groomingbooking"
+                    button_text = "View Grooming"
+                elif Order.objects.filter(pidx=pidx).exists():
+                    redirect_url = "pet_expenses"
+                    button_text = "View Product"
+                
+                return render(request, "payment_success.html", {
+                    "message": "Your payment has been processed successfully! 🐾",
+                    "redirect_url": redirect_url,
+                    "button_text": button_text
+                })
+                
         except Exception as e:
-             # Try for grooming booking
-             try:
-                 booking = None
-                 if purchase_order_id and purchase_order_id.startswith('GRM-'):
-                     booking_id = purchase_order_id.split('-')[1]
-                     booking = GroomingBooking.objects.get(id=booking_id)
-                 else:
-                     booking = GroomingBooking.objects.get(pidx=pidx)
-                 
-                 booking.paid = True
-                 booking.status = 'Confirmed'
-                 booking.save()
-                 
-                 messages.success(request, "Payment successful! Your grooming booking is confirmed.")
-                 return render(request, "payment_success.html", {"message": "Your grooming session is scheduled! 🐾"})
-             except Exception as grooming_e:
-                 # Try for shop order
-                 try:
-                     order = None
-                     if purchase_order_id and purchase_order_id.startswith('ORD-'):
-                         order_id_pk = purchase_order_id.split('-')[1]
-                         order = Order.objects.get(id=order_id_pk)
-                     else:
-                         order = Order.objects.get(pidx=pidx)
-                     
-                     order.paid = True
-                     order.status = 'Processing'
-                     order.save()
-                     
-                     # Clear Cart
-                     CartItem.objects.filter(user=order.user).delete()
-                     
-                     messages.success(request, "Payment successful! Your order is being processed.")
-                     return render(request, "payment_success.html", {"message": "Your order has been placed successfully! 🐾"})
-                 except Exception as inner_e:
-                     messages.error(request, f"Payment verified but error updating record: {str(inner_e)}")
-                     return redirect('dashboard')
+            messages.error(request, f"Error verifying payment record: {str(e)}")
+            return redirect('dashboard')
     else:
         messages.error(request, "Payment failed or was cancelled.")
         return redirect('dashboard')
@@ -1236,3 +1300,72 @@ def khalti_init_grooming_payment(request, booking_id):
     else:
         messages.error(request, f"Failed to initiate Khalti payment: {response.get('detail', 'Unknown error')}")
         return redirect('grooming_checkout', booking_id=booking.id)
+
+@login_required
+def pet_expenses_view(request):
+    user = request.user
+    from shop.models import Order
+    from grooming.models import GroomingBooking
+    from veterinary.models import Appointment
+    from django.db.models import Sum
+
+    # Fetch all paid transactions
+    orders = Order.objects.filter(user=user, paid=True).order_by('-date')
+    appointments = Appointment.objects.filter(user=user, paid=True).order_by('-appointment_date')
+    grooming = GroomingBooking.objects.filter(user=user, paid=True).order_by('-booking_date')
+
+    # Aggregates
+    spent_orders = orders.aggregate(total=Sum('amount'))['total'] or 0
+    spent_appts = appointments.aggregate(total=Sum('amount'))['total'] or 0
+    spent_grooming = grooming.aggregate(total=Sum('amount'))['total'] or 0
+    total_spent = spent_orders + spent_appts + spent_grooming
+
+    # Combine into a timeline
+    transactions = []
+    for o in orders:
+        transactions.append({
+            'type': 'Shop Order',
+            'detail': f"Order {o.order_id}",
+            'amount': o.amount,
+            'date': o.date,
+            'icon': 'shopping-bag',
+            'color': 'teal'
+        })
+    for a in appointments:
+        transactions.append({
+            'type': 'Veterinary',
+            'detail': f"{a.service_type} for {a.dog.name}",
+            'amount': a.amount,
+            'date': a.appointment_date,
+            'icon': 'stethoscope',
+            'color': 'blue'
+        })
+    for g in grooming:
+        transactions.append({
+            'type': 'Grooming',
+            'detail': f"{g.service.name if g.service else 'Service'} for {g.dog.name}",
+            'amount': g.amount,
+            'date': g.booking_date,
+            'icon': 'scissors',
+            'color': 'orange'
+        })
+
+    # Sort by date
+    # Harmonize date types (some are date, some are datetime)
+    from datetime import datetime, date
+    def get_date(val):
+        if isinstance(val, datetime):
+            return val.date()
+        return val
+
+    transactions.sort(key=lambda x: get_date(x['date']), reverse=True)
+
+    context = {
+        'total_spent': total_spent,
+        'spent_orders': spent_orders,
+        'spent_appts': spent_appts,
+        'spent_grooming': spent_grooming,
+        'transactions': transactions,
+    }
+    return render(request, 'pet_expenses.html', context)
+
