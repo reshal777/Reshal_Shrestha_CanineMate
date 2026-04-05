@@ -173,6 +173,30 @@
     color: #4b5563;
   }
 
+  /* Price Range Links */
+  .price-link {
+    transition: all 0.2s ease;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    margin-left: -0.5rem;
+    width: calc(100% + 1rem);
+  }
+
+  .price-link:hover {
+    background: #f3f4f6;
+  }
+
+  .price-link.active {
+    background: rgba(79, 189, 186, 0.08);
+    color: #4FBDBA !important;
+    font-weight: 600;
+  }
+
+  .price-link.active .check-box {
+    border-color: #4FBDBA;
+    background: #4FBDBA;
+  }
+
   /* products section */
   .products-area {
     flex: 1;
@@ -421,33 +445,30 @@
         <!-- price filter dynamic links -->
         <div class="price-section">
           <h3>Price Range</h3>
-          <a href="{% url 'shop' %}{% if request.GET.category %}?category={{ request.GET.category }}&{% else %}?{% endif %}price_range=under_500" class="price-link {% if current_price_range == 'under_500' %}active{% endif %}" style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size: 0.875rem; color: #4b5563; text-decoration:none;">
-            <div style="width:16px; height:16px; border:1px solid #d1d5db; border-radius:4px; display:flex; align-items:center; justify-content:center; background:{% if current_price_range == 'under_500' %}#4FBDBA{% else %}transparent{% endif %};">
-                {% if current_price_range == 'under_500' %}<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>{% endif %}
+          <a href="{% url 'shop' %}{% if request.GET.category %}?category={{ request.GET.category }}&{% else %}?{% endif %}price_range=under_500" class="price-link {% if current_price_range == 'under_500' %}active{% endif %}" style="display:flex; align-items:center; gap:10px; text-decoration:none; margin-bottom: 2px;">
+            <div class="check-box" style="width:18px; height:18px; border:2px solid #d1d5db; border-radius:4px; display:flex; align-items:center; justify-content:center; transition: all 0.2s;">
+                {% if current_price_range == 'under_500' %}<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg>{% endif %}
             </div>
-            Under Rs. 500
+            <span>Under Rs. 500</span>
           </a>
-          <a href="{% url 'shop' %}{% if request.GET.category %}?category={{ request.GET.category }}&{% else %}?{% endif %}price_range=500_1000" class="price-link {% if current_price_range == '500_1000' %}active{% endif %}" style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size: 0.875rem; color: #4b5563; text-decoration:none;">
-            <div style="width:16px; height:16px; border:1px solid #d1d5db; border-radius:4px; display:flex; align-items:center; justify-content:center; background:{% if current_price_range == '500_1000' %}#4FBDBA{% else %}transparent{% endif %};">
-                {% if current_price_range == '500_1000' %}<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>{% endif %}
+          <a href="{% url 'shop' %}{% if request.GET.category %}?category={{ request.GET.category }}&{% else %}?{% endif %}price_range=500_1000" class="price-link {% if current_price_range == '500_1000' %}active{% endif %}" style="display:flex; align-items:center; gap:10px; text-decoration:none; margin-bottom: 2px;">
+            <div class="check-box" style="width:18px; height:18px; border:2px solid #d1d5db; border-radius:4px; display:flex; align-items:center; justify-content:center; transition: all 0.2s;">
+                {% if current_price_range == '500_1000' %}<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg>{% endif %}
             </div>
-            Rs. 500 - 1000
+            <span>Rs. 500 - 1000</span>
           </a>
-          <a href="{% url 'shop' %}{% if request.GET.category %}?category={{ request.GET.category }}&{% else %}?{% endif %}price_range=1000_2000" class="price-link {% if current_price_range == '1000_2000' %}active{% endif %}" style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size: 0.875rem; color: #4b5563; text-decoration:none;">
-            <div style="width:16px; height:16px; border:1px solid #d1d5db; border-radius:4px; display:flex; align-items:center; justify-content:center; background:{% if current_price_range == '1000_2000' %}#4FBDBA{% else %}transparent{% endif %};">
-                {% if current_price_range == '1000_2000' %}<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>{% endif %}
+          <a href="{% url 'shop' %}{% if request.GET.category %}?category={{ request.GET.category }}&{% else %}?{% endif %}price_range=1000_2000" class="price-link {% if current_price_range == '1000_2000' %}active{% endif %}" style="display:flex; align-items:center; gap:10px; text-decoration:none; margin-bottom: 2px;">
+            <div class="check-box" style="width:18px; height:18px; border:2px solid #d1d5db; border-radius:4px; display:flex; align-items:center; justify-content:center; transition: all 0.2s;">
+                {% if current_price_range == '1000_2000' %}<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg>{% endif %}
             </div>
-            Rs. 1000 - 2000
+            <span>Rs. 1000 - 2000</span>
           </a>
-          <a href="{% url 'shop' %}{% if request.GET.category %}?category={{ request.GET.category }}&{% else %}?{% endif %}price_range=above_2000" class="price-link {% if current_price_range == 'above_2000' %}active{% endif %}" style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size: 0.875rem; color: #4b5563; text-decoration:none;">
-            <div style="width:16px; height:16px; border:1px solid #d1d5db; border-radius:4px; display:flex; align-items:center; justify-content:center; background:{% if current_price_range == 'above_2000' %}#4FBDBA{% else %}transparent{% endif %};">
-                {% if current_price_range == 'above_2000' %}<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>{% endif %}
+          <a href="{% url 'shop' %}{% if request.GET.category %}?category={{ request.GET.category }}&{% else %}?{% endif %}price_range=above_2000" class="price-link {% if current_price_range == 'above_2000' %}active{% endif %}" style="display:flex; align-items:center; gap:10px; text-decoration:none; margin-bottom: 2px;">
+            <div class="check-box" style="width:18px; height:18px; border:2px solid #d1d5db; border-radius:4px; display:flex; align-items:center; justify-content:center; transition: all 0.2s;">
+                {% if current_price_range == 'above_2000' %}<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg>{% endif %}
             </div>
-            Above Rs. 2000
+            <span>Above Rs. 2000</span>
           </a>
-          {% if current_price_range %}
-          <a href="{% url 'shop' %}{% if request.GET.category %}?category={{ request.GET.category }}{% endif %}" style="font-size: 0.75rem; color: #ef4444; text-decoration:underline; display:block; margin-top:8px;">Clear Price Filter</a>
-          {% endif %}
         </div>
       </div>
     </div>
@@ -456,11 +477,11 @@
     <div class="products-area">
       <div class="products-header">
         <p id="product-count">{{ product_count }} products found</p>
-        <select class="sort-select">
-          <option>Sort by: Popular</option>
-          <option>Price: Low to High</option>
-          <option>Price: High to Low</option>
-          <option>Highest Rated</option>
+        <select class="sort-select" onchange="handleSort(this.value)">
+          <option value="popular" {% if current_sort == 'popular' %}selected{% endif %}>Sort by: Popular</option>
+          <option value="price_low" {% if current_sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+          <option value="price_high" {% if current_sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+          <option value="rated" {% if current_sort == 'rated' %}selected{% endif %}>Highest Rated</option>
         </select>
       </div>
       <!-- cards loop -->
@@ -524,6 +545,9 @@
         // Update URL without refresh
         window.history.pushState({}, '', url);
         
+        // Update Sidebar UI based on URL
+        updateSidebarUI(url);
+        
         // If lucide is used in the partial, re-run it
         if (typeof lucide !== 'undefined') lucide.createIcons();
         
@@ -533,26 +557,50 @@
     }
   }
 
+  function updateSidebarUI(urlStr) {
+      const url = new URL(urlStr, window.location.origin);
+      const category = url.searchParams.get('category');
+      const priceRange = url.searchParams.get('price_range');
+
+      // Update Categories
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+          const btnUrl = new URL(btn.href, window.location.origin);
+          const btnCat = btnUrl.searchParams.get('category');
+          if (btnCat === category) btn.classList.add('active');
+          else btn.classList.remove('active');
+      });
+
+      // Update Price Ranges
+      document.querySelectorAll('.price-link').forEach(link => {
+          const lUrl = new URL(link.href, window.location.origin);
+          const lRange = lUrl.searchParams.get('price_range');
+          
+          if (lRange === priceRange) {
+              link.classList.add('active');
+              // Ensure tick mark is visible
+              if (!link.querySelector('.check-box svg')) {
+                  link.querySelector('.check-box').innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg>';
+              }
+          } else {
+              link.classList.remove('active');
+              link.querySelector('.check-box').innerHTML = '';
+          }
+      });
+  }
+
+  function handleSort(sortVal) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('sort', sortVal);
+      performFilter(url.toString());
+  }
+
   // Intercept Category & Price Link Clicks
   document.addEventListener('click', function(e) {
     const trigger = e.target.closest('.cat-btn, .price-link');
     if (trigger) {
         e.preventDefault();
         const url = trigger.getAttribute('href');
-        
-        // Update Active States UI immediately for better feel
-        if (trigger.classList.contains('cat-btn')) {
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            trigger.classList.add('active');
-        }
-        
         performFilter(url);
-    }
-    
-    // Clear filter link
-    if (e.target.matches('a[style*="clear"]')) {
-        e.preventDefault();
-        performFilter(e.target.getAttribute('href'));
     }
   });
 
@@ -582,6 +630,9 @@
     const btn = e.target.closest('.add-to-cart-btn');
     if (btn) {
         e.preventDefault();
+        if (btn.disabled) return;
+        btn.disabled = true;
+
         const productId = btn.getAttribute('data-id');
         const url = `/home/add-to-cart/${productId}/`;
         
@@ -593,7 +644,7 @@
             });
             
             if (response.status === 403) {
-                 window.location.href = '{% url 'login' %}';
+                 window.location.href = '{% url "signup" %}';
                  return;
             }
             
@@ -615,18 +666,22 @@
                 }
                 
                 // Visual feedback
+                const originalBg = btn.style.background;
                 btn.style.background = '#22c55e';
                 const originalHtml = btn.innerHTML;
                 btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
                 
                 setTimeout(() => {
-                    btn.style.background = '#4FBDBA';
+                    btn.style.background = originalBg || '#4FBDBA';
                     btn.innerHTML = originalHtml;
+                    btn.disabled = false;
                 }, 1500);
+            } else {
+                btn.disabled = false;
             }
         } catch (error) {
              // Handle guest redirect if not logged in
-             window.location.href = '{% url 'login' %}';
+             window.location.href = '{% url "signup" %}';
         }
     }
   });

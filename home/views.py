@@ -16,6 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from payment.khalti_utils import initiate_khalti_payment, verify_khalti_payment
 from .email_utils import send_order_email, send_appointment_email, send_grooming_email
+from shop.models import Product, Order, CartItem, OrderItem
 
 def index_view(request):
     if request.user.is_authenticated:
@@ -30,7 +31,16 @@ def index_view(request):
         v2 = Veterinarian.objects.create(name="Sita Thapa", clinic=clinic, experience_years=10, specialty="Head Groomer", about="Certified pet groomer.")
         v3 = Veterinarian.objects.create(name="Hari Gurung", clinic=clinic, experience_years=5, specialty="Adoption Coordinator", about="Passionate rescuer.")
         vets = Veterinarian.objects.all()[:4]
-    return render(request, "index.html", {'vets': vets})
+    
+    # Fetch 4 most recently added products
+    featured_products = Product.objects.all().order_by('-id')[:4]
+    
+    context = {
+        'vets': vets,
+        'featured_products': featured_products
+    }
+    
+    return render(request, "index.html", context)
 
 def adoption_listing_view(request):
     breed_filter = request.GET.get('breed', 'All Breeds')
@@ -193,7 +203,18 @@ def shop_view(request):
     price_range = request.GET.get('price_range')
     search_query = request.GET.get('search')
     
-    products = Product.objects.all().order_by('-id')
+    sort_by = request.GET.get('sort', 'popular')
+    
+    products = Product.objects.all()
+    
+    if sort_by == 'price_low':
+        products = products.order_by('price')
+    elif sort_by == 'price_high':
+        products = products.order_by('-price')
+    elif sort_by == 'rated':
+        products = products.order_by('-rating')
+    else: # Default is popular/newest
+        products = products.order_by('-sales', '-id')
     
     if category_filter:
         products = products.filter(category=category_filter)
@@ -219,6 +240,7 @@ def shop_view(request):
         'product_count': products.count(),
         'current_price_range': price_range,
         'current_category': category_filter,
+        'current_sort': sort_by,
     }
     
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -226,26 +248,28 @@ def shop_view(request):
         
     return render(request, "shop.html", context)
 
+
 def cart_view(request):
     if not request.user.is_authenticated:
-        return redirect('login')
+        return redirect('signup')
     cart_items = CartItem.objects.filter(user=request.user).select_related('product')
     total = sum(item.total_price for item in cart_items)
     return render(request, "cart.html", {'cart_items': cart_items, 'total': total})
 
-@login_required
+@login_required(login_url='signup')
 def add_to_cart_view(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     quantity = int(request.GET.get('qty', 1))
     
     cart_item, created = CartItem.objects.get_or_create(user=request.user, product=product)
     
-    if not created:
-        cart_item.quantity += quantity
-    else:
+    if created:
         cart_item.quantity = quantity
-        
-    cart_item.save()
+        cart_item.save()
+    else:
+        # If already exists, do not increment. 
+        # The user specifically requested that additional quantities be managed in the cart.
+        pass
     
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({'success': True, 'cart_count': CartItem.objects.filter(user=request.user).count()})
@@ -256,13 +280,13 @@ def add_to_cart_view(request, product_id):
         return redirect(next_url)
     return redirect('shop')
 
-@login_required
+@login_required(login_url='signup')
 def remove_from_cart_view(request, item_id):
     item = get_object_or_404(CartItem, id=item_id, user=request.user)
     item.delete()
     return redirect('cart')
 
-@login_required
+@login_required(login_url='signup')
 def update_cart_quantity_view(request, item_id):
     """AJAX endpoint to increment/decrement quantity on the cart page."""
     item = get_object_or_404(CartItem, id=item_id, user=request.user)
@@ -296,7 +320,7 @@ def product_details_view(request, product_id):
     }
     return render(request, "productdetails.html", context)
 
-@login_required
+@login_required(login_url='signup')
 def checkout_view(request):
     cart_items = CartItem.objects.filter(user=request.user)
     if not cart_items.exists():

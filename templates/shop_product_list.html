@@ -43,9 +43,9 @@
     
     <div class="product-footer" style="display: flex; gap: 8px;">
       <div class="product-price" style="flex: 1;">
-        Rs. {{ product.price }}
+        Rs. {{ product.price|floatformat:0 }}
         {% if product.old_price %}
-        <span style="font-size: 0.8rem; text-decoration: line-through; color: #9ca3af; font-weight: 400; margin-left: 4px;">Rs. {{ product.old_price }}</span>
+        <span style="font-size: 0.8rem; text-decoration: line-through; color: #9ca3af; font-weight: 400; margin-left: 4px;">Rs. {{ product.old_price|floatformat:0 }}</span>
         {% endif %}
       </div>
       <a href="{% url 'product_details' product.id %}" class="view-btn" style="padding: 0.5rem 0.85rem; background: #f3f4f6; color: #374151; text-decoration: none; font-size: 0.8rem; font-weight: 600; border-radius: 0.5rem; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;">

@@ -55,7 +55,7 @@
                 <h3 class="text-xl font-semibold text-[#333333] mb-3">Pet Care Center</h3>
                 <p class="text-gray-600 mb-4">Book and manage veterinary appointments with ease. Get timely
                     reminders and track your dog's health history.</p>
-                <a href="#appointments" class="text-[#4FBDBA] font-medium flex items-center gap-2 hover-gap-3">
+                <a href="{% url 'signup' %}" class="text-[#4FBDBA] font-medium flex items-center gap-2 hover-gap-3">
                     Learn more
                     <svg class="w-4 h-4 arrow-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -77,7 +77,7 @@
                 <h3 class="text-xl font-semibold text-[#333333] mb-3">Grooming Services</h3>
                 <p class="text-gray-600 mb-4">Professional grooming services including baths, haircuts, and nail
                     trimming at trusted centers across Nepal.</p>
-                <a href="#grooming" class="text-[#F4A261] font-medium flex items-center gap-2 hover-gap-3">
+                <a href="{% url 'signup' %}" class="text-[#F4A261] font-medium flex items-center gap-2 hover-gap-3">
                     Learn more
                     <svg class="w-4 h-4 arrow-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -99,7 +99,7 @@
                 <h3 class="text-xl font-semibold text-[#333333] mb-3">Smart Reminders</h3>
                 <p class="text-gray-600 mb-4">Never miss medicine schedules or vaccination dates with our
                     intelligent reminder system.</p>
-                <a href="#reminders" class="text-[#F4A261] font-medium flex items-center gap-2 hover-gap-3">
+                <a href="{% url 'signup' %}" class="text-[#F4A261] font-medium flex items-center gap-2 hover-gap-3">
                     Learn more
                     <svg class="w-4 h-4 arrow-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -121,7 +121,7 @@
                 <h3 class="text-xl font-semibold text-[#333333] mb-3">Dog Adoption</h3>
                 <p class="text-gray-600 mb-4">Find your perfect companion from our verified adoption listings. Give
                     a loving home to dogs in need.</p>
-                <a href="#adoption" class="text-[#4FBDBA] font-medium flex items-center gap-2 hover-gap-3">
+                <a href="{% url 'signup' %}" class="text-[#4FBDBA] font-medium flex items-center gap-2 hover-gap-3">
                     Learn more
                     <svg class="w-4 h-4 arrow-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -143,7 +143,7 @@
                 <h3 class="text-xl font-semibold text-[#333333] mb-3">Pet Products Shop</h3>
                 <p class="text-gray-600 mb-4">Quality pet food, toys, and accessories delivered to your doorstep.
                     Everything your dog needs.</p>
-                <a href="#shop" class="text-[#F4A261] font-medium flex items-center gap-2 hover-gap-3">
+                <a href="{% url 'signup' %}" class="text-[#F4A261] font-medium flex items-center gap-2 hover-gap-3">
                     Learn more
                     <svg class="w-4 h-4 arrow-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -165,7 +165,7 @@
                 <h3 class="text-xl font-semibold text-[#333333] mb-3">Dog Profile</h3>
                 <p class="text-gray-600 mb-4">Keep all your dog's information in one place. Track health records,
                     vaccinations, and important notes.</p>
-                <a href="{% url 'dogprofile' %}" class="text-[#4FBDBA] font-medium flex items-center gap-2 hover-gap-3">
+                <a href="{% url 'signup' %}" class="text-[#4FBDBA] font-medium flex items-center gap-2 hover-gap-3">
                     Learn more
                     <svg class="w-4 h-4 arrow-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -271,101 +271,41 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Product 1 -->
-            <a href="{% url 'product_details' 1 %}"
+            {% for product in featured_products %}
+            <a href="{% url 'product_details' product.id %}"
                 class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all group hover-lift">
                 <div class="relative h-56 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1714068691210-073dc52c6c1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2clMjBmb29kJTIwYm93bHxlbnwxfHx8fDE3Njg1OTA3NTB8MA&ixlib=rb-4.1.0&q=80&w=1080"
-                        alt="Premium Dog Food" class="w-full h-full object-cover hover-scale">
-                    <div
-                        class="absolute top-4 right-4 bg-[#4FBDBA] text-white px-3 py-1 rounded-full text-xs font-semibold">
-                        Popular</div>
-                </div>
-                <div class="p-5">
-                    <span class="text-xs text-[#F4A261] font-medium">Food</span>
-                    <h3 class="font-semibold text-[#333333] mt-1 mb-2">Premium Dog Food</h3>
-                    <div class="flex items-center gap-1 mb-3">
-                        <svg class="w-4 h-4 fill-[#F6E27F] text-[#F6E27F]" viewBox="0 0 24 24">
-                            <path
-                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                        </svg>
-                        <span class="text-sm text-gray-600">4.8 (124)</span>
-                    </div>
-                    <p class="text-xl font-bold text-[#4FBDBA]">Rs. 2,500</p>
-                </div>
-            </a>
-
-            <!-- Product 2 -->
-            <a href="{% url 'product_details' 2 %}"
-                class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all group hover-lift">
-                <div class="relative h-56 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1535294435445-d7249524ef2e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2clMjB0b3l8ZW58MXx8fHwxNzY4NjM4NDAxfDA&ixlib=rb-4.1.0&q=80&w=1080"
-                        alt="Interactive Dog Toy" class="w-full h-full object-cover hover-scale">
-                    <div
-                        class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover hover-scale">
+                    {% else %}
+                    <img src="https://via.placeholder.com/400x300?text=No+Image" alt="{{ product.name }}" class="w-full h-full object-cover hover-scale">
+                    {% endif %}
+                    {% if product.discount_percent > 0 %}
+                    <div class="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                        {{ product.discount_percent }}% OFF</div>
+                    {% elif product.stock > 0 %}
+                    <div class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
                         In Stock</div>
+                    {% endif %}
                 </div>
                 <div class="p-5">
-                    <span class="text-xs text-[#F4A261] font-medium">Toys</span>
-                    <h3 class="font-semibold text-[#333333] mt-1 mb-2">Interactive Dog Toy</h3>
+                    <span class="text-xs text-[#F4A261] font-medium">{{ product.category }}</span>
+                    <h3 class="font-semibold text-[#333333] mt-1 mb-2">{{ product.name }}</h3>
                     <div class="flex items-center gap-1 mb-3">
                         <svg class="w-4 h-4 fill-[#F6E27F] text-[#F6E27F]" viewBox="0 0 24 24">
-                            <path
-                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                         </svg>
-                        <span class="text-sm text-gray-600">4.6 (89)</span>
-                    </div>
-                    <p class="text-xl font-bold text-[#4FBDBA]">Rs. 850</p>
-                </div>
-            </a>
-
-            <!-- Product 3 -->
-            <a href="{% url 'product_details' 3 %}"
-                class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all group hover-lift">
-                <div class="relative h-56 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1577447281440-0400a5b0b079?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2clMjBhY2Nlc3NvcmllcyUyMGNvbGxhcnxlbnwxfHx8fDE3Njg2NTQxNDV8MA&ixlib=rb-4.1.0&q=80&w=1080"
-                        alt="Leather Dog Collar" class="w-full h-full object-cover hover-scale">
-                </div>
-                <div class="p-5">
-                    <span class="text-xs text-[#F4A261] font-medium">Accessories</span>
-                    <h3 class="font-semibold text-[#333333] mt-1 mb-2">Leather Dog Collar</h3>
-                    <div class="flex items-center gap-1 mb-3">
-                        <svg class="w-4 h-4 fill-[#F6E27F] text-[#F6E27F]" viewBox="0 0 24 24">
-                            <path
-                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                        </svg>
-                        <span class="text-sm text-gray-600">4.9 (156)</span>
-                    </div>
-                    <p class="text-xl font-bold text-[#4FBDBA]">Rs. 1,200</p>
-                </div>
-            </a>
-
-            <!-- Product 4 -->
-            <a href="{% url 'product_details' 4 %}"
-                class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all group hover-lift">
-                <div class="relative h-56 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1597595735781-6a57fb8e3e3d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2clMjBncm9vbWluZyUyMHNlcnZpY2V8ZW58MXx8fHwxNzY4NjUzODcxfDA&ixlib=rb-4.1.0&q=80&w=1080"
-                        alt="Dog Shampoo Set" class="w-full h-full object-cover hover-scale">
-                    <div
-                        class="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                        Sale</div>
-                </div>
-                <div class="p-5">
-                    <span class="text-xs text-[#F4A261] font-medium">Health</span>
-                    <h3 class="font-semibold text-[#333333] mt-1 mb-2">Dog Shampoo Set</h3>
-                    <div class="flex items-center gap-1 mb-3">
-                        <svg class="w-4 h-4 fill-[#F6E27F] text-[#F6E27F]" viewBox="0 0 24 24">
-                            <path
-                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                        </svg>
-                        <span class="text-sm text-gray-600">4.7 (67)</span>
+                        <span class="text-sm text-gray-600">{{ product.rating }} ({{ product.reviews_count }})</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <p class="text-xl font-bold text-[#4FBDBA]">Rs. 950</p>
-                        <p class="text-sm text-gray-400 line-through">Rs. 1,200</p>
+                        <p class="text-xl font-bold text-[#4FBDBA]">Rs. {{ product.price|floatformat:0 }}</p>
+                        {% if product.old_price %}
+                        <p class="text-sm text-gray-400 line-through">Rs. {{ product.old_price|floatformat:0 }}</p>
+                        {% endif %}
                     </div>
                 </div>
             </a>
+            {% endfor %}
         </div>
     </div>
 </section>

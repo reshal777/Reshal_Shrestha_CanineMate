@@ -444,9 +444,9 @@
 
             <!-- price -->
             <div class="price-row mt-6 flex items-baseline gap-4">
-              <span class="price-main text-4xl font-extrabold text-[#4FBDBA]">Rs. {{ product.price }}</span>
+              <span class="price-main text-4xl font-extrabold text-[#4FBDBA]">Rs. {{ product.price|floatformat:0 }}</span>
               {% if product.old_price %}
-              <span class="price-old text-xl text-gray-400 line-through">Rs. {{ product.old_price }}</span>
+              <span class="price-old text-xl text-gray-400 line-through">Rs. {{ product.old_price|floatformat:0 }}</span>
               {% endif %}
             </div>
 
@@ -559,6 +559,10 @@
         }
 
         function addToCart() {
+          const btn = document.querySelector('.add-cart-btn');
+          if (btn.disabled) return;
+          btn.disabled = true;
+
           const url = `/home/add-to-cart/{{ product.id }}/?qty=${currentQty}`;
 
           fetch(url, {
@@ -568,7 +572,7 @@
           })
             .then(response => {
               if (response.status === 403) {
-                window.location.href = '{% url "login" %}';
+                window.location.href = '{% url "signup" %}';
                 return;
               }
               return response.json();
@@ -590,24 +594,28 @@
                 }
 
                 // Success feedback on button
-                const btn = document.querySelector('.add-cart-btn');
                 const originalContent = btn.innerHTML;
+                const originalBg = btn.style.backgroundColor;
                 btn.style.backgroundColor = '#22c55e';
                 btn.innerHTML = `
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
-          Added Successfully!
-        `;
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  Added Successfully!
+                `;
 
                 setTimeout(() => {
-                  btn.style.backgroundColor = '#4FBDBA';
+                  btn.style.backgroundColor = originalBg;
                   btn.innerHTML = originalContent;
+                  btn.disabled = false;
                 }, 2000);
+              } else {
+                btn.disabled = false;
               }
             })
             .catch(error => {
               console.error('Error:', error);
+              btn.disabled = false;
               alert('Could not add to cart. Please try again.');
             });
         }

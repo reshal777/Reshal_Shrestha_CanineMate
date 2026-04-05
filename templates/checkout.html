@@ -337,17 +337,17 @@
             {% for item in cart_items %}
             <div class="summary-item">
               <span>{{ item.product.name }} x {{ item.quantity }}</span>
-              <span>Rs. {{ item.total_price }}</span>
+              <span>Rs. {{ item.total_price|floatformat:0 }}</span>
             </div>
             {% endfor %}
           </div>
           <!-- totals -->
-          <div class="summary-row"><span>Subtotal</span><span>Rs. {{ total_amount }}</span></div>
+          <div class="summary-row"><span>Subtotal</span><span>Rs. {{ total_amount|floatformat:0 }}</span></div>
           <div class="summary-row"><span>Delivery</span><span class="free-delivery">Free</span></div>
           <div class="summary-divider">
             <div class="total-row">
               <span class="total-label">Total</span>
-              <span class="total-amount">Rs. {{ total_amount }}</span>
+              <span class="total-amount">Rs. {{ total_amount|floatformat:0 }}</span>
             </div>
           </div>
           <!-- place order -->

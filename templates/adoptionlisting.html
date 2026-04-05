@@ -271,10 +271,11 @@
     }
 
     function openAdoptModal(id, name) {
-        {% if not request.user.is_authenticated %}
-        window.location.href = "{% url 'login' %}?next=" + window.location.pathname;
-        return;
-        {% endif %}
+        const isAuthenticated = "{{ request.user.is_authenticated|yesno:'true,false' }}" === "true";
+        if (!isAuthenticated) {
+            window.location.href = "{% url 'login' %}?next=" + window.location.pathname;
+            return;
+        }
         
         document.getElementById('adoptDogName').innerText = name;
         document.getElementById('adoptForm').action = "/home/adopt-dog/" + id + "/";
