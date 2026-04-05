@@ -1,6 +1,0 @@
-ID: 8, Name: TestDog, Image: EMPTY, Is Adoptable: True
-ID: 9, Name: Buddy, Image: EMPTY, Is Adoptable: True
-ID: 10, Name: Max, Image: EMPTY, Is Adoptable: True
-ID: 3, Name: Aditya, Image: /media/dog_profiles/dog_3.jpg, Is Adoptable: True
-ID: 1, Name: Buddy, Image: /media/dog_profiles/dog_1.jpg, Is Adoptable: True
-ID: 4, Name: Pramit, Image: /media/dog_profiles/dog_4.jpg, Is Adoptable: True

@@ -1,1 +1,0 @@
-[(9, 'Buddy', 'abin'), (10, 'Max', 'abin'), (16, 'Abin', 'Reshal shrestha')]
