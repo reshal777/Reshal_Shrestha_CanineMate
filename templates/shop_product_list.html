@@ -66,3 +66,35 @@
   <p>No products found in the system yet.</p>
 </div>
 {% endfor %}
+
+{% if products.has_other_pages %}
+<div class="pagination-wrap">
+    {% if products.has_previous %}
+        <a href="?page={{ products.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_price_range %}&price_range={{ current_price_range }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if current_search %}&search={{ current_search }}{% endif %}" class="pagination-btn" title="Previous Page">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </a>
+    {% else %}
+        <span class="pagination-btn disabled">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </span>
+    {% endif %}
+
+    {% for i in products.paginator.page_range %}
+        {% if products.number == i %}
+            <span class="pagination-btn active">{{ i }}</span>
+        {% elif i > products.number|add:'-3' and i < products.number|add:'3' %}
+            <a href="?page={{ i }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_price_range %}&price_range={{ current_price_range }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if current_search %}&search={{ current_search }}{% endif %}" class="pagination-btn">{{ i }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if products.has_next %}
+        <a href="?page={{ products.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_price_range %}&price_range={{ current_price_range }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if current_search %}&search={{ current_search }}{% endif %}" class="pagination-btn" title="Next Page">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+    {% else %}
+        <span class="pagination-btn disabled">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </span>
+    {% endif %}
+</div>
+{% endif %}

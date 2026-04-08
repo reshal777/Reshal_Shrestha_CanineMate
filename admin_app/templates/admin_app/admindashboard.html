@@ -3,6 +3,28 @@
 {% block title %}Admin Dashboard – Canine Mate{% endblock %}
 
 {% block content %}
+      <!-- Time Range Filter -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-[#333333]">Dashboard Summary</h2>
+          <p class="text-sm text-gray-500">Overview of platform performance and activity</p>
+        </div>
+        <form method="GET" class="flex items-center gap-3 bg-white border border-gray-200 px-4 py-2 rounded-2xl shadow-sm hover:shadow-md transition-all">
+          <i data-lucide="calendar-range" class="w-5 h-5 text-primary"></i>
+          <select name="time_range" onchange="this.form.submit()" class="bg-transparent text-gray-600 text-sm font-semibold focus:outline-none cursor-pointer appearance-none pr-8" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%239ca3af%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right center; background-size: 1.2em;">
+            <option value="" {% if not request.GET.time_range %}selected{% endif %}>All Time</option>
+            <option value="1w" {% if request.GET.time_range == '1w' %}selected{% endif %}>Last 1 Week</option>
+            <option value="1m" {% if request.GET.time_range == '1m' %}selected{% endif %}>Last 1 Month</option>
+            <option value="1y" {% if request.GET.time_range == '1y' %}selected{% endif %}>Last 1 Year</option>
+          </select>
+          {% for key, value in request.GET.items %}
+            {% if key != 'time_range' %}
+              <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endif %}
+          {% endfor %}
+        </form>
+      </div>
+
       <!-- Stats Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <!-- Total Users -->

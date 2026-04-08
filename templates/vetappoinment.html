@@ -539,7 +539,8 @@
         </div>
         <p class="vet-name">{{ vet.name }}</p>
         <p class="vet-clinic">{{ vet.clinic.name }}</p>
-        <p class="vet-location">{{ vet.clinic.location }}</p>
+        <p class="vet-location" style="margin-bottom: 0.25rem;">{{ vet.clinic.location }}</p>
+        <p style="color: #4FBDBA; font-weight: 600; font-size: 0.875rem; margin-bottom: 0.75rem;">Fee: Rs. {{ vet.consultation_fee }}</p>
         <div class="vet-rating" style="margin-bottom: 0;"><span class="star">★</span><span>{{ vet.rating }}</span></div>
       </a>
       <div style="display: flex; gap: 0.4rem; width: 100%; margin-top: 1rem;">
@@ -590,22 +591,37 @@
 
         <div class="field" id="vet-selection-field">
           <label>Select Veterinarian</label>
-          <select name="vet" id="vet-select" required>
+          <select name="vet" id="vet-select" required onchange="updatePricePreview()">
             {% for vet in veterinarians %}
-            <option value="{{ vet.id }}">{{ vet.name }} - {{ vet.clinic.name }}, {{ vet.clinic.location }}</option>
+            <option value="{{ vet.id }}"
+              data-consultation="{{ vet.consultation_fee }}"
+              data-regular_checkup="{{ vet.regular_checkup_fee }}"
+              data-vaccination="{{ vet.vaccination_fee }}"
+              data-emergency="{{ vet.emergency_fee }}"
+              data-followup="{{ vet.followup_fee }}"
+            >{{ vet.name }} — {{ vet.clinic.name }}</option>
             {% endfor %}
           </select>
         </div>
 
         <div class="field" id="type-selection-field">
           <label>Appointment Type</label>
-          <select name="service_type" required>
+          <select name="service_type" id="service-type-select" required onchange="updatePricePreview()">
             <option value="Regular Checkup">Regular Checkup</option>
             <option value="Vaccination">Vaccination</option>
             <option value="Emergency">Emergency</option>
             <option value="Follow-up">Follow-up</option>
             <option value="Consultation">Consultation</option>
           </select>
+        </div>
+
+        <!-- Live Price Preview -->
+        <div id="price-preview" style="background: linear-gradient(135deg, #f0fdf9, #e6faf8); border: 1px solid #4FBDBA; border-radius: 0.75rem; padding: 0.75rem 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4FBDBA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span style="font-size: 0.875rem; color: #4b5563;">Estimated fee for this service</span>
+          </div>
+          <span id="price-preview-amount" style="font-size: 1.125rem; font-weight: 700; color: #4FBDBA;">Rs. —</span>
         </div>
 
         <div class="field">
@@ -719,5 +735,31 @@
     btn.classList.add('selected');
     document.getElementById('selected-time').value = time;
   }
+
+  // Service type -> data-attribute key mapping
+  const serviceKeyMap = {
+    'Regular Checkup': 'regular_checkup',
+    'Vaccination': 'vaccination',
+    'Emergency': 'emergency',
+    'Follow-up': 'followup',
+    'Consultation': 'consultation',
+  };
+
+  function updatePricePreview() {
+    const vetSelect = document.getElementById('vet-select');
+    const serviceSelect = document.getElementById('service-type-select');
+    const priceEl = document.getElementById('price-preview-amount');
+    if (!vetSelect || !serviceSelect || !priceEl) return;
+
+    const selectedVetOption = vetSelect.options[vetSelect.selectedIndex];
+    const serviceType = serviceSelect.value;
+    const dataKey = serviceKeyMap[serviceType] || 'consultation';
+    const fee = selectedVetOption ? selectedVetOption.getAttribute('data-' + dataKey) : null;
+
+    priceEl.innerText = fee ? 'Rs. ' + fee : 'Rs. —';
+  }
+
+  // Run once on load to set initial state
+  document.addEventListener('DOMContentLoaded', updatePricePreview);
 </script>
 {% endblock %}

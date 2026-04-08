@@ -1,3 +1,4 @@
+<div id="partial-metadata" data-count="{{ dog_count }}" data-status="{{ current_status }}" class="hidden"></div>
 {% for dog in dogs %}
 <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all group">
     <div class="relative h-64 overflow-hidden">
@@ -66,13 +67,19 @@
                 class="details-btn flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg hover:bg-gray-200 transition-colors font-medium">
                 View Details
             </button>
-            {% if request.user != dog.owner %}
-            <button 
-                data-id="{{ dog.id }}"
-                data-name="{{ dog.name }}"
-                class="adopt-btn flex-1 bg-[#4FBDBA] text-white py-2.5 rounded-lg hover:bg-[#3da5a2] transition-colors shadow-md font-medium">
-                Adopt Me
-            </button>
+            {% if current_status != 'adopted' %}
+                {% if request.user != dog.owner %}
+                <button 
+                    data-id="{{ dog.id }}"
+                    data-name="{{ dog.name }}"
+                    class="adopt-btn flex-1 bg-[#4FBDBA] text-white py-2.5 rounded-lg hover:bg-[#3da5a2] transition-colors shadow-md font-medium">
+                    Adopt Me
+                </button>
+                {% endif %}
+            {% else %}
+                <button class="flex-1 bg-gray-300 text-gray-600 py-2.5 rounded-lg cursor-not-allowed shadow-md font-medium" disabled>
+                    Already Adopted
+                </button>
             {% endif %}
         </div>
     </div>

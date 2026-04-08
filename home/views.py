@@ -46,8 +46,16 @@ def adoption_listing_view(request):
     breed_filter = request.GET.get('breed', 'All Breeds')
     age_filter = request.GET.get('age', 'All Ages')
     location_filter = request.GET.get('location', 'All Locations')
+    status_filter = request.GET.get('status', 'available')
     
-    dogs = Dog.objects.filter(is_adoptable=True)
+    from pets.models import AdoptionRequest
+    base_dogs = Dog.objects.filter(is_adoptable=True)
+    adopted_ids = AdoptionRequest.objects.filter(status='Approved', dog__is_adoptable=True).values_list('dog_id', flat=True)
+    
+    if status_filter == 'adopted':
+        dogs = base_dogs.filter(id__in=adopted_ids)
+    else:
+        dogs = base_dogs.exclude(id__in=adopted_ids)
     
     if breed_filter != 'All Breeds':
         dogs = dogs.filter(breed__iexact=breed_filter)
@@ -76,6 +84,7 @@ def adoption_listing_view(request):
         'current_breed': breed_filter,
         'current_age': age_filter,
         'current_location': location_filter,
+        'current_status': status_filter,
     }
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -198,6 +207,8 @@ def about_us_view(request):
     return render(request, "Aboutus.html", {'vets': vets})
 
 
+from django.core.paginator import Paginator
+
 def shop_view(request):
     category_filter = request.GET.get('category')
     price_range = request.GET.get('price_range')
@@ -234,13 +245,19 @@ def shop_view(request):
             
     categories = Product.objects.values_list('category', flat=True).distinct()
     
+    # Pagination
+    paginator = Paginator(products, 9)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     context = {
-        'products': products,
+        'products': page_obj,
         'categories': categories,
         'product_count': products.count(),
         'current_price_range': price_range,
         'current_category': category_filter,
         'current_sort': sort_by,
+        'current_search': search_query,
     }
     
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -644,6 +661,16 @@ def vet_appointment_view(request):
             messages.error(request, f"There is already a booking for {dog.name} with this vet at this exact time.")
             return redirect('vetappointment')
 
+        # Pick the correct fee based on service type
+        service_fee_map = {
+            'Regular Checkup': vet.regular_checkup_fee,
+            'Vaccination': vet.vaccination_fee,
+            'Emergency': vet.emergency_fee,
+            'Follow-up': vet.followup_fee,
+            'Consultation': vet.consultation_fee,
+        }
+        fee = service_fee_map.get(service_type, vet.consultation_fee)
+
         appointment = Appointment.objects.create(
             user=request.user,
             dog=dog,
@@ -653,7 +680,7 @@ def vet_appointment_view(request):
             appointment_time=time,
             notes=notes,
             status='Pending',
-            amount=vet.consultation_fee
+            amount=fee
         )
         messages.success(request, f"Appointment initialized. Please complete the payment to confirm it.")
         return redirect('vet_checkout', appointment_id=appointment.id)

@@ -5,6 +5,22 @@
 {% block page_subtitle %}Review and manage customer orders and sales histories{% endblock %}
 
 {% block content %}
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-[#333333]">Orders Overview</h2>
+          <p class="text-sm text-gray-500">Track and manage customer transactions</p>
+        </div>
+        <form method="GET" class="flex items-center gap-3 bg-white border border-gray-200 px-4 py-2 rounded-2xl shadow-sm hover:shadow-md transition-all">
+          <i data-lucide="calendar-range" class="w-5 h-5 text-primary"></i>
+          <select name="time_range" onchange="this.form.submit()" class="bg-transparent text-gray-600 text-sm font-semibold focus:outline-none cursor-pointer appearance-none pr-8" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%239ca3af%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right center; background-size: 1.2em;">
+            <option value="" {% if not request.GET.time_range %}selected{% endif %}>All Time</option>
+            <option value="1w" {% if request.GET.time_range == '1w' %}selected{% endif %}>Last 1 Week</option>
+            <option value="1m" {% if request.GET.time_range == '1m' %}selected{% endif %}>Last 1 Month</option>
+            <option value="1y" {% if request.GET.time_range == '1y' %}selected{% endif %}>Last 1 Year</option>
+          </select>
+        </form>
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
       <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
         <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
@@ -30,10 +46,10 @@
       <table class="w-full text-left">
         <thead class="bg-gray-50 border-b border-gray-100">
           <tr>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">S.N.</th>
             <th class="px-6 py-4 text-sm font-bold text-gray-600">Order ID</th>
             <th class="px-6 py-4 text-sm font-bold text-gray-600">Customer</th>
             <th class="px-6 py-4 text-sm font-bold text-gray-600">Product</th>
-            <th class="px-6 py-4 text-sm font-bold text-gray-600">Category</th>
             <th class="px-6 py-4 text-sm font-bold text-gray-600">Date</th>
             <th class="px-6 py-4 text-sm font-bold text-gray-600">Amount</th>
             <th class="px-6 py-4 text-sm font-bold text-gray-600 text-right">Payment Status</th>
@@ -42,11 +58,18 @@
         <tbody class="divide-y divide-gray-100">
           {% for order in orders %}
           <tr class="hover:bg-gray-50 transition-colors">
-            <td class="px-6 py-4 font-semibold text-[#333333]">#{{ order.id }}</td>
+            <td class="px-6 py-4 text-sm font-bold text-gray-400">{{ forloop.counter }}</td>
+            <td class="px-6 py-4 font-semibold text-[#333333]">{{ order.order_id }}</td>
             <td class="px-6 py-4">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-[#4FBDBA] rounded-full flex items-center justify-center text-white font-bold">
-                  {{ order.user.username|slice:":1"|upper }}
+                <div class="flex-shrink-0">
+                  {% if order.user.profile_picture %}
+                  <img src="{{ order.user.profile_picture.url }}" class="w-10 h-10 rounded-full object-cover border-2 border-gray-100 shadow-sm" alt="{{ order.user.username }}">
+                  {% else %}
+                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                    {{ order.user.username|slice:":1"|upper }}
+                  </div>
+                  {% endif %}
                 </div>
                 <span class="font-medium text-[#333333]">{{ order.user.get_full_name|default:order.user.username }}</span>
               </div>
@@ -54,7 +77,6 @@
             <td class="px-6 py-4">
               <span class="text-sm font-medium text-[#333333] block truncate max-w-[200px]" title="{{ order.get_product_names }}">{{ order.get_product_names }}</span>
             </td>
-            <td class="px-6 py-4 text-sm text-gray-500">{{ order.get_categories|default:"Various" }}</td>
             <td class="px-6 py-4 text-sm text-gray-500">{{ order.date|date:"M d, Y" }} {{ order.date|time:"P" }}</td>
             <td class="px-6 py-4 text-sm font-bold text-[#4FBDBA]">NPR {{ order.amount|floatformat:2 }}</td>
             <td class="px-6 py-4 text-right">

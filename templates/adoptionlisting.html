@@ -25,15 +25,28 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
-            <span class="text-white font-medium">{{ dog_count }} Dogs Available for Adoption</span>
+            <span id="hero-text" class="text-white font-medium">
+                {{ dog_count }} 
+                {% if current_status == 'adopted' %}
+                Dogs Adopted / Booked
+                {% else %}
+                Dogs Available for Adoption
+                {% endif %}
+            </span>
         </div>
     </div>
 </div>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-center mb-8">
+        <button id="tab-available" onclick="setStatusFilter('available')" class="{% if current_status != 'adopted' %}bg-[#4FBDBA] text-white{% else %}bg-white text-gray-700 hover:bg-gray-50 border border-r-0 border-gray-200{% endif %} px-8 py-3 rounded-l-xl font-bold transition-all shadow-sm">Available Dogs</button>
+        <button id="tab-adopted" onclick="setStatusFilter('adopted')" class="{% if current_status == 'adopted' %}bg-[#4FBDBA] text-white{% else %}bg-white text-gray-700 hover:bg-gray-50 border border-gray-200{% endif %} px-8 py-3 rounded-r-xl font-bold transition-all shadow-sm">Adopted / Booked</button>
+    </div>
+
     <!-- Filters -->
     <div class="bg-white rounded-2xl p-6 shadow-lg mb-8">
         <form method="GET" action="{% url 'adoption' %}" id="filterForm">
+            <input type="hidden" name="status" value="{{ current_status }}">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2">
                     <svg class="w-5 h-5 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -215,12 +228,44 @@
         .then(html => {
             grid.innerHTML = html;
             grid.style.opacity = '1';
+            
+            const metadata = grid.querySelector('#partial-metadata');
+            if (metadata) {
+                const count = metadata.dataset.count;
+                const status = metadata.dataset.status;
+                
+                const heroText = document.getElementById('hero-text');
+                if (heroText) {
+                    if (status === 'adopted') {
+                        heroText.innerText = count + ' Dogs Adopted / Booked';
+                    } else {
+                        heroText.innerText = count + ' Dogs Available for Adoption';
+                    }
+                }
+                
+                const btnAvailable = document.getElementById('tab-available');
+                const btnAdopted = document.getElementById('tab-adopted');
+                
+                if (status === 'adopted') {
+                    btnAvailable.className = "bg-white text-gray-700 hover:bg-gray-50 border border-r-0 border-gray-200 px-8 py-3 rounded-l-xl font-bold transition-all shadow-sm";
+                    btnAdopted.className = "bg-[#4FBDBA] text-white px-8 py-3 rounded-r-xl font-bold transition-all shadow-sm";
+                } else {
+                    btnAvailable.className = "bg-[#4FBDBA] text-white px-8 py-3 rounded-l-xl font-bold transition-all shadow-sm";
+                    btnAdopted.className = "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 px-8 py-3 rounded-r-xl font-bold transition-all shadow-sm";
+                }
+            }
+            
             attachEventListeners(); // Re-attach listeners to new buttons
         })
         .catch(error => {
             console.error('Error updating dogs:', error);
             grid.style.opacity = '1';
         });
+    }
+
+    function setStatusFilter(status) {
+        document.querySelector('input[name="status"]').value = status;
+        updateDogs();
     }
 
     function attachEventListeners() {

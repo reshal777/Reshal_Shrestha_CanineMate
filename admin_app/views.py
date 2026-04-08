@@ -62,32 +62,61 @@ def admin_logout_view(request):
 
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
+from datetime import timedelta
+
+def apply_time_range_filter(queryset, date_field, request):
+    time_range = request.GET.get('time_range')
+    if not time_range:
+        return queryset
+    
+    now = timezone.now()
+    if time_range == '1w':
+        start_date = now - timedelta(days=7)
+    elif time_range == '1m':
+        start_date = now - timedelta(days=30)
+    elif time_range == '1y':
+        start_date = now - timedelta(days=365)
+    else:
+        return queryset
+        
+    return queryset.filter(**{f"{date_field}__range": [start_date, now]})
 
 @admin_required
 def admin_dashboard_view(request):
-    product_count = Product.objects.count()
-    user_count = User.objects.filter(is_superuser=False, is_staff=False).count()
-    order_count = Order.objects.count()
-    adoption_request_count = AdoptionRequest.objects.filter(status='Pending').count()
+    # Apply global time filter to counts
+    products_qs = apply_time_range_filter(Product.objects.all(), 'created_at', request)
+    users_qs = apply_time_range_filter(User.objects.filter(is_superuser=False, is_staff=False), 'date_joined', request)
+    orders_qs = apply_time_range_filter(Order.objects.all(), 'date', request)
+    adoption_reqs_qs = apply_time_range_filter(AdoptionRequest.objects.all(), 'created_at', request)
     
-    # Calculate Total Revenue
-    order_revenue = Order.objects.filter(paid=True).aggregate(Sum('amount'))['amount__sum'] or 0
-    vet_revenue = Appointment.objects.filter(paid=True).aggregate(Sum('amount'))['amount__sum'] or 0
-    grooming_revenue = GroomingBooking.objects.filter(paid=True).aggregate(Sum('amount'))['amount__sum'] or 0
+    product_count = products_qs.count()
+    user_count = users_qs.count()
+    order_count = orders_qs.count()
+    adoption_request_count = adoption_reqs_qs.filter(status='Pending').count()
+    
+    # Calculate Total Revenue with time filter
+    order_rev_qs = apply_time_range_filter(Order.objects.filter(paid=True), 'date', request)
+    vet_rev_qs = apply_time_range_filter(Appointment.objects.filter(paid=True), 'appointment_date', request)
+    grooming_rev_qs = apply_time_range_filter(GroomingBooking.objects.filter(paid=True), 'booking_date', request)
+
+    order_revenue = order_rev_qs.aggregate(Sum('amount'))['amount__sum'] or 0
+    vet_revenue = vet_rev_qs.aggregate(Sum('amount'))['amount__sum'] or 0
+    grooming_revenue = grooming_rev_qs.aggregate(Sum('amount'))['amount__sum'] or 0
     total_revenue = order_revenue + vet_revenue + grooming_revenue
     
     order_pct = (order_revenue / total_revenue * 100) if total_revenue > 0 else 0
     vet_pct = (vet_revenue / total_revenue * 100) if total_revenue > 0 else 0
     grooming_pct = (grooming_revenue / total_revenue * 100) if total_revenue > 0 else 0
  
-    # Fetch 5 most recent customers (excluding staff/admins)
-    from django.db.models import Q
-    recent_users = User.objects.filter(is_superuser=False, is_staff=False).annotate(
+    # Recent users with time filter
+    recent_users = users_qs.annotate(
         dog_count=Count('dogs', filter=Q(dogs__is_adoption_post=False), distinct=True)
     ).order_by('-date_joined')[:5]
     
-    # Fetch top products
-    top_products = Product.objects.all().order_by('-sales')[:5]
+    # Top products (sales are lifetime, but we can filter recently added or just keep it)
+    # The requirement says "filter and view data by selecting time ranges... for products"
+    # This might mean products added in that range.
+    top_products = products_qs.order_by('-sales')[:5]
     top_products_list = []
     for p in top_products:
         top_products_list.append({
@@ -98,12 +127,10 @@ def admin_dashboard_view(request):
             'trend': 'up' if p.sales > 0 else 'down'
         })
     
-    # Fetch recent payments across all types
-    # We will grab orders, appointments, grooming and sort them.
-    from itertools import chain
-    orders_recent = Order.objects.filter(paid=True).order_by('-date')[:5]
-    vet_recent = Appointment.objects.filter(paid=True).order_by('-appointment_date')[:5]
-    groom_recent = GroomingBooking.objects.filter(paid=True).order_by('-booking_date')[:5]
+    # Recent payments with time filter
+    orders_recent = order_rev_qs.order_by('-date')[:5]
+    vet_recent = vet_rev_qs.order_by('-appointment_date')[:5]
+    groom_recent = grooming_rev_qs.order_by('-booking_date')[:5]
     
     recent_payments = []
     for o in orders_recent:
@@ -118,7 +145,6 @@ def admin_dashboard_view(request):
     recent_payments.sort(key=lambda x: x['sort_dt'], reverse=True)
     recent_payments = recent_payments[:5]
     
-    # Prepare JSON for frontend scripts
     recent_users_list = []
     for u in recent_users:
         recent_users_list.append({
@@ -152,6 +178,7 @@ def admin_users_view(request):
     sort_by = request.GET.get('sort', '-date_joined')
     
     users_list = User.objects.filter(is_staff=False, is_superuser=False).annotate(dog_count=Count('dogs', filter=Q(dogs__is_adoption_post=False), distinct=True))
+    users_list = apply_time_range_filter(users_list, 'date_joined', request)
     
     if search_query:
         users_list = users_list.filter(
@@ -172,10 +199,12 @@ def admin_users_view(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    active_count = User.objects.filter(is_staff=False, is_superuser=False, is_active=True).count()
-    inactive_count = User.objects.filter(is_staff=False, is_superuser=False, is_active=False).count()
-    from pets.models import Dog
-    total_dogs = Dog.objects.filter(is_adoption_post=False).count()
+    users_stats_qs = User.objects.filter(is_staff=False, is_superuser=False)
+    users_stats_qs = apply_time_range_filter(users_stats_qs, 'date_joined', request)
+    active_count = users_stats_qs.filter(is_active=True).count()
+    inactive_count = users_stats_qs.filter(is_active=False).count()
+    
+    total_dogs = apply_time_range_filter(Dog.objects.filter(is_adoption_post=False), 'created_at', request).count()
 
     return render(request, 'admin_app/adminusers.html', {
         'users': page_obj,
@@ -296,6 +325,7 @@ def admin_products_view(request):
         return redirect('admin_products')
 
     products = Product.objects.all().order_by('-id')
+    products = apply_time_range_filter(products, 'created_at', request)
     return render(request, 'admin_app/adminproducts.html', {
         'products': products,
         'total_products': products.count(),
@@ -318,6 +348,7 @@ def admin_orders_view(request):
         return redirect('admin_orders')
 
     orders = Order.objects.all().prefetch_related('items__product', 'product').order_by('-date')
+    orders = apply_time_range_filter(orders, 'date', request)
     
     from django.db.models import Sum
     total_orders = orders.count()
@@ -397,42 +428,58 @@ def admin_adoption_view(request):
             messages.success(request, "Adoption listing deleted.")
             return redirect('admin_adoption')
 
-    requests = AdoptionRequest.objects.all().order_by('-created_at')
-    listings = Dog.objects.filter(is_adoptable=True).order_by('-id')
+    requests = apply_time_range_filter(AdoptionRequest.objects.all(), 'created_at', request).order_by('-created_at')
+    listings = apply_time_range_filter(Dog.objects.filter(is_adoptable=True), 'created_at', request).order_by('-id')
     return render(request, 'admin_app/adminadoption.html', {
         'requests': requests,
         'listings': listings,
-        'total_listings': Dog.objects.filter(is_adoptable=True).count(),
-        'booked_count': Dog.objects.filter(is_adoptable=True, adoption_requests__status='Approved').distinct().count(),
+        'total_listings': listings.count(),
+        'booked_count': listings.filter(adoption_requests__status='Approved').distinct().count(),
         'pending_count': requests.filter(status='Pending').count()
     })
 
 @admin_required
 def admin_grooming_view(request):
+    from grooming.models import GroomingService
     if request.method == 'POST':
         action = request.POST.get('action')
+        
+        if action == 'update_price':
+            service_id = request.POST.get('service_id')
+            new_price = request.POST.get('price')
+            service = get_object_or_404(GroomingService, id=service_id)
+            service.price = new_price
+            service.save()
+            messages.success(request, f"Price updated for {service.name}!")
+            return redirect('admin_grooming')
+            
         booking_id = request.POST.get('booking_id')
-        booking = get_object_or_404(GroomingBooking, id=booking_id)
-        if action == 'confirm':
-            booking.status = 'Confirmed'
-            booking.save()
-            messages.success(request, "Grooming booking confirmed!")
-        elif action == 'complete':
-            booking.status = 'Completed'
-            booking.save()
-            messages.success(request, "Grooming booking marked as completed!")
-        elif action == 'delete':
-            booking.delete()
-            messages.success(request, "Grooming booking deleted.")
+        if booking_id:
+            booking = get_object_or_404(GroomingBooking, id=booking_id)
+            if action == 'confirm':
+                booking.status = 'Confirmed'
+                booking.save()
+                messages.success(request, "Grooming booking confirmed!")
+            elif action == 'complete':
+                booking.status = 'Completed'
+                booking.save()
+                messages.success(request, "Grooming booking marked as completed!")
+            elif action == 'delete':
+                booking.delete()
+                messages.success(request, "Grooming booking deleted.")
         return redirect('admin_grooming')
 
     bookings = GroomingBooking.objects.all().order_by('-booking_date')
+    bookings = apply_time_range_filter(bookings, 'booking_date', request)
+    from grooming.models import GroomingService
+    services = GroomingService.objects.all()
     
     total_bookings = bookings.count()
     pending = bookings.filter(status='Pending').count()
     
     return render(request, 'admin_app/admingrooming.html', {
         'bookings': bookings,
+        'services': services,
         'total_bookings': total_bookings,
         'pending': pending
     })
@@ -462,9 +509,9 @@ def admin_health_view(request):
             messages.success(request, msg)
         return redirect('admin_health')
 
-    records_query = HealthRecord.objects.all().order_by('-date')
-    vaccinations = Vaccination.objects.all().order_by('-date_administered')
-    medications = Medication.objects.all().order_by('-last_given')
+    records_query = apply_time_range_filter(HealthRecord.objects.all(), 'date', request).order_by('-date')
+    vaccinations = apply_time_range_filter(Vaccination.objects.all(), 'date_administered', request).order_by('-date_administered')
+    medications = apply_time_range_filter(Medication.objects.all(), 'last_given', request).order_by('-last_given')
 
     all_health_data = []
     for r in records_query:
@@ -506,9 +553,9 @@ def admin_health_view(request):
 @admin_required
 def admin_payments_view(request):
     # Showing all types of transactions
-    orders = Order.objects.filter(paid=True).order_by('-date')
-    appts = Appointment.objects.filter(paid=True).order_by('-appointment_date')
-    grooming = GroomingBooking.objects.filter(paid=True).order_by('-booking_date')
+    orders = apply_time_range_filter(Order.objects.filter(paid=True), 'date', request).order_by('-date')
+    appts = apply_time_range_filter(Appointment.objects.filter(paid=True), 'appointment_date', request).order_by('-appointment_date')
+    grooming = apply_time_range_filter(GroomingBooking.objects.filter(paid=True), 'booking_date', request).order_by('-booking_date')
     
     payments = []
     for o in orders:
@@ -555,6 +602,7 @@ def admin_pets_view(request):
     breed_filter = request.GET.get('breed', 'all')
     
     pets = Dog.objects.filter(owner__is_staff=False, is_adoption_post=False)
+    pets = apply_time_range_filter(pets, 'created_at', request)
     
     if search_query:
         pets = pets.filter(
@@ -568,11 +616,12 @@ def admin_pets_view(request):
         pets = pets.filter(breed=breed_filter)
         
     all_pets = Dog.objects.filter(owner__is_staff=False, is_adoption_post=False)
+    all_pets_filtered = apply_time_range_filter(all_pets, 'created_at', request)
     
     return render(request, 'admin_app/adminpets.html', {
         'pets': pets.order_by('-id'),
-        'total_pets': all_pets.count(),
-        'healthy_pets': all_pets.filter(health_records__isnull=True).count(), 
+        'total_pets': all_pets_filtered.count(),
+        'healthy_pets': all_pets_filtered.filter(health_records__isnull=True).count(), 
         'search_query': search_query,
         'breed_filter': breed_filter,
         'breeds': all_pets.values_list('breed', flat=True).distinct().order_by('breed')
@@ -586,15 +635,15 @@ def admin_reports_view(request):
     import json
     
     # 1. Total Revenue (same logic as dashboard)
-    order_revenue_total = Order.objects.filter(paid=True).aggregate(Sum('amount'))['amount__sum'] or 0
-    vet_revenue_total = Appointment.objects.filter(paid=True).aggregate(Sum('amount'))['amount__sum'] or 0
-    grooming_revenue_total = GroomingBooking.objects.filter(paid=True).aggregate(Sum('amount'))['amount__sum'] or 0
+    order_revenue_total = apply_time_range_filter(Order.objects.filter(paid=True), 'date', request).aggregate(Sum('amount'))['amount__sum'] or 0
+    vet_revenue_total = apply_time_range_filter(Appointment.objects.filter(paid=True), 'appointment_date', request).aggregate(Sum('amount'))['amount__sum'] or 0
+    grooming_revenue_total = apply_time_range_filter(GroomingBooking.objects.filter(paid=True), 'booking_date', request).aggregate(Sum('amount'))['amount__sum'] or 0
     total_net_revenue = order_revenue_total + vet_revenue_total + grooming_revenue_total
 
     # Summary Stats
-    product_count = Product.objects.count()
-    user_count = User.objects.count()
-    order_count = Order.objects.count()
+    product_count = apply_time_range_filter(Product.objects.all(), 'created_at', request).count()
+    user_count = apply_time_range_filter(User.objects.all(), 'date_joined', request).count()
+    order_count = apply_time_range_filter(Order.objects.all(), 'date', request).count()
 
     summary_stats = [
       { 'label': 'Total Revenue', 'value': f'NPR {total_net_revenue:,.0f}', 'change': '+0%', 'trend': 'up', 'bg': 'linear-gradient(135deg,#22c55e,#16a34a)', 'icon': 'indian-rupee' },
@@ -603,9 +652,9 @@ def admin_reports_view(request):
       { 'label': 'Total Products', 'value': f'{product_count}', 'change': '+0%', 'trend': 'up', 'bg': 'linear-gradient(135deg,#3b82f6,#2563eb)', 'icon': 'package' }
     ]
 
-    # 2. Top Customers based on Orders amount only (or we can combine, but order amounts are easier here)
-    # Easiest way is to just aggregate spent amounts from Order
-    customers = User.objects.annotate(
+    # 2. Top Customers based on Orders amount only
+    customers_qs = apply_time_range_filter(User.objects.all(), 'date_joined', request)
+    customers = customers_qs.annotate(
         total_spent=Sum('product_orders__amount', filter=Q(product_orders__paid=True)),
         order_count=Count('product_orders', filter=Q(product_orders__paid=True))
     ).order_by('-total_spent')[:5]
@@ -620,12 +669,10 @@ def admin_reports_view(request):
                 'spent': float(c.total_spent)
             })
 
-    # 3. Monthly Revenue Trend (Last 3 months)
+    # 3. Monthly Revenue Trend (Last 3 months) - Keeping this as a trend
     today = timezone.now().date()
-    months = []
     monthly_revenue = []
     for i in range(2, -1, -1):
-        # basic approximation of months going backwards
         first_day = (today.replace(day=1) - timedelta(days=30 * i)).replace(day=1)
         last_day = (first_day + timedelta(days=32)).replace(day=1) - timedelta(days=1)
         
@@ -633,8 +680,6 @@ def admin_reports_view(request):
         appt_rev = Appointment.objects.filter(paid=True, appointment_date__range=[first_day, last_day]).aggregate(Sum('amount'))['amount__sum'] or 0
         groom_rev = GroomingBooking.objects.filter(paid=True, booking_date__range=[first_day, last_day]).aggregate(Sum('amount'))['amount__sum'] or 0
         m_rev = ord_rev + appt_rev + groom_rev
-        
-        # approximate orders count
         m_orders = Order.objects.filter(paid=True, date__date__range=[first_day, last_day]).count()
 
         monthly_revenue.append({
@@ -643,16 +688,18 @@ def admin_reports_view(request):
             'orders': m_orders
         })
         
-    # 4. Sales by Category (Real data from OrderItems)
+    # 4. Sales by Category
     cats = Product.objects.values_list('category', flat=True).distinct()
     sales_by_category = []
     
-    total_rev_all = Order.objects.filter(paid=True).aggregate(Sum('amount'))['amount__sum'] or 0
+    total_rev_all = apply_time_range_filter(Order.objects.filter(paid=True), 'date', request).aggregate(Sum('amount'))['amount__sum'] or 0
     
     for cat in cats:
         if not cat: continue
-        # Accurate aggregation from OrderItem
         cat_items = OrderItem.objects.filter(order__paid=True, product__category=cat)
+        # Apply time filter to item sales too
+        cat_items = apply_time_range_filter(cat_items, 'order__date', request)
+        
         cat_rev = cat_items.aggregate(total=Sum('price'))['total'] or 0
         cat_qty = cat_items.aggregate(total=Sum('quantity'))['total'] or 0
         
@@ -676,26 +723,46 @@ def admin_reports_view(request):
 
 @admin_required
 def admin_veterinary_view(request):
+    from veterinary.models import Veterinarian
     if request.method == 'POST':
         action = request.POST.get('action')
+        
+        if action == 'update_price':
+            vet_id = request.POST.get('vet_id')
+            vet = get_object_or_404(Veterinarian, id=vet_id)
+            vet.consultation_fee = request.POST.get('consultation_fee', vet.consultation_fee)
+            vet.regular_checkup_fee = request.POST.get('regular_checkup_fee', vet.regular_checkup_fee)
+            vet.vaccination_fee = request.POST.get('vaccination_fee', vet.vaccination_fee)
+            vet.emergency_fee = request.POST.get('emergency_fee', vet.emergency_fee)
+            vet.followup_fee = request.POST.get('followup_fee', vet.followup_fee)
+            vet.save()
+            messages.success(request, f"All service fees updated for Dr. {vet.name}!")
+            return redirect('admin_veterinary')
+            
         appt_id = request.POST.get('appointment_id')
-        appt = get_object_or_404(Appointment, id=appt_id)
-        if action == 'confirm':
-            appt.status = 'Confirmed'
-            appt.save()
-            messages.success(request, "Appointment confirmed!")
-        elif action == 'complete':
-            appt.status = 'Completed'
-            appt.save()
-            messages.success(request, "Appointment marked as completed!")
-        elif action == 'delete':
-            appt.delete()
-            messages.success(request, "Appointment deleted.")
+        if appt_id:
+            appt = get_object_or_404(Appointment, id=appt_id)
+            if action == 'confirm':
+                appt.status = 'Confirmed'
+                appt.save()
+                messages.success(request, "Appointment confirmed!")
+            elif action == 'complete':
+                appt.status = 'Completed'
+                appt.save()
+                messages.success(request, "Appointment marked as completed!")
+            elif action == 'delete':
+                appt.delete()
+                messages.success(request, "Appointment deleted.")
         return redirect('admin_veterinary')
 
     appointments = Appointment.objects.all().order_by('-appointment_date')
+    appointments = apply_time_range_filter(appointments, 'appointment_date', request)
+    from veterinary.models import Veterinarian
+    veterinarians = Veterinarian.objects.all()
+    
     return render(request, 'admin_app/adminvetenary.html', {
         'appointments': appointments,
+        'veterinarians': veterinarians,
         'total_appointments': appointments.count()
     })
 
