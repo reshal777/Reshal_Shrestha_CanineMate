@@ -34,6 +34,15 @@
     @keyframes slideIn { from { opacity:0; transform: translateY(-10px); } to { opacity:1; transform: translateY(0); } }
     .notif-pulse { animation: pulse 2s infinite; }
     @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(244, 162, 97, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(244, 162, 97, 0); } 100% { box-shadow: 0 0 0 0 rgba(244, 162, 97, 0); } }
+    
+    .filter-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 1.2em;
+      padding-right: 2.5rem !important;
+    }
   </style>
   {% block extra_style %}{% endblock %}
 </head>
@@ -89,6 +98,10 @@
       <a href="{% url 'admin_products' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'admin_products' %}bg-gradient-to-r from-[#4FBDBA] to-[#3da5a2] text-white shadow-lg{% else %}text-gray-600 hover:bg-gray-100{% endif %} transition-all nav-link" data-label="Products">
         <i data-lucide="package" class="w-5 h-5 shrink-0"></i>
         <span class="font-medium nav-label">Products</span>
+      </a>
+      <a href="{% url 'admin_reviews' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'admin_reviews' %}bg-gradient-to-r from-[#4FBDBA] to-[#3da5a2] text-white shadow-lg{% else %}text-gray-600 hover:bg-gray-100{% endif %} transition-all nav-link" data-label="Reviews">
+        <i data-lucide="message-square" class="w-5 h-5 shrink-0"></i>
+        <span class="font-medium nav-label">Reviews</span>
       </a>
       <a href="{% url 'admin_orders' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'admin_orders' %}bg-gradient-to-r from-[#4FBDBA] to-[#3da5a2] text-white shadow-lg{% else %}text-gray-600 hover:bg-gray-100{% endif %} transition-all nav-link" data-label="Orders">
         <i data-lucide="shopping-bag" class="w-5 h-5 shrink-0"></i>

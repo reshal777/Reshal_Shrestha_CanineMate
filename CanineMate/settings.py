@@ -48,6 +48,11 @@ INSTALLED_APPS = [
     "grooming",
     "chat",
     "admin_app",
+    "django.contrib.sites",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
 ]
 
 MIDDLEWARE = [
@@ -59,6 +64,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "home.middleware.NoCacheMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "CanineMate.urls"
@@ -151,6 +157,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'accounts.backends.EmailBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -173,6 +180,30 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 # IMPORTANT: Use an "App Password" if you have 2FA enabled on your Gmail account.
-EMAIL_HOST_USER = 'your-email@gmail.com' # Replace with your gmail address
-EMAIL_HOST_PASSWORD = 'your-app-password' # Replace with your gmail app password
-DEFAULT_FROM_EMAIL = 'CanineMate <your-email@gmail.com>' # Replace with your gmail address
+EMAIL_HOST_USER = 'vets.caninemate@gmail.com' # Replace with your actual gmail address if different
+EMAIL_HOST_PASSWORD = 'diej ixax dwcd voeg' # Gmail App Password provided by user
+DEFAULT_FROM_EMAIL = 'CanineMate <vets.caninemate@gmail.com>' # Replace with your gmail address
+
+# Site setting for allauth
+SITE_ID = 1
+
+# Allauth Configuration
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'none' # Set to 'mandatory' in production
+ACCOUNT_USERNAME_REQUIRED = True
+LOGIN_REDIRECT_URL = 'dashboard'
+SOCIALACCOUNT_LOGIN_ON_GET = True # Skip the intermediate login page
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    }
+}

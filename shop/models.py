@@ -21,6 +21,24 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
+    def update_rating(self):
+        """Update the product's rating and reviews count based on actual reviews from purchasers."""
+        # Only count reviews from users who actually bought the product
+        from django.db.models import Exists, OuterRef
+        reviews = self.reviews.filter(
+            Exists(OrderItem.objects.filter(
+                order__user=OuterRef('user'),
+                product=self,
+                order__status__in=['Delivered', 'Shipped', 'Processing']
+            ))
+        )
+        self.reviews_count = reviews.count()
+        if self.reviews_count > 0:
+            self.rating = sum(r.rating for r in reviews) / self.reviews_count
+        else:
+            self.rating = 0.0
+        self.save(update_fields=['rating', 'reviews_count'])
+
 class Order(models.Model):
     STATUS_CHOICES = [
         ('Pending', 'Pending'),
@@ -102,3 +120,27 @@ class CartItem(models.Model):
     @property
     def total_price(self):
         return self.product.price * self.quantity
+
+class ProductReview(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    rating = models.IntegerField(default=5)
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'home_productreview'
+        unique_together = ('product', 'user') # One review per user per product
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Review for {self.product.name} by {self.user.username}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.product.update_rating()
+
+    def delete(self, *args, **kwargs):
+        product = self.product
+        super().delete(*args, **kwargs)
+        product.update_rating()

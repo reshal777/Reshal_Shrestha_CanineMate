@@ -12,7 +12,7 @@
         </div>
         <form method="GET" class="flex items-center gap-3 bg-white border border-gray-200 px-4 py-2 rounded-2xl shadow-sm hover:shadow-md transition-all">
           <i data-lucide="calendar-range" class="w-5 h-5 text-primary"></i>
-          <select name="time_range" onchange="this.form.submit()" class="bg-transparent text-gray-600 text-sm font-semibold focus:outline-none cursor-pointer appearance-none pr-8" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%239ca3af%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right center; background-size: 1.2em;">
+          <select name="time_range" onchange="this.form.submit()" class="bg-transparent text-gray-600 text-sm font-semibold focus:outline-none cursor-pointer filter-select">
             <option value="" {% if not request.GET.time_range %}selected{% endif %}>All Time</option>
             <option value="1w" {% if request.GET.time_range == '1w' %}selected{% endif %}>Last 1 Week</option>
             <option value="1m" {% if request.GET.time_range == '1m' %}selected{% endif %}>Last 1 Month</option>
@@ -58,7 +58,20 @@
           <tr class="hover:bg-gray-50 transition-colors">
             <td class="px-6 py-4 text-sm font-bold text-gray-400">{{ forloop.counter }}</td>
             <td class="px-6 py-4 font-semibold text-[#333333]">{{ app.dog.name }}</td>
-            <td class="px-6 py-4 text-gray-600">{{ app.user.get_full_name|default:app.user.username }}</td>
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="flex-shrink-0">
+                  {% if app.user.profile_picture %}
+                  <img src="{{ app.user.profile_picture.url }}" class="w-8 h-8 rounded-full object-cover border border-gray-100 shadow-sm" alt="{{ app.user.username }}">
+                  {% else %}
+                  <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
+                    {{ app.user.username|slice:":1"|upper }}
+                  </div>
+                  {% endif %}
+                </div>
+                <span class="text-gray-700 font-medium">{{ app.user.get_full_name|default:app.user.username }}</span>
+              </div>
+            </td>
             <td class="px-6 py-4 font-medium text-[#4FBDBA]">{{ app.service_type }}</td>
             <td class="px-6 py-4 text-gray-500">{{ app.appointment_date|date:"M d, Y" }} {{ app.appointment_time|time:"P" }}</td>
             <td class="px-6 py-4 text-right">

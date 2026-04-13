@@ -15,7 +15,7 @@
         <p class="text-gray-500 text-lg mb-10 leading-relaxed">{{ message|default:"Your transation has been completed successfully." }}</p>
 
         <div class="space-y-4">
-            <a href="{% url redirect_url|default:'dashboard' %}" class="block w-full bg-[#4FBDBA] text-white py-4 rounded-2xl font-bold text-lg hover:bg-[#3da5a2] transition-all transform hover:-translate-y-1 shadow-xl shadow-teal-100">
+            <a href="{% url redirect_url|default:'dashboard' %}{{ query_params|default:'' }}" class="block w-full bg-[#4FBDBA] text-white py-4 rounded-2xl font-bold text-lg hover:bg-[#3da5a2] transition-all transform hover:-translate-y-1 shadow-xl shadow-teal-100">
                 {{ button_text|default:"View Appointments" }}
             </a>
             <a href="{% url 'dashboard' %}" class="block w-full py-4 text-gray-400 font-bold hover:text-[#4FBDBA] transition-colors">
@@ -28,4 +28,134 @@
         </div>
     </div>
 </div>
+
+{% if order and order.paid and unreviewed_items %}
+<!-- Rating Popup Modal -->
+<div id="rating-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300 hidden">
+    <div class="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden transform transition-all scale-100 animate-in zoom-in duration-300">
+        <!-- Close button -->
+        <button onclick="closeRatingModal()" class="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <div class="p-10 text-center">
+            <!-- Canine Mate Logo -->
+            <div class="flex items-center justify-center gap-3 mb-8">
+                <div class="w-12 h-12 bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] rounded-2xl flex items-center justify-center shadow-lg shadow-teal-100">
+                    <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .52 5.86 3 3 0 1 0 5.653 2.355 3 3 0 0 0 5.65-.001 3 3 0 1 0 5.61-2.35 4 4 0 0 0 .526-5.87 4 4 0 0 0-2.52-5.767A3 3 0 1 0 12 5Z"/>
+                    </svg>
+                </div>
+                <div class="text-left">
+                    <p class="font-bold text-[#333333] text-lg leading-tight">Canine Mate</p>
+                    <p class="text-xs text-gray-400 leading-tight">Your Pet Companion</p>
+                </div>
+            </div>
+            
+            <h2 class="text-2xl font-black text-gray-900 mb-2">How was your experience?</h2>
+            <p class="text-gray-500 mb-8">Please rate your purchased product below to help us improve!</p>
+
+            <div id="items-to-rate" class="space-y-8">
+                {% for item in unreviewed_items %}
+                <div class="item-rate-row" data-product-id="{{ item.product.id }}">
+                    <div class="flex items-center gap-4 mb-4 justify-center">
+                        {% if item.product.image %}
+                        <img src="{{ item.product.image.url }}" class="w-12 h-12 rounded-xl object-cover shadow-sm" alt="{{ item.product.name }}">
+                        {% endif %}
+                        <span class="font-bold text-gray-800">{{ item.product.name }}</span>
+                    </div>
+
+                    <form action="{% url 'add_product_review' item.product.id %}?next={{ request.get_full_path }}" method="POST" class="rate-form">
+                        {% csrf_token %}
+                        <div class="star-rating-row flex flex-row-reverse justify-center gap-2 mb-4">
+                            {% for i in "54321"|make_list %}
+                            <input type="radio" id="star{{ item.id }}-{{ i }}" name="rating" value="{{ i }}" class="hidden peer" required>
+                            <label for="star{{ item.id }}-{{ i }}" class="cursor-pointer text-gray-200 hover:text-yellow-400 peer-checked:text-yellow-400 peer-hover:text-yellow-400 peer-hover:scale-110 transition-all duration-200">
+                                <svg class="w-10 h-10 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        <textarea name="comment" class="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#4FBDBA] focus:bg-white transition-all" placeholder="Tell us more about the product (optional)..."></textarea>
+                        <button type="submit" class="mt-4 w-full bg-[#4FBDBA] text-white py-3 rounded-xl font-bold hover:bg-[#3da5a2] shadow-lg shadow-teal-50 transition-all">Submit Review</button>
+                    </form>
+                </div>
+                {% if not forloop.last %}<div class="border-t border-gray-50 pt-8 mt-8"></div>{% endif %}
+                {% endfor %}
+            </div>
+            
+            <button onclick="closeRatingModal()" class="mt-8 text-gray-400 font-semibold hover:text-gray-600 transition-colors">Skip for now</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Show rating modal after payment confirmation is visible (3-second delay)
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            const ratingModal = document.getElementById('rating-modal');
+            if (ratingModal) {
+                ratingModal.classList.remove('hidden');
+            }
+        }, 3000); // 3 second delay to show payment confirmation first
+    });
+
+    function closeRatingModal() {
+        const modal = document.getElementById('rating-modal');
+        modal.classList.add('opacity-0');
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
+    // Handle AJAX review submission
+    document.querySelectorAll('.rate-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const container = this.closest('.item-rate-row');
+            const submitBtn = this.querySelector('button[type="submit"]');
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="inline-block animate-spin mr-2">◌</span> Submitting...';
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    container.innerHTML = `
+                        <div class="py-12 animate-in zoom-in duration-500">
+                            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-1">Thank you!</h3>
+                            <p class="text-gray-500">Your review was submitted successfully.</p>
+                        </div>
+                    `;
+                    
+                    // If no more items to rate, close modal after a delay
+                    const remaining = document.querySelectorAll('.rate-form').length;
+                    if (remaining === 0) {
+                        setTimeout(closeRatingModal, 2000);
+                    }
+                } else {
+                    alert(data.message || 'Error submitting review');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Submit Review';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Something went wrong. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Submit Review';
+            });
+        });
+    });
+</script>
+{% endif %}
 {% endblock %}

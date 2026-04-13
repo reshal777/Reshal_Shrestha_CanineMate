@@ -1,0 +1,107 @@
+{% extends 'admin_app/admin_base.html' %}
+
+{% block title %}Product Reviews – Admin Panel{% endblock %}
+{% block page_title %}Product Reviews{% endblock %}
+{% block page_subtitle %}Manage and moderate customer product reviews{% endblock %}
+
+{% block content %}
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 w-full max-w-2xl">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+                <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center text-yellow-600">
+                    <i data-lucide="star"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Average Rating</p>
+                    <p class="text-2xl font-bold text-[#333333]">{{ avg_rating|floatformat:1 }} / 5.0</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
+                    <i data-lucide="message-square"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Total Reviews</p>
+                    <p class="text-2xl font-bold text-[#333333]">{{ total_reviews }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 w-full md:w-auto">
+            <form method="GET" class="flex items-center gap-3 bg-white border border-gray-200 px-4 py-2 rounded-2xl shadow-sm hover:shadow-md transition-all flex-1 md:flex-none">
+              <i data-lucide="calendar-range" class="w-5 h-5 text-primary"></i>
+              <select name="time_range" onchange="this.form.submit()" class="bg-transparent text-gray-600 text-sm font-semibold focus:outline-none cursor-pointer filter-select">
+                <option value="" {% if not request.GET.time_range %}selected{% endif %}>All Time</option>
+                <option value="1w" {% if request.GET.time_range == '1w' %}selected{% endif %}>Last 1 Week</option>
+                <option value="1m" {% if request.GET.time_range == '1m' %}selected{% endif %}>Last 1 Month</option>
+                <option value="1y" {% if request.GET.time_range == '1y' %}selected{% endif %}>Last 1 Year</option>
+              </select>
+            </form>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+      <table class="w-full text-left">
+        <thead class="bg-gray-50 border-b border-gray-100">
+          <tr>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">S.N.</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Product</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">User</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Rating</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Comment</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Date</th>
+            <th class="px-6 py-4 text-sm font-bold text-gray-600">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for review in reviews %}
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 text-sm font-bold text-gray-400">{{ forloop.counter }}</td>
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                {% if review.product.image %}
+                <img src="{{ review.product.image.url }}" class="w-8 h-8 rounded object-cover" />
+                {% endif %}
+                <span class="font-semibold text-gray-800">{{ review.product.name }}</span>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-600">
+              <div class="flex items-center gap-2">
+                {% if review.user.profile_picture %}
+                <img src="{{ review.user.profile_picture.url }}" class="w-6 h-6 rounded-full object-cover" />
+                {% endif %}
+                {{ review.user.username }}
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex text-yellow-500">
+                {% with ""|center:5 as range %}
+                {% for _ in range %}
+                  {% if forloop.counter <= review.rating %}
+                  <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                  {% else %}
+                  <i data-lucide="star" class="w-4 h-4 text-gray-300"></i>
+                  {% endif %}
+                {% endfor %}
+                {% endwith %}
+              </div>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{{ review.comment }}</td>
+            <td class="px-6 py-4 text-sm text-gray-500">{{ review.created_at|date:"Y-m-d" }}</td>
+            <td class="px-6 py-4">
+              <form method="POST" onsubmit="return confirm('Permanently delete this review?');" class="inline">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="review_id" value="{{ review.id }}">
+                <button type="submit" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7" class="px-6 py-12 text-center text-gray-500">No reviews found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+{% endblock %}

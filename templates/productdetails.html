@@ -8,7 +8,7 @@
   .product-main {
     max-width: 1280px;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 2rem 0;
   }
 
   /* product top section — image + info */
@@ -28,9 +28,9 @@
   /* left: product image */
   .product-img-card {
     background: #fff;
-    border-radius: 1rem;
+    border-radius: 2rem;
     overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   }
 
   .product-img-card img {
@@ -253,9 +253,9 @@
   /* features card */
   .features-card {
     background: #fff;
-    border-radius: 1rem;
-    padding: 1.5rem;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 2rem;
+    padding: 2.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   }
 
   .features-card h3 {
@@ -286,9 +286,9 @@
   /* specs section */
   .specs-card {
     background: #fff;
-    border-radius: 1rem;
-    padding: 1.5rem;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 2rem;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
     margin-bottom: 2rem;
   }
 
@@ -383,13 +383,100 @@
     font-weight: 700;
     color: #4FBDBA;
   }
+
+  /* Reviews Section Styles */
+  .reviews-section {
+    margin-top: 1rem;
+    padding: 0;
+    margin-bottom: 8rem;
+  }
+  .review-item {
+    border-bottom: 1px solid #f3f4f6;
+    padding: 1.5rem 0;
+  }
+  .review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  .review-user {
+    font-weight: 600;
+    color: #374151;
+  }
+  .review-date {
+    font-size: 0.875rem;
+    color: #9ca3af;
+  }
+  .review-rating {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 0.5rem;
+  }
+  .review-comment {
+    color: #4b5563;
+    line-height: 1.5;
+  }
+  .write-review-card {
+    background: #f8fafc;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 3rem;
+  }
+  .star-rating-input {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .star-rating-input input {
+    display: none;
+  }
+  .star-rating-input label {
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    color: #d1d5db;
+    transition: color 0.2s;
+  }
+  .star-rating-input label:hover,
+  .star-rating-input label:hover ~ label,
+  .star-rating-input input:checked ~ label {
+    color: #eab308;
+  }
+  .review-textarea {
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    min-height: 100px;
+    margin-bottom: 1rem;
+  }
+  .review-submit-btn {
+    background: #4FBDBA;
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+  }
+
+  .review-container-card {
+    background: #fff;
+    border-radius: 2rem;
+    padding: 2.5rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    margin-bottom: 2rem;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="product-main">
   <!-- header with back button -->
-  <div class="page-header mb-10">
+  <div class="page-header mb-10 px-0">
     <div class="flex items-center gap-3">
       <button class="bg-none border-none text-[#4b5563] flex items-center transition-colors hover:text-[#4FBDBA] p-0"
         onclick="history.back()">
@@ -424,7 +511,7 @@
               <div class="stars flex">
                 {% with ""|center:5 as range %}
                 {% for _ in range %}
-                {% if forloop.counter <= product.rating %} <svg class="star filled w-5 h-5 text-yellow-400"
+                {% if forloop.counter <= reviews_rating %} <svg class="star filled w-5 h-5 text-yellow-400"
                   xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                   </svg>
@@ -438,16 +525,13 @@
                   {% endfor %}
                   {% endwith %}
               </div>
-              <span class="rating-num font-bold">{{ product.rating|floatformat:1 }}</span>
-              <span class="review-count text-gray-500">({{ product.reviews_count }} reviews)</span>
+              <span class="rating-num font-bold">{{ reviews_rating|floatformat:1 }}</span>
+              <span class="review-count text-gray-500">({{ reviews_count }} reviews)</span>
             </div>
 
             <!-- price -->
             <div class="price-row mt-6 flex items-baseline gap-4">
               <span class="price-main text-4xl font-extrabold text-[#4FBDBA]">Rs. {{ product.price|floatformat:0 }}</span>
-              {% if product.old_price %}
-              <span class="price-old text-xl text-gray-400 line-through">Rs. {{ product.old_price|floatformat:0 }}</span>
-              {% endif %}
             </div>
 
             <!-- stock status -->
@@ -544,7 +628,90 @@
       </div>
     </div>
   </div>
-</div>
+  <!-- Reviews & Related Section -->
+  <div class="reviews-section">
+    <!-- Reviews List Wrapped in a Card -->
+    <div class="review-container-card">
+        <h3 class="text-2xl font-black text-gray-900 mb-8 font-primary tracking-tight">Customer Reviews ({{ reviews.count }})</h3>
+        
+        {% if can_review %}
+        <div class="write-review-card">
+          <h4 class="text-lg font-bold mb-4">Write a Review</h4>
+          <form action="{% url 'add_product_review' product.id %}" method="POST">
+            {% csrf_token %}
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Your Rating</label>
+              <div class="star-rating-input">
+                <input type="radio" id="star5" name="rating" value="5" required /><label for="star5"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></label>
+                <input type="radio" id="star4" name="rating" value="4" /><label for="star4"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></label>
+                <input type="radio" id="star3" name="rating" value="3" /><label for="star3"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></label>
+                <input type="radio" id="star2" name="rating" value="2" /><label for="star2"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></label>
+                <input type="radio" id="star1" name="rating" value="1" /><label for="star1"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></label>
+              </div>
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Your Review</label>
+              <textarea name="comment" class="review-textarea" placeholder="Share your experience with this product..." required></textarea>
+            </div>
+            <button type="submit" class="review-submit-btn">Submit Review</button>
+          </form>
+        </div>
+        {% elif not request.user.is_authenticated %}
+        <div class="bg-gray-50 border border-dashed border-gray-300 rounded-2xl p-6 text-center mb-8">
+          <p class="text-gray-600 font-medium">Please <a href="{% url 'signup' %}" class="text-[#4FBDBA] font-bold">sign in</a> to leave a review.</p>
+        </div>
+        {% elif not can_review %}
+        <div class="bg-blue-50/50 border border-blue-100 rounded-2xl p-6 text-blue-800 text-center mb-10">
+          <p class="font-medium flex items-center justify-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              Only customers who have purchased this product can leave a review. 🐾
+          </p>
+        </div>
+        {% endif %}
+
+        <div class="reviews-list">
+          {% for review in reviews %}
+          <div class="review-item flex gap-4">
+            <div class="flex-shrink-0 mt-1">
+              {% if review.user.profile_picture %}
+                <img src="{{ review.user.profile_picture.url }}" class="w-11 h-11 rounded-full object-cover border-2 border-white shadow-sm" alt="{{ review.user.username }}">
+              {% else %}
+                <div class="w-11 h-11 rounded-full bg-{% cycle 'blue' 'green' 'purple' 'orange' %}-100 text-{% cycle 'blue' 'green' 'purple' 'orange' %}-600 flex items-center justify-center font-bold text-lg border-2 border-white shadow-sm">
+                  {{ review.user.username|make_list|first|upper }}
+                </div>
+              {% endif %}
+            </div>
+            <div class="flex-1">
+              <div class="review-header flex justify-between items-center mb-1">
+                <span class="review-user text-gray-900 font-bold tracking-tight">{{ review.user.get_full_name|default:review.user.username }}</span>
+                <span class="review-date text-xs text-gray-400 font-medium">{{ review.created_at|date:"M d, Y" }}</span>
+              </div>
+            <div class="review-rating">
+              {% with ""|center:5 as range %}
+              {% for _ in range %}
+                {% if forloop.counter <= review.rating %}
+                <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                {% else %}
+                <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                {% endif %}
+              {% endfor %}
+              {% endwith %}
+            </div>
+            <p class="review-comment">{{ review.comment }}</p>
+          </div>
+        </div>
+          {% empty %}
+          <div class="text-center py-12 text-gray-500 bg-gray-50/50 rounded-3xl">
+            <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+            </svg>
+            <p class="font-medium">No reviews yet. Be the first to review!</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
       {% block extra_js %}

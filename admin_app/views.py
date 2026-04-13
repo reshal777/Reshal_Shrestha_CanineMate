@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from accounts.models import User
-from shop.models import Product, Order, OrderItem
+from shop.models import Product, Order, OrderItem, ProductReview
 from pets.models import Dog, AdoptionRequest, HealthRecord, Vaccination, Medication
 from grooming.models import GroomingBooking
 from veterinary.models import Appointment
@@ -134,13 +134,43 @@ def admin_dashboard_view(request):
     
     recent_payments = []
     for o in orders_recent:
-        recent_payments.append({'user': o.user.username, 'type': 'Order', 'amount': float(o.amount), 'method': o.payment_method, 'date': o.date.strftime('%Y-%m-%d'), 'time': o.date.strftime('%H:%M:%S'), 'sort_dt': o.date, 'status': 'Success'})
+        recent_payments.append({
+            'user': o.user.username, 
+            'profile_picture': o.user.profile_picture.url if o.user.profile_picture else None,
+            'type': 'Order', 
+            'amount': float(o.amount), 
+            'method': o.payment_method, 
+            'date': o.date.strftime('%Y-%m-%d'), 
+            'time': o.date.strftime('%H:%M:%S'), 
+            'sort_dt': o.date, 
+            'status': 'Success'
+        })
     for v in vet_recent:
         dt = timezone.make_aware(datetime.combine(v.appointment_date, v.appointment_time))
-        recent_payments.append({'user': v.user.username, 'type': 'Vet Appointment', 'amount': float(v.amount), 'method': 'Khalti', 'date': v.appointment_date.strftime('%Y-%m-%d'), 'time': v.appointment_time.strftime('%H:%M:%S'), 'sort_dt': dt, 'status': 'Success'})
+        recent_payments.append({
+            'user': v.user.username, 
+            'profile_picture': v.user.profile_picture.url if v.user.profile_picture else None,
+            'type': 'Vet Appointment', 
+            'amount': float(v.amount), 
+            'method': 'Khalti', 
+            'date': v.appointment_date.strftime('%Y-%m-%d'), 
+            'time': v.appointment_time.strftime('%H:%M:%S'), 
+            'sort_dt': dt, 
+            'status': 'Success'
+        })
     for g in groom_recent:
         dt = timezone.make_aware(datetime.combine(g.booking_date, g.booking_time))
-        recent_payments.append({'user': g.user.username, 'type': 'Grooming', 'amount': float(g.amount), 'method': 'Khalti', 'date': g.booking_date.strftime('%Y-%m-%d'), 'time': g.booking_time.strftime('%H:%M:%S'), 'sort_dt': dt, 'status': 'Success'})
+        recent_payments.append({
+            'user': g.user.username, 
+            'profile_picture': g.user.profile_picture.url if g.user.profile_picture else None,
+            'type': 'Grooming', 
+            'amount': float(g.amount), 
+            'method': 'Khalti', 
+            'date': g.booking_date.strftime('%Y-%m-%d'), 
+            'time': g.booking_time.strftime('%H:%M:%S'), 
+            'sort_dt': dt, 
+            'status': 'Success'
+        })
 
     recent_payments.sort(key=lambda x: x['sort_dt'], reverse=True)
     recent_payments = recent_payments[:5]
@@ -149,6 +179,7 @@ def admin_dashboard_view(request):
     for u in recent_users:
         recent_users_list.append({
             'name': f"{u.first_name} {u.last_name}" if u.first_name else u.username,
+            'profile_picture': u.profile_picture.url if u.profile_picture else None,
             'email': u.email,
             'dogs': u.dog_count,
             'joined': u.date_joined.strftime('%b %d, %Y')
@@ -347,15 +378,19 @@ def admin_orders_view(request):
             messages.success(request, "Order deleted permanently.")
         return redirect('admin_orders')
 
-    orders = Order.objects.all().prefetch_related('items__product', 'product').order_by('-date')
-    orders = apply_time_range_filter(orders, 'date', request)
+    orders_list = Order.objects.all().prefetch_related('items__product', 'product').order_by('-date')
+    orders_list = apply_time_range_filter(orders_list, 'date', request)
     
     from django.db.models import Sum
-    total_orders = orders.count()
-    total_revenue = orders.filter(paid=True).aggregate(Sum('amount'))['amount__sum'] or 0
+    total_orders = orders_list.count()
+    total_revenue = orders_list.filter(paid=True).aggregate(Sum('amount'))['amount__sum'] or 0
+    
+    paginator = Paginator(orders_list, 20) # 20 orders per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     
     return render(request, 'admin_app/adminorders.html', {
-        'orders': orders,
+        'orders': page_obj,
         'total_orders': total_orders,
         'total_revenue': total_revenue
     })
@@ -664,6 +699,7 @@ def admin_reports_view(request):
         if c.total_spent and c.total_spent > 0:
             top_customers_list.append({
                 'name': f"{c.first_name} {c.last_name}" if c.first_name else c.username,
+                'profile_picture': c.profile_picture.url if c.profile_picture else None,
                 'email': c.email,
                 'orders': c.order_count,
                 'spent': float(c.total_spent)
@@ -764,6 +800,39 @@ def admin_veterinary_view(request):
         'appointments': appointments,
         'veterinarians': veterinarians,
         'total_appointments': appointments.count()
+    })
+
+@admin_required
+def admin_reviews_view(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        review_id = request.POST.get('review_id')
+        review = get_object_or_404(ProductReview, id=review_id)
+        
+        if action == 'delete':
+            product = review.product
+            review.delete()
+            # The ProductReview.save() logic handles updating product stats during save, 
+            # so for delete we might need to trigger it manually or let the model handle it.
+            # My current model logic only updates on save. 
+            # Let's fix that in models.py later or just do it here.
+            reviews = product.reviews.all()
+            product.reviews_count = reviews.count()
+            if product.reviews_count > 0:
+                product.rating = sum(r.rating for r in reviews) / product.reviews_count
+            else:
+                product.rating = 0
+            product.save()
+            messages.success(request, "Review deleted successfully.")
+        return redirect('admin_reviews')
+
+    reviews = ProductReview.objects.all().order_by('-created_at')
+    reviews = apply_time_range_filter(reviews, 'created_at', request)
+    
+    return render(request, 'admin_app/adminreviews.html', {
+        'reviews': reviews,
+        'total_reviews': reviews.count(),
+        'avg_rating': reviews.aggregate(Sum('rating'))['rating__sum'] / reviews.count() if reviews.count() > 0 else 0
     })
 
 # Optional: Add API endpoints or handling logic for creating/deleting things via JSON to match your frontend scripts.

@@ -15,6 +15,7 @@ urlpatterns = [
     path("", home_views.index_view, name="index"),
     path("home/", include("home.urls")),
     path("", include("accounts.urls")),
+    path("accounts/", include("allauth.urls")),
 ]
 
 if settings.DEBUG:

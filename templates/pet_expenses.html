@@ -63,22 +63,30 @@
 
         <!-- Transaction Timeline -->
         <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100">
-            <h3 class="text-xl font-extrabold text-[#333333] mb-8 flex items-center gap-2">
-                <i data-lucide="history" class="text-[#4FBDBA]"></i>
-                Transaction History
-            </h3>
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                <h3 class="text-xl font-extrabold text-[#333333] flex items-center gap-2">
+                    <i data-lucide="history" class="text-[#4FBDBA]"></i>
+                    Transaction History
+                </h3>
+                
+                <!-- Filter Tabs -->
+                <div class="flex bg-gray-50 p-1 rounded-2xl border border-gray-100 overflow-x-auto max-w-full">
+                    <button onclick="filterTransactions('all')" class="expense-tab active px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap" id="tab-all">All</button>
+                    <button onclick="filterTransactions('shop')" class="expense-tab px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap" id="tab-shop">Orders</button>
+                    <button onclick="filterTransactions('vet')" class="expense-tab px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap" id="tab-vet">Vet</button>
+                    <button onclick="filterTransactions('groom')" class="expense-tab px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap" id="tab-groom">Grooming</button>
+                </div>
+            </div>
 
-            <div class="space-y-6">
+            <div class="space-y-6" id="transaction-list">
                 {% for t in transactions %}
-                <div class="flex items-start gap-4 group">
+                <div class="transaction-item flex items-start gap-4 group" data-category="{% if t.type == 'Shop Order' %}shop{% elif t.type == 'Veterinary' %}vet{% else %}groom{% endif %}">
                     <div class="relative">
                         <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-all group-hover:scale-110 
                             {% if t.color == 'teal' %}bg-teal-50 text-teal-600{% elif t.color == 'blue' %}bg-blue-50 text-blue-600{% else %}bg-orange-50 text-orange-600{% endif %}">
                             <i data-lucide="{{ t.icon }}" class="w-6 h-6"></i>
                         </div>
-                        {% if not forloop.last %}
-                        <div class="absolute top-14 left-1/2 -translate-x-1/2 w-px h-8 bg-gray-100"></div>
-                        {% endif %}
+                        <div class="timeline-line absolute top-14 left-1/2 -translate-x-1/2 w-px h-8 bg-gray-100"></div>
                     </div>
                     
                     <div class="flex-1 min-w-0 pb-6 border-b border-gray-50 last:border-0">
@@ -102,14 +110,87 @@
                     <p class="text-gray-400 font-medium">No expenses recorded yet.</p>
                 </div>
                 {% endfor %}
+                
+                <!-- Empty State for filters -->
+                <div id="filter-empty-state" class="hidden text-center py-20 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-200">
+                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                        <i data-lucide="search-x" class="text-gray-300"></i>
+                    </div>
+                    <p class="text-gray-400 font-medium">No transactions found for this category.</p>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+    .expense-tab {
+        color: #9ca3af;
+    }
+    .expense-tab.active {
+        background: white;
+        color: #4FBDBA;
+        box-shadow: 0 4px 12px rgba(79, 189, 186, 0.1);
+    }
+</style>
+
 <script>
+    function filterTransactions(category) {
+        const items = document.querySelectorAll('.transaction-item');
+        const tabs = document.querySelectorAll('.expense-tab');
+        const emptyState = document.getElementById('filter-empty-state');
+        let count = 0;
+
+        // Update tabs
+        tabs.forEach(tab => tab.classList.remove('active'));
+        document.getElementById('tab-' + category).classList.add('active');
+
+        // Filter items
+        items.forEach(item => {
+            if (category === 'all' || item.getAttribute('data-category') === category) {
+                item.classList.remove('hidden');
+                item.classList.add('flex');
+                count++;
+            } else {
+                item.classList.remove('flex');
+                item.classList.add('hidden');
+            }
+        });
+
+        // Update timeline lines
+        const visibleItems = Array.from(items).filter(i => !i.classList.contains('hidden'));
+        visibleItems.forEach((item, index) => {
+            const line = item.querySelector('.timeline-line');
+            if (line) {
+                if (index === visibleItems.length - 1) {
+                    line.classList.add('hidden');
+                } else {
+                    line.classList.remove('hidden');
+                }
+            }
+        });
+
+        // Show/hide empty state
+        if (count === 0 && items.length > 0) {
+            emptyState.classList.remove('hidden');
+        } else {
+            emptyState.classList.add('hidden');
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
+        
+        // Handle URL filter parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const filterParam = urlParams.get('filter');
+        
+        if (filterParam && ['shop', 'vet', 'groom'].includes(filterParam)) {
+            filterTransactions(filterParam);
+        } else {
+            // Initial line fix
+            filterTransactions('all');
+        }
     });
 </script>
 {% endblock %}

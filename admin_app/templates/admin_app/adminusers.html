@@ -52,7 +52,7 @@
         </div>
         <div class="flex items-center gap-2">
           <i data-lucide="calendar-range" class="w-4 h-4 text-gray-400"></i>
-          <select name="time_range" onchange="this.form.submit()" class="bg-gray-50 border border-gray-200 text-gray-600 text-sm px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4FBDBA] transition-all cursor-pointer">
+          <select name="time_range" onchange="this.form.submit()" class="bg-gray-50 border border-gray-200 text-gray-600 text-sm px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4FBDBA] transition-all cursor-pointer filter-select">
             <option value="" {% if not request.GET.time_range %}selected{% endif %}>All Time</option>
             <option value="1w" {% if request.GET.time_range == '1w' %}selected{% endif %}>Last 1 Week</option>
             <option value="1m" {% if request.GET.time_range == '1m' %}selected{% endif %}>Last 1 Month</option>

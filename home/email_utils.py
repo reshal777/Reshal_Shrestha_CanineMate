@@ -74,3 +74,26 @@ def send_grooming_email(booking):
         )
     except Exception as e:
         logger.error(f"Failed to send grooming email for GRM-{booking.id}: {str(e)}")
+
+def send_medicine_reminder_email(reminder):
+    """Send medicine reminder email to the user."""
+    try:
+        subject = f'Medicine Reminder: {reminder.name} for {reminder.dog.name} | CanineMate 🐾'
+        context = {
+            'reminder': reminder,
+            'user': reminder.dog.owner,
+            'dog': reminder.dog
+        }
+        html_message = render_to_string('emails/medicine_reminder.html', context)
+        plain_message = strip_tags(html_message)
+        
+        send_mail(
+            subject,
+            plain_message,
+            settings.DEFAULT_FROM_EMAIL,
+            [reminder.dog.owner.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+    except Exception as e:
+        logger.error(f"Failed to send medicine reminder email for {reminder.name}: {str(e)}")

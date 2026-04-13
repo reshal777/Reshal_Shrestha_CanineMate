@@ -11,6 +11,7 @@ urlpatterns = [
     path('users/delete/<int:user_id>/', views.admin_user_delete_view, name='admin_user_delete'),
     path('products/', views.admin_products_view, name='admin_products'),
     path('orders/', views.admin_orders_view, name='admin_orders'),
+    path('reviews/', views.admin_reviews_view, name='admin_reviews'),
     
     # New views to map the additional templates
     path('adoption/', views.admin_adoption_view, name='admin_adoption'),

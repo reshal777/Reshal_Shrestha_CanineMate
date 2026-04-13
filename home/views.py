@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from pets.models import Dog, Vaccination, HealthRecord, Medication, Reminder
 from veterinary.models import Clinic, Veterinarian, Appointment
 from grooming.models import GroomingSalon, GroomingService, GroomingBooking
-from shop.models import Product, Order, CartItem, OrderItem
+from shop.models import Product, Order, CartItem, OrderItem, ProductReview
 from chat.models import ChatMessage
 from django.contrib import messages
 from django.db.models import Q
@@ -15,7 +15,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from payment.khalti_utils import initiate_khalti_payment, verify_khalti_payment
-from .email_utils import send_order_email, send_appointment_email, send_grooming_email
+from .email_utils import send_order_email, send_appointment_email, send_grooming_email, send_medicine_reminder_email
 from shop.models import Product, Order, CartItem, OrderItem
 
 def index_view(request):
@@ -331,11 +331,89 @@ def product_details_view(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     related_products = Product.objects.filter(category=product.category).exclude(id=product.id)[:5]
     
+    # Filter reviews: Only from those who purchased and order is in valid status
+    from django.db.models import Exists, OuterRef
+    purchasers_filter = OrderItem.objects.filter(
+        order__user=OuterRef('user'),
+        product=product,
+        order__status__in=['Delivered', 'Shipped', 'Processing']
+    )
+    reviews = product.reviews.filter(Exists(purchasers_filter))
+    
+    # Calculate valid stats
+    reviews_count = reviews.count()
+    if reviews_count > 0:
+        reviews_rating = sum(r.rating for r in reviews) / reviews_count
+    else:
+        reviews_rating = 0.0
+    
+    can_review = False
+    if request.user.is_authenticated:
+        # Check if user has bought this product
+        can_review = OrderItem.objects.filter(
+            order__user=request.user, 
+            product=product,
+            order__status__in=['Delivered', 'Shipped', 'Processing']
+        ).exists()
+        
+        # Also check if user already reviewed
+        if can_review and ProductReview.objects.filter(product=product, user=request.user).exists():
+            can_review = False
+
     context = {
         'product': product,
         'related_products': related_products,
+        'reviews': reviews,
+        'reviews_count': reviews_count,
+        'reviews_rating': reviews_rating,
+        'can_review': can_review,
     }
     return render(request, "productdetails.html", context)
+
+@login_required
+def add_product_review(request, product_id):
+    if request.method == "POST":
+        product = get_object_or_404(Product, id=product_id)
+        rating = request.POST.get('rating')
+        comment = request.POST.get('comment')
+        
+        # Double check if they can review
+        can_review = OrderItem.objects.filter(
+            order__user=request.user, 
+            product=product,
+            order__status__in=['Delivered', 'Shipped', 'Processing']
+        ).exists()
+        
+        if not can_review:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'error', 'message': "You must purchase the product before reviewing it."}, status=403)
+            messages.error(request, "You must purchase the product before reviewing it.")
+            return redirect('product_details', product_id=product.id)
+            
+        if ProductReview.objects.filter(product=product, user=request.user).exists():
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'error', 'message': "You have already reviewed this product."}, status=400)
+            messages.error(request, "You have already reviewed this product.")
+            return redirect('product_details', product_id=product.id)
+
+        ProductReview.objects.create(
+            product=product,
+            user=request.user,
+            rating=int(rating),
+            comment=comment
+        )
+        
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'success', 'message': "Review added successfully!"})
+
+        messages.success(request, "Review added successfully!")
+        
+        next_url = request.POST.get('next') or request.GET.get('next')
+        if next_url:
+            return redirect(next_url)
+            
+        return redirect('product_details', product_id=product.id)
+    return redirect('shop')
 
 @login_required(login_url='signup')
 def checkout_view(request):
@@ -347,7 +425,7 @@ def checkout_view(request):
     total_amount = sum(item.total_price for item in cart_items)
     
     if request.method == "POST":
-        payment_method = request.POST.get('payment_method', 'Cash on Delivery')
+        payment_method = request.POST.get('payment_method', 'khalti')
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         phone = request.POST.get('phone')
@@ -410,23 +488,6 @@ def checkout_view(request):
                 error_msg = response.get('detail') or response.get('error_key') or 'Unknown error'
                 messages.error(request, f"Khalti initiation failed: {error_msg}")
                 return redirect('checkout')
-        else:
-            # Cash on Delivery
-            # Update Product Sales and Stock
-            for cart_item in cart_items:
-                product = cart_item.product
-                product.sales += cart_item.quantity
-                product.stock -= cart_item.quantity
-                product.save()
-            
-            cart_items.delete()
-            send_order_email(order)
-            messages.success(request, "Order placed successfully! We will contact you soon for delivery.")
-            return render(request, "payment_success.html", {
-                "message": "Your order has been placed successfully! 🐾",
-                "redirect_url": "pet_expenses",
-                "button_text": "View Product"
-            })
 
     context = {
         'cart_items': cart_items,
@@ -617,7 +678,7 @@ def add_reminder(request):
         dog = get_object_or_404(Dog, id=dog_id, owner=request.user)
         
         from pets.models import Reminder
-        Reminder.objects.create(
+        reminder = Reminder.objects.create(
             dog=dog,
             reminder_type=reminder_type,
             name=name,
@@ -625,6 +686,7 @@ def add_reminder(request):
             reminder_time=time,
             start_date=start_date
         )
+        send_medicine_reminder_email(reminder)
         messages.success(request, f"Reminder for {name} added!")
         
     return redirect('medicinereminder')
@@ -1250,10 +1312,15 @@ def khalti_callback_view(request):
                 CartItem.objects.filter(user=order.user).delete()
                 send_order_email(order)
                 messages.success(request, "Payment successful! Your order is being processed.")
+                unreviewed_items = [item for item in order.items.all() if not ProductReview.objects.filter(product=item.product, user=request.user).exists()]
+                
                 return render(request, "payment_success.html", {
                     "message": "Your order has been placed successfully! 🐾",
                     "redirect_url": "pet_expenses",
-                    "button_text": "View Product"
+                    "query_params": "?filter=shop",
+                    "button_text": "View Orders",
+                    "order": order,
+                    "unreviewed_items": unreviewed_items
                 })
                 
             # Fallback for old style or non-prefixed IDs
@@ -1295,14 +1362,22 @@ def khalti_callback_view(request):
                     redirect_url = "groomingbooking"
                     button_text = "View Grooming"
                 elif Order.objects.filter(pidx=pidx).exists():
+                    obj = Order.objects.get(pidx=pidx)
                     redirect_url = "pet_expenses"
-                    button_text = "View Product"
+                    button_text = "View Orders"
+                    order = obj
                 
-                return render(request, "payment_success.html", {
+                context = {
                     "message": "Your payment has been processed successfully! 🐾",
                     "redirect_url": redirect_url,
-                    "button_text": button_text
-                })
+                    "button_text": button_text,
+                    "query_params": "?filter=shop" if redirect_url == "pet_expenses" else ""
+                }
+                if 'order' in locals():
+                    context['order'] = order
+                    context['unreviewed_items'] = [item for item in order.items.all() if not ProductReview.objects.filter(product=item.product, user=request.user).exists()]
+                    
+                return render(request, "payment_success.html", context)
                 
         except Exception as e:
             messages.error(request, f"Error verifying payment record: {str(e)}")

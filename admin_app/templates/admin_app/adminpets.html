@@ -45,7 +45,7 @@
             </div>
             <div class="flex items-center gap-2">
               <i data-lucide="calendar-range" class="w-4 h-4 text-gray-400"></i>
-              <select name="time_range" onchange="this.form.submit()" class="pl-4 pr-10 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA] bg-gray-50 text-sm font-semibold text-gray-600 cursor-pointer">
+              <select name="time_range" onchange="this.form.submit()" class="pl-4 pr-10 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA] bg-gray-50 text-sm font-semibold text-gray-600 cursor-pointer filter-select">
                 <option value="" {% if not request.GET.time_range %}selected{% endif %}>All Time</option>
                 <option value="1w" {% if request.GET.time_range == '1w' %}selected{% endif %}>Last 1 Week</option>
                 <option value="1m" {% if request.GET.time_range == '1m' %}selected{% endif %}>Last 1 Month</option>
@@ -101,9 +101,20 @@
                     </td>
                     <td class="px-6 py-5 text-sm text-gray-600">{{ p.breed }}</td>
                     <td class="px-6 py-5">
-                        <div class="text-sm">
-                            <p class="font-semibold text-gray-800">{{ p.owner.get_full_name|default:p.owner.username }}</p>
-                            <p class="text-xs text-gray-500">{{ p.owner.email }}</p>
+                        <div class="flex items-center gap-3">
+                            <div class="flex-shrink-0">
+                                {% if p.owner.profile_picture %}
+                                <img src="{{ p.owner.profile_picture.url }}" class="w-8 h-8 rounded-full object-cover border border-gray-100 shadow-sm" alt="{{ p.owner.username }}">
+                                {% else %}
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
+                                    {{ p.owner.username|slice:":1"|upper }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="text-sm">
+                                <p class="font-semibold text-gray-800">{{ p.owner.get_full_name|default:p.owner.username }}</p>
+                                <p class="text-xs text-gray-500">{{ p.owner.email }}</p>
+                            </div>
                         </div>
                     </td>
                     <td class="px-6 py-5 text-sm text-gray-600 font-medium">{{ p.age }}</td>
