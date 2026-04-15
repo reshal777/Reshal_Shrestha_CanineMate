@@ -1,0 +1,111 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Terms and Conditions - CanineMate{% endblock %}
+
+{% block extra_head %}
+<style>
+    .terms-container {
+        max-width: 900px;
+        margin: 60px auto;
+        padding: 40px;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    .terms-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .terms-header h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #1a1a1a;
+        margin-bottom: 10px;
+    }
+
+    .terms-header p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .terms-section {
+        margin-bottom: 40px;
+    }
+
+    .terms-section h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .terms-section h2 i {
+        color: #4FBDBA;
+    }
+
+    .terms-section p {
+        color: #555;
+        line-height: 1.8;
+        margin-bottom: 15px;
+    }
+
+    .important-notice {
+        background: #fff8f8;
+        border-left: 4px solid #e05252;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+
+    .important-notice p {
+        margin-bottom: 0;
+        color: #a83232;
+        font-weight: 500;
+    }
+
+    .accent-bg {
+        background: #f0fdfc;
+        padding: 30px;
+        border-radius: 15px;
+        border: 1px dashed #4FBDBA;
+    }
+
+    .last-updated {
+        text-align: center;
+        color: #999;
+        font-size: 0.9rem;
+        margin-top: 50px;
+        border-top: 1px solid #eee;
+        padding-top: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="terms-container">
+    <div class="terms-header">
+        <h1>Terms and Conditions</h1>
+        <p>Please read these terms carefully before using the CanineMate platform.</p>
+    </div>
+
+    {% include 'terms_content_partial.html' %}
+
+    <div class="last-updated">
+        <p>Last Updated: April 15, 2026</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Lucide icons are likely initialized in base template, but ensuring consistency
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+</script>
+{% endblock %}

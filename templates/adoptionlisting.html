@@ -194,6 +194,12 @@
                         <textarea name="reason" required rows="3" placeholder="Tell us about your home and experience..."
                             class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]"></textarea>
                     </div>
+                    <div class="flex items-start gap-3 pt-2">
+                        <input type="checkbox" id="terms_check" required class="mt-1 w-4 h-4 text-[#4FBDBA] border-gray-300 rounded focus:ring-[#4FBDBA]">
+                        <label for="terms_check" class="text-xs text-gray-500 leading-relaxed">
+                            I agree to the <a href="{% url 'terms' %}" target="_blank" class="text-[#4FBDBA] hover:underline font-semibold">Terms and Conditions</a> and understand that CanineMate is not responsible for any incidents during or after the adoption.
+                        </label>
+                    </div>
                 </div>
                 <div class="mt-8 flex gap-3">
                     <button type="button" onclick="closeModals()" class="flex-1 px-4 py-3 border border-gray-200 text-gray-600 rounded-xl font-bold hover:bg-gray-50 transition-all">Cancel</button>

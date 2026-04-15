@@ -119,6 +119,10 @@
         <i data-lucide="file-text" class="w-5 h-5 shrink-0"></i>
         <span class="font-medium nav-label">Reports</span>
       </a>
+      <a href="{% url 'admin_messages' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.resolver_match.url_name == 'admin_messages' %}bg-gradient-to-r from-[#4FBDBA] to-[#3da5a2] text-white shadow-lg{% else %}text-gray-600 hover:bg-gray-100{% endif %} transition-all nav-link" data-label="Messages">
+        <i data-lucide="mail" class="w-5 h-5 shrink-0"></i>
+        <span class="font-medium nav-label">Messages</span>
+      </a>
     </nav>
 
     <!-- User Info Bottom -->
@@ -291,6 +295,14 @@
   });
 
   notifDropdown.addEventListener('click', (e) => e.stopPropagation());
+
+  // Global time range filter — auto-submit on change
+  const timeSelect = document.getElementById('global-time-range-select');
+  if (timeSelect) {
+    timeSelect.addEventListener('change', function() {
+      this.closest('form').submit();
+    });
+  }
 </script>
 {% block extra_js %}{% endblock %}
 </body>

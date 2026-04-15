@@ -10,6 +10,7 @@ from shop.models import Product, Order, OrderItem, ProductReview
 from pets.models import Dog, AdoptionRequest, HealthRecord, Vaccination, Medication
 from grooming.models import GroomingBooking
 from veterinary.models import Appointment
+from home.models import ContactMessage
 from django.db.models import Sum
 from datetime import datetime
 from django.utils import timezone
@@ -78,8 +79,19 @@ def apply_time_range_filter(queryset, date_field, request):
         start_date = now - timedelta(days=365)
     else:
         return queryset
+
+    # Check if the field is a DateField (not DateTimeField) by inspecting the model
+    try:
+        model = queryset.model
+        field = model._meta.get_field(date_field.split('__')[0])
+        from django.db.models import DateField as DjDateField, DateTimeField as DjDateTimeField
+        if isinstance(field, DjDateField) and not isinstance(field, DjDateTimeField):
+            return queryset.filter(**{f"{date_field}__range": [start_date.date(), now.date()]})
+    except Exception:
+        pass
         
     return queryset.filter(**{f"{date_field}__range": [start_date, now]})
+
 
 @admin_required
 def admin_dashboard_view(request):
@@ -836,3 +848,26 @@ def admin_reviews_view(request):
     })
 
 # Optional: Add API endpoints or handling logic for creating/deleting things via JSON to match your frontend scripts.
+
+@admin_required
+def admin_messages_view(request):
+    messages_list = ContactMessage.objects.all().order_by('-created_at')
+    messages_list = apply_time_range_filter(messages_list, 'created_at', request)
+    
+    if request.method == "POST":
+        msg_id = request.POST.get('msg_id')
+        action = request.POST.get('action')
+        if msg_id:
+            msg = get_object_or_404(ContactMessage, id=msg_id)
+            if action == 'resolve':
+                msg.is_resolved = not msg.is_resolved
+                msg.save()
+                messages.success(request, f"Message status updated.")
+            elif action == 'delete':
+                msg.delete()
+                messages.success(request, "Message deleted.")
+        return redirect('admin_messages')
+        
+    return render(request, "admin_app/adminmessages.html", {
+        'messages_list': messages_list
+    })

@@ -682,6 +682,13 @@
           <option>Yes - Other</option>
         </select>
       </div>
+      
+      <div class="field" style="display: flex; align-items: flex-start; gap: 10px; margin-top: 20px;">
+        <input type="checkbox" id="terms_check_details" required style="width: 18px; height: 18px; margin-top: 4px;">
+        <label for="terms_check_details" style="font-size: 0.8rem; color: #666; font-weight: 400; line-height: 1.5;">
+            I agree to the <a href="{% url 'terms' %}" target="_blank" style="color: #4FBDBA; text-decoration: none; font-weight: 600;">Terms and Conditions</a> and understand that CanineMate is not responsible for any incidents during or after the adoption.
+        </label>
+      </div>
 
       <div class="modal-actions">
         <button class="modal-cancel-btn" onclick="closeModal()">Cancel</button>

@@ -71,20 +71,10 @@
                     </label>
 
                     
-                    <a href="#" class="text-sm text-[#4FBDBA] hover:underline">Forgot password?</a>
+                    <a href="{% url 'forgot_password' %}" class="text-sm text-[#4FBDBA] hover:underline font-medium">Forgot password?</a>
                 </div>
 
-                {% if messages %}
-                <div class="space-y-2">
-                    {% for message in messages %}
-                        {% if "Product created successfully" not in message.message %}
-                        <div class="p-4 rounded-xl {% if message.tags == 'success' %}bg-green-50 text-green-700{% else %}bg-red-50 text-red-700{% endif %} text-sm">
-                            {{ message }}
-                        </div>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-                {% endif %}
+
 
                 <button type="submit"
                     class="w-full bg-[#4FBDBA] text-white py-3 rounded-xl hover:bg-[#3da5a2] transition-all font-semibold">Log

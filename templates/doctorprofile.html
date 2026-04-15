@@ -642,13 +642,8 @@
           </div>
         </div>
 
-        <div class="action-grid" style="grid-template-columns: repeat(2, 1fr);">
+        <div class="action-grid" style="grid-template-columns: 1fr;">
           <button onclick="openModal()" class="btn-primary">Book Appointment</button>
-          {% if vet.user %}
-          <a href="{% url 'chat' vet.user.user_id %}" class="btn-outline-teal">Message</a>
-          {% else %}
-          <button class="btn-outline-teal" disabled title="Messaging not available for this vet">Message</button>
-          {% endif %}
         </div>
       </div>
 

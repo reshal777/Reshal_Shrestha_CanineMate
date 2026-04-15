@@ -1,10 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from pets.models import Dog, Vaccination, HealthRecord, Medication, Reminder
+from pets.models import Dog, Vaccination, HealthRecord, Medication, Reminder, AdoptionRequest
 from veterinary.models import Clinic, Veterinarian, Appointment
 from grooming.models import GroomingSalon, GroomingService, GroomingBooking
 from shop.models import Product, Order, CartItem, OrderItem, ProductReview
-from chat.models import ChatMessage
 from django.contrib import messages
 from django.db.models import Q
 from accounts.models import User
@@ -17,6 +16,10 @@ from django.urls import reverse
 from payment.khalti_utils import initiate_khalti_payment, verify_khalti_payment
 from .email_utils import send_order_email, send_appointment_email, send_grooming_email, send_medicine_reminder_email
 from shop.models import Product, Order, CartItem, OrderItem
+from home.models import ContactMessage
+
+def services_view(request):
+    return render(request, "service.html")
 
 def index_view(request):
     if request.user.is_authenticated:
@@ -176,12 +179,17 @@ def adopt_dog_view(request, dog_id):
         address = request.POST.get('address')
         reason = request.POST.get('reason')
         
+        # Prevent self-adoption
+        if dog.owner == request.user:
+            messages.error(request, "You cannot adopt a dog that you have posted yourself.")
+            return redirect('adoption')
+        
         # Check if already submitted a request
         if AdoptionRequest.objects.filter(dog=dog, user=request.user, status='Pending').exists():
             messages.warning(request, f"You already have a pending request for {dog.name}.")
-            return redirect('adoptionlisting')
+            return redirect('adoption')
 
-        AdoptionRequest.objects.create(
+        adoption_request = AdoptionRequest.objects.create(
             dog=dog,
             user=request.user,
             full_name=full_name,
@@ -189,12 +197,33 @@ def adopt_dog_view(request, dog_id):
             address=address,
             reason=reason
         )
-        messages.success(request, f"Your adoption request for {dog.name} has been submitted! We will contact you soon.")
-        return redirect('adoptionlisting')
+        messages.success(request, "Dog adopted successfully")
+        return redirect('adoption_success', request_id=adoption_request.id)
         
-    return redirect('adoptionlisting')
+    return redirect('adoption')
+
+def adoption_success_view(request, request_id):
+    adoption_request = get_object_or_404(AdoptionRequest, id=request_id, user=request.user)
+    return render(request, "adoptionsuccess.html", {
+        "adoption_request": adoption_request,
+        "dog": adoption_request.dog
+    })
 
 def contact_us_view(request):
+    if request.method == "POST":
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
+        
+        if name and email and message:
+            ContactMessage.objects.create(
+                name=name,
+                email=email,
+                message=message
+            )
+            messages.success(request, "Your message has been sent successfully! We will get back to you soon.")
+            return redirect('contact')
+            
     return render(request, "contactus.html")
 
 @login_required
@@ -205,6 +234,9 @@ def user_settings_view(request):
 def about_us_view(request):
     vets = Veterinarian.objects.exclude(specialty__icontains='Grooming')[:4]
     return render(request, "Aboutus.html", {'vets': vets})
+
+def terms_and_conditions_view(request):
+    return render(request, "terms_and_conditions.html")
 
 
 from django.core.paginator import Paginator
@@ -505,10 +537,7 @@ def doctor_profile_view(request, vet_id):
 def dog_profile_view(request, dog_id=None):
     dogs = Dog.objects.filter(owner=request.user, is_adoption_post=False)
     
-    if not dogs.exists():
-        # Optional: create a demo dog for first-time users
-        Dog.objects.create(owner=request.user, name="Buddy", breed="Golden Retriever", age="3 years", gender="Male", weight="32 kg", color="Golden")
-        dogs = Dog.objects.filter(owner=request.user, is_adoption_post=False)
+
     
     if dog_id:
         dog = get_object_or_404(Dog, id=dog_id, owner=request.user)
@@ -763,12 +792,7 @@ def vet_appointment_view(request):
     # Fetch user's dogs
     dogs = Dog.objects.filter(owner=request.user, is_adoption_post=False)
     
-    # Ensure there are dogs for the user for the demo
-    if not dogs.exists():
-        # Let's create dummy dog for the demo purpose if requested user exists
-        Dog.objects.create(owner=request.user, name="Buddy", breed="Golden Retriever")
-        Dog.objects.create(owner=request.user, name="Max", breed="Golden Retriever")
-        dogs = Dog.objects.filter(owner=request.user, is_adoption_post=False)
+
 
     context = {
         'appointments': appointments,
@@ -881,31 +905,6 @@ def cancel_grooming(request, booking_id):
     booking.save()
     messages.success(request, "Grooming booking cancelled successfully!")
     return redirect('groomingbooking')
-
-@login_required
-def chat_room_view(request, user_id):
-    other_user = get_object_or_404(User, user_id=user_id)
-    # Get all messages between current user and other user
-    chat_messages = ChatMessage.objects.filter(
-        (Q(sender=request.user) & Q(receiver=other_user)) |
-        (Q(sender=other_user) & Q(receiver=request.user))
-    ).order_by('timestamp')
-    
-    context = {
-        'other_user': other_user,
-        'chat_messages': chat_messages,
-    }
-    return render(request, "chat.html", context)
-
-@login_required
-def chat_list_view(request):
-    # Get all unique users the current user has chatted with
-    sent_to = ChatMessage.objects.filter(sender=request.user).values_list('receiver', flat=True)
-    received_from = ChatMessage.objects.filter(receiver=request.user).values_list('sender', flat=True)
-    user_ids = set(list(sent_to) + list(received_from))
-    chat_users = User.objects.filter(user_id__in=user_ids)
-    return render(request, "chat_list.html", {'chat_users': chat_users})
-
 @login_required
 def user_profile_view(request):
     """Display user profile page"""
@@ -1151,56 +1150,6 @@ def update_user_profile_api(request):
         except Exception as e:
              return JsonResponse({'error': str(e)}, status=400)
     return JsonResponse({'error': 'Invalid request'}, status=400)
-
-@csrf_exempt
-def chatbot_proxy(request):
-    import os
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            user_message = data.get("message")
-            
-            # Groq API Configuration
-            # Update this key with your active API key or set GROQ_API_KEY environment variable
-            api_key = os.environ.get("GROQ_API_KEY", "gsk_VPhf8Xl8PzPr0W4X7XlWWGdyb3FY0RnU")
-            
-            url = "https://api.groq.com/openai/v1/chat/completions"
-            
-            headers = {
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
-            }
-            
-            payload = {
-                "model": "llama-3.3-70b-versatile",
-                "messages": [
-                    {
-                        "role": "system", 
-                        "content": "You are CanineMate Assistant, a helpful AI focused on dog care, health, and services in Nepal. You are friendly, knowledgeable, and sometimes use dog-themed puns like 'ruff', 'paws-itive', etc. Keep answers concise and helpful."
-                    },
-                    {"role": "user", "content": user_message}
-                ],
-                "temperature": 0.7,
-                "max_tokens": 500
-            }
-            
-            response = requests.post(url, headers=headers, json=payload, timeout=30)
-            
-            if response.status_code == 200:
-                result = response.json()
-                bot_response = result['choices'][0]['message']['content']
-                return JsonResponse({"response": bot_response})
-            elif response.status_code == 401 or response.status_code == 403:
-                return JsonResponse({"error": "I couldn't connect because the Groq API Key is missing or invalid! Please update `api_key` in `views.py` with your active key. 🐾"}, status=401)
-            else:
-                return JsonResponse({"error": f"API Error: {response.text}"}, status=response.status_code)
-                
-        except requests.exceptions.Timeout:
-            return JsonResponse({"error": "The connection timed out. Please try again in a moment! 🐾"}, status=504)
-        except Exception as e:
-            return JsonResponse({"error": f"An unexpected error occurred: {str(e)} 🐾"}, status=500)
-            
-    return JsonResponse({"error": "Invalid request"}, status=400)
 
 @login_required
 def vet_checkout_view(request, appointment_id):
@@ -1495,3 +1444,95 @@ def pet_expenses_view(request):
     }
     return render(request, 'pet_expenses.html', context)
 
+
+
+@login_required
+def send_password_reset_view(request):
+    """AJAX: Send a password reset email to the currently logged-in user."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Method not allowed.'}, status=405)
+
+    from django.contrib.auth.tokens import default_token_generator
+    from django.utils.http import urlsafe_base64_encode
+    from django.utils.encoding import force_bytes
+    from django.core.mail import send_mail
+    from django.conf import settings as django_settings
+    import logging
+    logger = logging.getLogger(__name__)
+
+    user = request.user
+    try:
+        uid   = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        reset_url = request.build_absolute_uri(
+            f'/accounts/password-reset/confirm/{uid}/{token}/'
+        )
+
+        subject = 'Reset Your CanineMate Password'
+        plain_message = (
+            f'Hi {user.username},\n\n'
+            f'Reset your password here: {reset_url}\n\n'
+            f'This link expires in 24 hours.'
+        )
+        html_message = (
+            '<html><body style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:0 auto;">'
+            '<div style="background:linear-gradient(135deg,#4FBDBA,#3da5a2);padding:30px;text-align:center;border-radius:12px 12px 0 0;">'
+            '<h1 style="color:#fff;margin:0;font-size:24px;">CanineMate</h1>'
+            '<p style="color:rgba(255,255,255,.85);margin:8px 0 0;">Password Reset Request</p>'
+            '</div>'
+            '<div style="background:#fff;padding:32px;border-radius:0 0 12px 12px;box-shadow:0 4px 16px rgba(0,0,0,.08);">'
+            f'<p>Hi <strong>{user.get_full_name() or user.username}</strong>,</p>'
+            '<p>Click the button below to reset your CanineMate account password:</p>'
+            '<div style="text-align:center;margin:28px 0;">'
+            f'<a href="{reset_url}" style="background:linear-gradient(90deg,#4FBDBA,#3da5a2);color:#fff;text-decoration:none;padding:14px 32px;border-radius:50px;font-weight:600;font-size:16px;display:inline-block;">'
+            'Reset My Password</a>'
+            '</div>'
+            '<p style="font-size:13px;color:#6b7280;">This link will expire in 24 hours. If you did not request this, you can safely ignore this email.</p>'
+            '<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">'
+            '<p style="font-size:12px;color:#9ca3af;text-align:center;">&copy; 2026 CanineMate</p>'
+            '</div>'
+            '</body></html>'
+        )
+
+        send_mail(
+            subject,
+            plain_message,
+            django_settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+        return JsonResponse({'success': True})
+    except Exception as e:
+        logger.error(f'Password reset email failed: {e}')
+        return JsonResponse({'success': False, 'error': 'Failed to send email. Please try again later.'})
+
+
+@login_required
+@csrf_exempt
+def delete_user_account_api(request):
+    """API endpoint to delete user account after password verification"""
+    if request.method == "POST":
+        try:
+            import json
+            data = json.loads(request.body)
+            password = data.get('password')
+            user = request.user
+
+            if not password:
+                return JsonResponse({'success': False, 'error': 'Password is required to delete your account.'}, status=400)
+
+            if not user.check_password(password):
+                return JsonResponse({'success': False, 'error': 'Incorrect password.'}, status=400)
+
+            # Log the user out before deletion
+            from django.contrib.auth import logout
+            logout(request)
+
+            # Delete the user
+            user.delete()
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)

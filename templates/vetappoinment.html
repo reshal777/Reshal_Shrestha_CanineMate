@@ -544,12 +544,8 @@
         <div class="vet-rating" style="margin-bottom: 0;"><span class="star">★</span><span>{{ vet.rating }}</span></div>
       </a>
       <div style="display: flex; gap: 0.4rem; width: 100%; margin-top: 1rem;">
-        {% if vet.user %}
-        <a href="{% url 'chat' vet.user.user_id %}" class="vet-book-btn"
-          style="background: #FAFAF7; color: #333; border: 1px solid #e5e7eb; text-decoration: none; display: flex; align-items: center; justify-content: center; flex: 1; padding: 0.5rem 0; font-size: 0.75rem;">Chat</a>
-        {% endif %}
         <button class="vet-book-btn" data-vet-id="{{ vet.id }}" onclick="openModalWithVet(this)"
-          style="flex: 1.5; padding: 0.5rem 0; font-size: 0.75rem;">Book Now</button>
+          style="flex: 1; padding: 0.5rem 0; font-size: 0.75rem;">Book Now</button>
       </div>
     </div>
     {% empty %}

@@ -31,16 +31,7 @@
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="bg-white rounded-3xl p-8 md:p-12 shadow-2xl border border-gray-100">
 
-        {% if messages %}
-        <div class="mb-8">
-            {% for message in messages %}
-            <div
-                class="p-4 rounded-xl {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
-                {{ message }}
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
+
 
         <form method="POST" enctype="multipart/form-data" class="space-y-8">
             {% csrf_token %}
@@ -63,12 +54,12 @@
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Breed</label>
-                        <input type="text" name="breed" required value="{{ dog.breed|default:'' }}"
+                        <input type="text" name="breed" value="{{ dog.breed|default:'' }}"
                             class="form-input w-full px-5 py-3 rounded-xl border border-gray-200 outline-none">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Age</label>
-                        <input type="text" name="age" required value="{{ dog.age|default:'' }}"
+                        <input type="text" name="age" value="{{ dog.age|default:'' }}"
                             class="form-input w-full px-5 py-3 rounded-xl border border-gray-200 outline-none">
                     </div>
                     <div>

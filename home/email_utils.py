@@ -6,6 +6,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+def get_base_url():
+    """Get base URL for email links from settings or fallback to localhost."""
+    return settings.BASE_URL or 'http://127.0.0.1:8000'
+
 def send_order_email(order):
     """Send order confirmation email to the user."""
     try:
@@ -13,7 +17,8 @@ def send_order_email(order):
         context = {
             'order': order,
             'user': order.user,
-            'items': order.items.all()
+            'items': order.items.all(),
+            'base_url': get_base_url()
         }
         html_message = render_to_string('emails/order_confirmation.html', context)
         plain_message = strip_tags(html_message)
@@ -35,7 +40,8 @@ def send_appointment_email(appointment):
         subject = f'Appointment Confirmed: {appointment.service_type} | CanineMate 🐾'
         context = {
             'appointment': appointment,
-            'user': appointment.user
+            'user': appointment.user,
+            'base_url': get_base_url()
         }
         html_message = render_to_string('emails/appointment_confirmation.html', context)
         plain_message = strip_tags(html_message)
@@ -59,7 +65,8 @@ def send_grooming_email(booking):
         context = {
             'booking': booking,
             'user': booking.user,
-            'service_name': service_name
+            'service_name': service_name,
+            'base_url': get_base_url()
         }
         html_message = render_to_string('emails/grooming_confirmation.html', context)
         plain_message = strip_tags(html_message)
@@ -82,7 +89,8 @@ def send_medicine_reminder_email(reminder):
         context = {
             'reminder': reminder,
             'user': reminder.dog.owner,
-            'dog': reminder.dog
+            'dog': reminder.dog,
+            'base_url': get_base_url()
         }
         html_message = render_to_string('emails/medicine_reminder.html', context)
         plain_message = strip_tags(html_message)
@@ -97,3 +105,154 @@ def send_medicine_reminder_email(reminder):
         )
     except Exception as e:
         logger.error(f"Failed to send medicine reminder email for {reminder.name}: {str(e)}")
+
+
+def send_appointment_cancellation_email(appointment):
+    """Send appointment cancellation email to the user."""
+    try:
+        subject = f'Appointment Cancelled: {appointment.service_type} | CanineMate 🐾'
+        context = {
+            'appointment': appointment,
+            'user': appointment.user
+        }
+        html_message = f'''
+        <html>
+            <body style="font-family: Arial, sans-serif; color: #333;">
+                <h2>Appointment Cancelled</h2>
+                <p>Hi {appointment.user.username},</p>
+                <p>Your appointment scheduled for <strong>{appointment.appointment_date} at {appointment.appointment_time}</strong> has been cancelled.</p>
+                <p><strong>Service Type:</strong> {appointment.service_type}</p>
+                <p><strong>Veterinarian:</strong> {appointment.veterinarian.name}</p>
+                <p>If you would like to reschedule or have any questions, please contact us.</p>
+                <p>Best regards,<br>CanineMate Team</p>
+            </body>
+        </html>
+        '''
+        plain_message = strip_tags(html_message)
+        
+        send_mail(
+            subject,
+            plain_message,
+            settings.DEFAULT_FROM_EMAIL,
+            [appointment.user.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+    except Exception as e:
+        logger.error(f"Failed to send appointment cancellation email for APPT-{appointment.id}: {str(e)}")
+
+
+def send_grooming_cancellation_email(booking):
+    """Send grooming cancellation email to the user."""
+    try:
+        service_name = booking.service.name if booking.service else "Grooming Service"
+        subject = f'Grooming Booking Cancelled: {service_name} | CanineMate 🐾'
+        context = {
+            'booking': booking,
+            'user': booking.user,
+            'service_name': service_name
+        }
+        html_message = f'''
+        <html>
+            <body style="font-family: Arial, sans-serif; color: #333;">
+                <h2>Grooming Booking Cancelled</h2>
+                <p>Hi {booking.user.username},</p>
+                <p>Your grooming booking for <strong>{booking.booking_date} at {booking.booking_time}</strong> has been cancelled.</p>
+                <p><strong>Service:</strong> {service_name}</p>
+                <p><strong>Dog:</strong> {booking.dog.name}</p>
+                <p>If you would like to reschedule or have any questions, please contact us.</p>
+                <p>Best regards,<br>CanineMate Team</p>
+            </body>
+        </html>
+        '''
+        plain_message = strip_tags(html_message)
+        
+        send_mail(
+            subject,
+            plain_message,
+            settings.DEFAULT_FROM_EMAIL,
+            [booking.user.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+    except Exception as e:
+        logger.error(f"Failed to send grooming cancellation email for GRM-{booking.id}: {str(e)}")
+
+
+def send_appointment_reminder_email(appointment):
+    """Send appointment reminder email (day before appointment)."""
+    try:
+        subject = f'Reminder: Your Appointment Tomorrow | CanineMate 🐾'
+        context = {
+            'appointment': appointment,
+            'user': appointment.user
+        }
+        html_message = f'''
+        <html>
+            <body style="font-family: Arial, sans-serif; color: #333;">
+                <h2>Appointment Reminder 🐾</h2>
+                <p>Hi {appointment.user.username},</p>
+                <p>This is a reminder that you have an appointment scheduled for tomorrow!</p>
+                <p><strong>Date:</strong> {appointment.appointment_date}</p>
+                <p><strong>Time:</strong> {appointment.appointment_time}</p>
+                <p><strong>Service Type:</strong> {appointment.service_type}</p>
+                <p><strong>Veterinarian:</strong> {appointment.veterinarian.name}</p>
+                <p><strong>Fee:</strong> NPR {appointment.amount}</p>
+                <p>Please arrive 10 minutes early. If you need to cancel or reschedule, please contact us as soon as possible.</p>
+                <p>Best regards,<br>CanineMate Team</p>
+            </body>
+        </html>
+        '''
+        plain_message = strip_tags(html_message)
+        
+        send_mail(
+            subject,
+            plain_message,
+            settings.DEFAULT_FROM_EMAIL,
+            [appointment.user.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+    except Exception as e:
+        logger.error(f"Failed to send appointment reminder email for APPT-{appointment.id}: {str(e)}")
+
+
+def send_grooming_reminder_email(booking):
+    """Send grooming booking reminder email (day before booking)."""
+    try:
+        service_name = booking.service.name if booking.service else "Grooming Service"
+        subject = f'Reminder: Your Grooming Session Tomorrow | CanineMate 🐾'
+        context = {
+            'booking': booking,
+            'user': booking.user,
+            'service_name': service_name
+        }
+        html_message = f'''
+        <html>
+            <body style="font-family: Arial, sans-serif; color: #333;">
+                <h2>Grooming Session Reminder 🐾</h2>
+                <p>Hi {booking.user.username},</p>
+                <p>This is a reminder that you have a grooming session scheduled for tomorrow!</p>
+                <p><strong>Date:</strong> {booking.booking_date}</p>
+                <p><strong>Time:</strong> {booking.booking_time}</p>
+                <p><strong>Service:</strong> {service_name}</p>
+                <p><strong>Dog:</strong> {booking.dog.name}</p>
+                <p><strong>Salon:</strong> {booking.salon.name if booking.salon else 'CanineMate Salon'}</p>
+                <p><strong>Fee:</strong> NPR {booking.amount}</p>
+                <p>Please bring your dog well-groomed and ready. If you need to cancel or reschedule, please contact us as soon as possible.</p>
+                <p>Best regards,<br>CanineMate Team</p>
+            </body>
+        </html>
+        '''
+        plain_message = strip_tags(html_message)
+        
+        send_mail(
+            subject,
+            plain_message,
+            settings.DEFAULT_FROM_EMAIL,
+            [booking.user.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+    except Exception as e:
+        logger.error(f"Failed to send grooming reminder email for GRM-{booking.id}: {str(e)}")

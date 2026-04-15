@@ -11,19 +11,34 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from urllib.parse import urljoin
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    dotenv_path = BASE_DIR / '.env'
+    if dotenv_path.exists():
+        load_dotenv(dotenv_path, override=True)
+    else:
+        print(f"Warning: .env file not found at {dotenv_path}")
+except ImportError:
+    print("Warning: python-dotenv not installed. Environment variables from .env will not be loaded.")
+
+# Base URL for OAuth callbacks - set in environment or use default
+BASE_URL = os.getenv('BASE_URL', 'http://127.0.0.1:8000')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-!bad!kya$i8!x%1xy9rt6s#e9q7g6a$i7tj6fwwvb2+m@b(s=#"
+SECRET_KEY = os.getenv("SECRET_KEY", "fallback-insecure-key-change-me")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = []
 
@@ -46,7 +61,6 @@ INSTALLED_APPS = [
     "shop",
     "veterinary",
     "grooming",
-    "chat",
     "admin_app",
     "django.contrib.sites",
     "allauth",
@@ -168,8 +182,8 @@ LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'index'
 
 # Khalti Configuration
-KHALTI_PUBLIC_KEY = "341eb052d8214489a5639eed3495aa61"
-KHALTI_SECRET_KEY = "6f207e29a0c34eb4b36b27dbd244b360"
+KHALTI_PUBLIC_KEY = os.getenv('KHALTI_PUBLIC_KEY')
+KHALTI_SECRET_KEY = os.getenv('KHALTI_SECRET_KEY')
 KHALTI_API_URL = "https://a.khalti.com/api/v2/" 
 KHALTI_SANDBOX_API_URL = "https://dev.khalti.com/api/v2/epayment/initiate/"
 KHALTI_SANDBOX_LOOKUP_URL = "https://dev.khalti.com/api/v2/epayment/lookup/"
@@ -180,9 +194,9 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 # IMPORTANT: Use an "App Password" if you have 2FA enabled on your Gmail account.
-EMAIL_HOST_USER = 'vets.caninemate@gmail.com' # Replace with your actual gmail address if different
-EMAIL_HOST_PASSWORD = 'diej ixax dwcd voeg' # Gmail App Password provided by user
-DEFAULT_FROM_EMAIL = 'CanineMate <vets.caninemate@gmail.com>' # Replace with your gmail address
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = 'CanineMate <caninemate07@gmail.com>'
 
 # Site setting for allauth
 SITE_ID = 1
@@ -195,6 +209,10 @@ ACCOUNT_USERNAME_REQUIRED = True
 LOGIN_REDIRECT_URL = 'dashboard'
 SOCIALACCOUNT_LOGIN_ON_GET = True # Skip the intermediate login page
 
+# Google OAuth - Construct full redirect URIs from BASE_URL
+GOOGLE_CALLBACK_PATH = '/accounts/google/login/callback/'
+GOOGLE_REDIRECT_URI = urljoin(BASE_URL, GOOGLE_CALLBACK_PATH) if BASE_URL.endswith('/') else BASE_URL + GOOGLE_CALLBACK_PATH
+
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': [
@@ -205,5 +223,6 @@ SOCIALACCOUNT_PROVIDERS = {
             'access_type': 'online',
         },
         'OAUTH_PKCE_ENABLED': True,
+        'VERIFIED_EMAIL': True,
     }
 }

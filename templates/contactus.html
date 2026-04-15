@@ -83,24 +83,25 @@
         <div class="bg-white rounded-2xl p-8 shadow-lg">
             <h2 class="text-2xl font-bold text-[#4FBDBA] mb-6">Send us a Message</h2>
 
-            <form onsubmit="handleContactSubmit(event)" class="space-y-6">
+            <form method="POST" action="{% url 'contact' %}" class="space-y-6">
+                {% csrf_token %}
                 <div>
                     <label class="block text-sm font-medium text-[#333333] mb-2">Your Name</label>
-                    <input type="text" id="contact-name"
+                    <input type="text" name="name" id="contact-name"
                         class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]"
                         placeholder="Full Name" required>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-[#333333] mb-2">Your Email</label>
-                    <input type="email" id="contact-email"
+                    <input type="email" name="email" id="contact-email"
                         class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]"
                         placeholder="your@email.com" required>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-[#333333] mb-2">Your Message</label>
-                    <textarea id="contact-message" rows="6"
+                    <textarea name="message" id="contact-message" rows="6"
                         class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]"
                         placeholder="Tell us how we can help you..." required></textarea>
                 </div>
@@ -129,15 +130,4 @@
     </div>
 </div>
 {% endblock %}
-
-{% block extra_js %}
-<script>
-    function handleContactSubmit(e) {
-        e.preventDefault();
-        alert('Thank you for contacting us! We will get back to you soon.');
-        document.getElementById('contact-name').value = '';
-        document.getElementById('contact-email').value = '';
-        document.getElementById('contact-message').value = '';
-    }
-</script>
-{% endblock %}
+

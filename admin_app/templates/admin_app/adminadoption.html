@@ -5,6 +5,23 @@
 {% block page_subtitle %}Review requests and manage dog listings for adoption{% endblock %}
 
 {% block content %}
+    <!-- Time Range Filter -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-[#333333]">Adoption Overview</h2>
+          <p class="text-sm text-gray-500">Manage adoption requests and dog listings</p>
+        </div>
+        <form method="GET" class="flex items-center gap-3 bg-white border border-gray-200 px-4 py-2 rounded-2xl shadow-sm hover:shadow-md transition-all">
+          <i data-lucide="calendar-range" class="w-5 h-5 text-primary"></i>
+          <select name="time_range" onchange="this.form.submit()" class="bg-transparent text-gray-600 text-sm font-semibold focus:outline-none cursor-pointer filter-select">
+            <option value="" {% if not request.GET.time_range %}selected{% endif %}>All Time</option>
+            <option value="1w" {% if request.GET.time_range == '1w' %}selected{% endif %}>Last 1 Week</option>
+            <option value="1m" {% if request.GET.time_range == '1m' %}selected{% endif %}>Last 1 Month</option>
+            <option value="1y" {% if request.GET.time_range == '1y' %}selected{% endif %}>Last 1 Year</option>
+          </select>
+        </form>
+    </div>
+
     <!-- Stats Summary -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">

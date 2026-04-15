@@ -441,6 +441,34 @@
             color: #9ca3af;
             font-size: .8rem;
         }
+
+        /* Status Messages */
+        .status-msg {
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border: 1px solid transparent;
+        }
+
+        .status-msg-success {
+            background: #dcfce7;
+            color: #15803d;
+            border-color: #bbf7d0;
+        }
+
+        .status-msg-error {
+            background: #fef2f2;
+            color: #b91c1c;
+            border-color: #fecaca;
+        }
+
+        .status-msg-info {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border-color: #bfdbfe;
+        }
     </style>
 </head>
 
@@ -472,6 +500,7 @@
     </header>
 
     <div class="page-wrap">
+
 
         <!-- Success Banner -->
         <div class="success-card">
@@ -697,31 +726,7 @@
         <p>&copy; 2026 Canine Mate. Made with ❤️ for dogs in Nepal</p>
     </footer>
 
-    <script>
-        const params = new URLSearchParams(window.location.search);
-        const applicationId = params.get('applicationId') || 'ADT' + Math.floor(100000 + Math.random() * 900000);
-        const dogName = params.get('dogName') || 'Buddy';
-        const dogBreed = params.get('dogBreed') || 'Golden Retriever';
-        const dogAge = params.get('dogAge') || '2 years';
-        const dogImage = params.get('dogImage') || '';
 
-        const fmt = { day: 'numeric', month: 'short', year: 'numeric' };
-        const now = new Date();
-        const expected = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-
-        document.getElementById('appIdDisplay').textContent = applicationId;
-        document.getElementById('appIdRow').textContent = applicationId;
-        document.getElementById('appDate').textContent = now.toLocaleDateString('en-GB', fmt);
-        document.getElementById('appExpected').textContent = expected.toLocaleDateString('en-GB', fmt);
-        document.getElementById('dogNameDisplay').textContent = dogName;
-        document.getElementById('dogBreedDisplay').textContent = dogBreed;
-        document.getElementById('dogAgeDisplay').textContent = dogAge;
-
-        if (dogImage) {
-            document.getElementById('dogImgWrap').innerHTML =
-                `<img class="dog-img" src="${dogImage}" alt="${dogName}" onerror="this.style.display='none'"/>`;
-        }
-    </script>
 </body>
 
 </html>

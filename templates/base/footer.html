@@ -1,62 +1,390 @@
 <!-- Footer -->
-<footer class="bg-[#333333] text-white py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    .cm-footer {
+        background: #0a0a0a;
+        color: #ffffff;
+        font-family: 'Inter', sans-serif;
+        padding: 60px 80px 0;
+    }
+
+    .cm-footer *,
+    .cm-footer *::before,
+    .cm-footer *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    .cm-footer__inner {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Top grid */
+    .cm-footer__grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr 0.8fr 1fr;
+        gap: 60px;
+        padding-bottom: 48px;
+    }
+
+    @media (max-width: 960px) {
+        .cm-footer {
+            padding: 48px 32px 0;
+        }
+
+        .cm-footer__grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+    }
+
+    @media (max-width: 560px) {
+        .cm-footer__grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Brand column */
+    .cm-brand__logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .cm-brand__icon {
+        width: 48px;
+        height: 48px;
+        background: #4FBDBA;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .cm-brand__icon svg {
+        width: 26px;
+        height: 26px;
+    }
+
+    .cm-brand__name {
+        font-size: 22px;
+        font-weight: 700;
+        color: #ffffff;
+        letter-spacing: -0.3px;
+    }
+
+    .cm-brand__desc {
+        font-size: 14px;
+        color: #888888;
+        line-height: 1.75;
+        margin-bottom: 28px;
+        max-width: 240px;
+    }
+
+    /* Social buttons */
+    .cm-socials {
+        display: flex;
+        gap: 10px;
+    }
+
+    .cm-social-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        background: #1a1a1a;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.2s, transform 0.15s;
+    }
+
+    .cm-social-btn:hover {
+        background: #2a2a2a;
+        transform: translateY(-2px);
+    }
+
+    .cm-social-btn svg {
+        width: 17px;
+        height: 17px;
+        fill: #cccccc;
+        transition: fill 0.2s;
+    }
+
+    .cm-social-btn:hover svg {
+        fill: #ffffff;
+    }
+
+    /* Column headings */
+    .cm-col__heading {
+        font-size: 17px;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 16px;
+        position: relative;
+        padding-bottom: 14px;
+    }
+
+    .cm-col__heading::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 36px;
+        height: 3px;
+        background: #4FBDBA;
+        border-radius: 2px;
+    }
+
+    /* Nav links */
+    .cm-nav-links {
+        list-style: none;
+        margin-top: 8px;
+    }
+
+    .cm-nav-links li {
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .cm-nav-links li::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #4FBDBA;
+        flex-shrink: 0;
+    }
+
+    .cm-nav-links a {
+        font-size: 14px;
+        color: #888888;
+        text-decoration: none;
+        transition: color 0.18s;
+    }
+
+    .cm-nav-links a:hover {
+        color: #4FBDBA;
+    }
+
+    /* Contact column */
+    .cm-contact-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .cm-contact-item__icon {
+        width: 40px;
+        height: 40px;
+        background: #1a2a2a;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .cm-contact-item__icon svg {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: #4FBDBA;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .cm-contact-item__label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        margin-bottom: 3px;
+    }
+
+    .cm-contact-item__value {
+        font-size: 13px;
+        color: #888888;
+        line-height: 1.5;
+    }
+
+    /* Divider */
+    .cm-footer__divider {
+        border: none;
+        border-top: 1px solid #1e1e1e;
+        margin: 0;
+    }
+
+    /* Bottom bar */
+    .cm-footer__bottom {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 22px 0;
+    }
+
+    .cm-copyright {
+        font-size: 13px;
+        color: #555555;
+    }
+
+    .cm-copyright .heart {
+        color: #e05252;
+    }
+
+    .cm-legal {
+        display: flex;
+        gap: 28px;
+    }
+
+    .cm-legal a {
+        font-size: 13px;
+        color: #555555;
+        text-decoration: none;
+        transition: color 0.18s;
+    }
+
+    .cm-legal a:hover {
+        color: #ffffff;
+    }
+</style>
+
+<footer class="cm-footer">
+    <div class="cm-footer__inner">
+        <div class="cm-footer__grid">
+
+            <!-- Brand -->
             <div>
-                <div class="flex items-center gap-2.5 mb-4">
-                    <div class="w-8 h-8 bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] rounded-lg flex items-center justify-center">
-                        <i data-lucide="paw-print" class="w-5 h-5 text-white"></i>
+                <div class="cm-brand__logo">
+                    <div class="cm-brand__icon">
+                        <i data-lucide="paw-print" class="w-7 h-7 text-white"></i>
                     </div>
-                    <span class="text-xl font-bold">Canine Mate</span>
+                    <span class="cm-brand__name">Canine Mate</span>
                 </div>
-                <p class="text-gray-400 text-sm">Smart care for your best friend across Nepal</p>
+                <p class="cm-brand__desc">Nepal's trusted smart care platform for your best friend. Professional
+                    services, quality products, and loving care.</p>
+                <div class="cm-socials">
+                    <a href="#" class="cm-social-btn" title="Facebook">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="cm-social-btn" title="Twitter">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="cm-social-btn" title="Instagram">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <rect x="2" y="2" width="20" height="20" rx="5" stroke="#cccccc" stroke-width="2"
+                                fill="none" />
+                            <circle cx="12" cy="12" r="4" stroke="#cccccc" stroke-width="2" fill="none" />
+                            <circle cx="17.5" cy="6.5" r="1" fill="#cccccc" />
+                        </svg>
+                    </a>
+                    <a href="#" class="cm-social-btn" title="LinkedIn">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z" />
+                            <circle cx="4" cy="4" r="2" />
+                        </svg>
+                    </a>
+                </div>
             </div>
 
+            <!-- Our Services -->
             <div>
-                <h4 class="font-semibold mb-4">Services</h4>
-                <ul class="space-y-2 text-gray-400">
-                    <li><a href="/#appointments" class="hover:text-[#4FBDBA] transition-colors">Vet Appointments</a>
-                    </li>
-                    <li><a href="/#grooming" class="hover:text-[#4FBDBA] transition-colors">Grooming</a></li>
-                    <li><a href="{% url 'adoption' %}" class="hover:text-[#4FBDBA] transition-colors">Adoption</a></li>
-                    <li><a href="{% url 'shop' %}" class="hover:text-[#4FBDBA] transition-colors">Shop</a></li>
+                <p class="cm-col__heading">Our Services</p>
+                <ul class="cm-nav-links">
+                    <li><a href="{% url 'services' %}">Vet Appointments</a></li>
+                    <li><a href="{% url 'services' %}">Grooming Services</a></li>
+                    <li><a href="{% url 'adoption' %}">Dog Adoption</a></li>
+                    <li><a href="{% url 'shop' %}">Shop Products</a></li>
+                    <li><a href="{% url 'services' %}">Smart Reminders</a></li>
                 </ul>
             </div>
 
+            <!-- Company -->
             <div>
-                <h4 class="font-semibold mb-4">Company</h4>
-                <ul class="space-y-2 text-gray-400">
-                    <li><a href="/#about" class="hover:text-[#4FBDBA] transition-colors">About Us</a></li>
-                    <li><a href="/#contact" class="hover:text-[#4FBDBA] transition-colors">Contact</a></li>
-                    <li><a href="/#careers" class="hover:text-[#4FBDBA] transition-colors">Careers</a></li>
+                <p class="cm-col__heading">Company</p>
+                <ul class="cm-nav-links">
+                    <li><a href="{% url 'about' %}">About Us</a></li>
+                    <li><a href="{% url 'contact' %}">Contact Us</a></li>
+                    <li><a href="{% url 'terms' %}">Terms & Conditions</a></li>
+                    <li><a href="/admin/">Admin Portal</a></li>
                 </ul>
             </div>
 
+            <!-- Get In Touch -->
             <div>
-                <h4 class="font-semibold mb-4 text-[#4FBDBA]">Contact Info</h4>
-                <ul class="space-y-4 text-gray-400">
-                    <li class="flex items-center gap-3">
-                        <i data-lucide="map-pin" class="w-5 h-5 text-[#4FBDBA]"></i>
-                        <span class="text-sm">Pokhara, Lakeside</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <i data-lucide="mail" class="w-5 h-5 text-[#4FBDBA]"></i>
-                        <span class="text-sm">info@caninemate.com.np</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <i data-lucide="phone" class="w-5 h-5 text-[#4FBDBA]"></i>
-                        <span class="text-sm">+977 1234567890</span>
-                    </li>
-                </ul>
+                <p class="cm-col__heading">Get In Touch</p>
+
+                <div class="cm-contact-item">
+                    <div class="cm-contact-item__icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                            <circle cx="12" cy="9" r="2.5" stroke="none" fill="#4FBDBA" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="cm-contact-item__label">Address</p>
+                        <p class="cm-contact-item__value">Lakeside, Pokhara<br>Nepal</p>
+                    </div>
+                </div>
+
+                <div class="cm-contact-item">
+                    <div class="cm-contact-item__icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                            <polyline points="22,6 12,13 2,6" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="cm-contact-item__label">Email</p>
+                        <p class="cm-contact-item__value">caninemate07@gmail.comn</p>
+                    </div>
+                </div>
+
+                <div class="cm-contact-item">
+                    <div class="cm-contact-item__icon">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.09 12a19.79 19.79 0 01-3.07-8.67A2 2 0 012 1.22h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 9.02a16 16 0 006.29 6.29l1.16-1.16a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="cm-contact-item__label">Phone</p>
+                        <p class="cm-contact-item__value">+977 97636747373</p>
+                    </div>
+                </div>
+
             </div>
         </div>
 
-        <div class="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p class="text-gray-400 text-sm">&copy; 2026 Canine Mate. All rights reserved.</p>
-            <div class="flex gap-6">
-                <a href="#" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
-                <a href="#" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
+        <hr class="cm-footer__divider">
+
+        <div class="cm-footer__bottom">
+            <p class="cm-copyright">© 2026 Canine Mate. All rights reserved. Made with <span class="heart">❤</span> in
+                Nepal</p>
+            <div class="cm-legal">
+                <a href="#">Privacy Policy</a>
+                <a href="{% url 'terms' %}">Terms of Service</a>
+                <a href="#">Cookie Policy</a>
             </div>
         </div>
+
     </div>
 </footer>

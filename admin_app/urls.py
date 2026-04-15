@@ -21,4 +21,5 @@ urlpatterns = [
     path('pets/', views.admin_pets_view, name='admin_pets'),
     path('reports/', views.admin_reports_view, name='admin_reports'),
     path('veterinary/', views.admin_veterinary_view, name='admin_veterinary'),
+    path('messages/', views.admin_messages_view, name='admin_messages'),
 ]

@@ -59,21 +59,9 @@
 
                 <label class="flex items-start gap-2 cursor-pointer">
                     <input type="checkbox" id="terms" class="w-4 h-4 mt-0.5 rounded" required>
-                    <span class="text-sm text-gray-600">I agree to the <a href="#"
+                    <span class="text-sm text-gray-600">I agree to the <a href="javascript:void(0)" onclick="openTermsModal()"
                             class="text-[#4FBDBA] hover:underline">Terms & Conditions</a></span>
                 </label>
-
-                {% if messages %}
-                <div class="space-y-2">
-                    {% for message in messages %}
-                        {% if "Product created successfully" not in message.message %}
-                        <div class="p-4 rounded-xl {% if message.tags == 'success' %}bg-green-50 text-green-700{% else %}bg-red-50 text-red-700{% endif %} text-sm">
-                            {{ message }}
-                        </div>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-                {% endif %}
 
                 <button type="submit"
                     class="w-full bg-[#4FBDBA] text-white py-3 rounded-xl hover:bg-[#3da5a2] transition-all font-semibold">Create
@@ -96,7 +84,6 @@
                     Continue with Google
                 </a>
             </form>
-
             <p class="text-center text-gray-600 mt-6">Already have an account? <a href="/login/"
                     class="text-[#4FBDBA] font-semibold hover:underline">Log In</a></p>
         </div>
@@ -105,4 +92,49 @@
                 class="hover:text-[#4FBDBA] transition-colors">← Back to Home</a></p>
     </div>
 </div>
-{% endblock %}
+
+<!-- Terms & Conditions Modal -->
+<div id="termsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeTermsModal()"></div>
+    <div class="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div class="p-6 border-b flex items-center justify-between bg-white sticky top-0 z-10">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Terms & Conditions</h2>
+                <p class="text-sm text-gray-500">Last updated: April 15, 2026</p>
+            </div>
+            <button onclick="closeTermsModal()" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        <div class="p-8 overflow-y-auto">
+            {% include 'terms_content_partial.html' %}
+        </div>
+        <div class="p-6 border-t bg-gray-50 flex justify-end">
+            <button onclick="closeTermsModal()" class="px-8 py-3 bg-[#4FBDBA] text-white rounded-xl font-bold hover:bg-[#3da5a2] shadow-lg transition-all">
+                I Understand
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openTermsModal() {
+        const modal = document.getElementById('termsModal');
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeTermsModal() {
+        const modal = document.getElementById('termsModal');
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Initialize Lucide icons if modal content is added dynamically or just ensuring they run
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    });
+</script>
+{% endblock %}
