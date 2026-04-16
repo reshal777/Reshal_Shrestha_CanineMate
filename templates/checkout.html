@@ -257,6 +257,10 @@
     <!-- left: delivery info + payment -->
     <form method="POST" action="{% url 'checkout' %}" class="contents">
       {% csrf_token %}
+      {% if buy_now_id %}
+      <input type="hidden" name="buy_now_id" value="{{ buy_now_id }}">
+      <input type="hidden" name="buy_now_qty" value="{{ buy_now_qty }}">
+      {% endif %}
       <div>
         <!-- delivery info form -->
         <div class="card">

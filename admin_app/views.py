@@ -86,11 +86,11 @@ def apply_time_range_filter(queryset, date_field, request):
         field = model._meta.get_field(date_field.split('__')[0])
         from django.db.models import DateField as DjDateField, DateTimeField as DjDateTimeField
         if isinstance(field, DjDateField) and not isinstance(field, DjDateTimeField):
-            return queryset.filter(**{f"{date_field}__range": [start_date.date(), now.date()]})
+            return queryset.filter(**{f"{date_field}__gte": start_date.date()})
     except Exception:
         pass
         
-    return queryset.filter(**{f"{date_field}__range": [start_date, now]})
+    return queryset.filter(**{f"{date_field}__gte": start_date})
 
 
 @admin_required
@@ -475,14 +475,27 @@ def admin_adoption_view(request):
             messages.success(request, "Adoption listing deleted.")
             return redirect('admin_adoption')
 
-    requests = apply_time_range_filter(AdoptionRequest.objects.all(), 'created_at', request).order_by('-created_at')
-    listings = apply_time_range_filter(Dog.objects.filter(is_adoptable=True), 'created_at', request).order_by('-id')
+    requests_qs = apply_time_range_filter(AdoptionRequest.objects.all(), 'created_at', request).order_by('-created_at')
+    listings_qs = apply_time_range_filter(Dog.objects.filter(is_adoptable=True), 'created_at', request).order_by('-id')
+    
+    # Pagination
+    req_paginator = Paginator(requests_qs, 6)
+    req_page = request.GET.get('req_page')
+    requests_obj = req_paginator.get_page(req_page)
+    
+    list_paginator = Paginator(listings_qs, 6)
+    list_page = request.GET.get('list_page')
+    listings_obj = list_paginator.get_page(list_page)
+    
+    active_tab = request.GET.get('tab', 'requests')
+
     return render(request, 'admin_app/adminadoption.html', {
-        'requests': requests,
-        'listings': listings,
-        'total_listings': listings.count(),
-        'booked_count': listings.filter(adoption_requests__status='Approved').distinct().count(),
-        'pending_count': requests.filter(status='Pending').count()
+        'requests': requests_obj,
+        'listings': listings_obj,
+        'total_listings': listings_qs.count(),
+        'booked_count': listings_qs.filter(adoption_requests__status='Approved').distinct().count(),
+        'pending_count': requests_qs.filter(status='Pending').count(),
+        'active_tab': active_tab
     })
 
 @admin_required
@@ -516,16 +529,22 @@ def admin_grooming_view(request):
                 messages.success(request, "Grooming booking deleted.")
         return redirect('admin_grooming')
 
-    bookings = GroomingBooking.objects.all().order_by('-booking_date')
-    bookings = apply_time_range_filter(bookings, 'booking_date', request)
+    bookings_qs = GroomingBooking.objects.all().order_by('-booking_date')
+    bookings_qs = apply_time_range_filter(bookings_qs, 'booking_date', request)
+    
+    from django.core.paginator import Paginator
+    paginator = Paginator(bookings_qs, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     from grooming.models import GroomingService
     services = GroomingService.objects.all()
     
-    total_bookings = bookings.count()
-    pending = bookings.filter(status='Pending').count()
+    total_bookings = bookings_qs.count()
+    pending = bookings_qs.filter(status='Pending').count()
     
     return render(request, 'admin_app/admingrooming.html', {
-        'bookings': bookings,
+        'bookings': page_obj,
         'services': services,
         'total_bookings': total_bookings,
         'pending': pending
@@ -665,8 +684,13 @@ def admin_pets_view(request):
     all_pets = Dog.objects.filter(owner__is_staff=False, is_adoption_post=False)
     all_pets_filtered = apply_time_range_filter(all_pets, 'created_at', request)
     
+    from django.core.paginator import Paginator
+    paginator = Paginator(pets.order_by('-id'), 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     return render(request, 'admin_app/adminpets.html', {
-        'pets': pets.order_by('-id'),
+        'pets': page_obj,
         'total_pets': all_pets_filtered.count(),
         'healthy_pets': all_pets_filtered.filter(health_records__isnull=True).count(), 
         'search_query': search_query,
@@ -803,15 +827,21 @@ def admin_veterinary_view(request):
                 messages.success(request, "Appointment deleted.")
         return redirect('admin_veterinary')
 
-    appointments = Appointment.objects.all().order_by('-appointment_date')
-    appointments = apply_time_range_filter(appointments, 'appointment_date', request)
+    appointments_qs = Appointment.objects.all().order_by('-appointment_date')
+    appointments_qs = apply_time_range_filter(appointments_qs, 'appointment_date', request)
+    
+    from django.core.paginator import Paginator
+    paginator = Paginator(appointments_qs, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     from veterinary.models import Veterinarian
     veterinarians = Veterinarian.objects.all()
     
     return render(request, 'admin_app/adminvetenary.html', {
-        'appointments': appointments,
+        'appointments': page_obj,
         'veterinarians': veterinarians,
-        'total_appointments': appointments.count()
+        'total_appointments': appointments_qs.count()
     })
 
 @admin_required

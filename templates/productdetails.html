@@ -583,7 +583,7 @@
                     </svg>
                     Add to Cart
                   </button>
-                  <a href="{% url 'add_to_cart' product.id %}?next={% url 'checkout' %}"
+                  <a href="javascript:void(0)" onclick="buyNow()"
                     class="btn-buy flex-shrink-0 flex items-center gap-2 py-4 px-6 rounded-lg font-bold border-2 border-[#4FBDBA] text-[#4FBDBA] hover:bg-[#4FBDBA] hover:text-white transition-all {% if product.stock <= 0 %}opacity-50 pointer-events-none{% endif %}"
                     style="white-space:nowrap;">
                     <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
@@ -723,6 +723,11 @@
           if (maxStock <= 0) return;
           currentQty = Math.max(1, Math.min(maxStock, currentQty + delta));
           document.getElementById('product-qty').textContent = currentQty;
+        }
+
+        function buyNow() {
+          const url = `{% url 'checkout' %}?buy_now_id={{ product.id }}&buy_now_qty=${currentQty}`;
+          window.location.href = url;
         }
 
         function addToCart() {

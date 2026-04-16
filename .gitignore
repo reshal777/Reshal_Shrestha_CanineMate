@@ -56,3 +56,8 @@ db.sqlite3
 # Coverage
 htmlcov/
 .coverage
+
+# Assistant & Scratch
+.gemini/
+.antigravity/
+scratch/

@@ -133,7 +133,35 @@
                 </tbody>
             </table>
         </div>
+        
+        <!-- Requests Pagination -->
+        {% if requests.has_other_pages %}
+        <div class="mt-6 flex justify-center">
+            <nav class="flex items-center gap-2">
+                {% if requests.has_previous %}
+                <a href="?req_page={{ requests.previous_page_number }}&tab=requests&time_range={{ request.GET.time_range }}" class="p-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 transition-all">
+                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                </a>
+                {% endif %}
+
+                {% for i in requests.paginator.page_range %}
+                    {% if requests.number == i %}
+                    <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-[#4FBDBA] text-white font-bold shadow-lg shadow-[#4FBDBA]/20">{{ i }}</span>
+                    {% elif i > requests.number|add:'-3' and i < requests.number|add:'3' %}
+                    <a href="?req_page={{ i }}&tab=requests&time_range={{ request.GET.time_range }}" class="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 transition-all font-medium">{{ i }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if requests.has_next %}
+                <a href="?req_page={{ requests.next_page_number }}&tab=requests&time_range={{ request.GET.time_range }}" class="p-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 transition-all">
+                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
     </div>
+
 
     <!-- SLIDE 2: LISTINGS -->
     <div id="tab-content-listings" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -166,6 +194,33 @@
             </div>
         </div>
         {% endfor %}
+
+        <!-- Listings Pagination -->
+        {% if listings.has_other_pages %}
+        <div class="col-span-full mt-6 flex justify-center">
+            <nav class="flex items-center gap-2">
+                {% if listings.has_previous %}
+                <a href="?list_page={{ listings.previous_page_number }}&tab=listings&time_range={{ request.GET.time_range }}" class="p-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 transition-all">
+                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                </a>
+                {% endif %}
+
+                {% for i in listings.paginator.page_range %}
+                    {% if listings.number == i %}
+                    <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-[#4FBDBA] text-white font-bold shadow-lg shadow-[#4FBDBA]/20">{{ i }}</span>
+                    {% elif i > listings.number|add:'-3' and i < listings.number|add:'3' %}
+                    <a href="?list_page={{ i }}&tab=listings&time_range={{ request.GET.time_range }}" class="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 transition-all font-medium">{{ i }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if listings.has_next %}
+                <a href="?list_page={{ listings.next_page_number }}&tab=listings&time_range={{ request.GET.time_range }}" class="p-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 transition-all">
+                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
     </div>
 
     <!-- MODALS (Creation & Edit) - Using User-Facing UI Style -->
@@ -386,5 +441,13 @@
             document.getElementById('edit-vaccinated').checked = (vaccinated === 'True');
             document.getElementById('edit-listing-modal').classList.remove('hidden');
         }
+
+        // Initialize tab on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const activeTab = "{{ active_tab }}";
+            if (activeTab === 'listings') {
+                switchTab('listings');
+            }
+        });
     </script>
 {% endblock %}

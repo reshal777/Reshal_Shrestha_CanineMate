@@ -47,6 +47,7 @@
     <div class="bg-white rounded-2xl p-6 shadow-lg mb-8">
         <form method="GET" action="{% url 'adoption' %}" id="filterForm">
             <input type="hidden" name="status" value="{{ current_status }}">
+            <input type="hidden" name="page" id="pageNumber" value="1">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2">
                     <svg class="w-5 h-5 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,7 +67,7 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div>
                     <label class="block text-sm font-medium text-[#333333] mb-2">Breed</label>
-                    <select name="breed" onchange="updateDogs()"
+                    <select name="breed" onchange="document.getElementById('pageNumber').value=1; updateDogs()"
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]">
                         <option value="All Breeds" {% if current_breed == 'All Breeds' %}selected{% endif %}>All Breeds</option>
                         {% for breed in breeds %}
@@ -76,7 +77,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-[#333333] mb-2">Age</label>
-                    <select name="age" onchange="updateDogs()"
+                    <select name="age" onchange="document.getElementById('pageNumber').value=1; updateDogs()"
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]">
                         <option value="All Ages" {% if current_age == 'All Ages' %}selected{% endif %}>All Ages</option>
                         <option value="Puppy (0-1 year)" {% if current_age == 'Puppy (0-1 year)' %}selected{% endif %}>Puppy (0-1 year)</option>
@@ -86,7 +87,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-[#333333] mb-2">Location</label>
-                    <select name="location" onchange="updateDogs()"
+                    <select name="location" onchange="document.getElementById('pageNumber').value=1; updateDogs()"
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]">
                         <option value="All Locations" {% if current_location == 'All Locations' %}selected{% endif %}>All Locations</option>
                         {% for loc in locations %}
@@ -235,6 +236,11 @@
             grid.innerHTML = html;
             grid.style.opacity = '1';
             
+            // Scroll to grid top if not on initial load
+            if (params.get('page') !== '1') {
+                grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            
             const metadata = grid.querySelector('#partial-metadata');
             if (metadata) {
                 const count = metadata.dataset.count;
@@ -271,6 +277,12 @@
 
     function setStatusFilter(status) {
         document.querySelector('input[name="status"]').value = status;
+        document.getElementById('pageNumber').value = 1;
+        updateDogs();
+    }
+
+    function setPage(page) {
+        document.getElementById('pageNumber').value = page;
         updateDogs();
     }
 

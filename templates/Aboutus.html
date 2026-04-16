@@ -4,162 +4,262 @@
 
 {% block extra_head %}
 <style>
-    .feature-img {
-        height: 320px;
-        object-fit: cover;
-        width: 100%;
-        transition: transform 0.5s ease;
+    :root {
+        --primary: #4FBDBA;
+        --secondary: #3da5a2;
+        --accent: #F4A261;
+        --text-dark: #333333;
+        --text-light: #6b7280;
+        --bg-soft: #fafaf9;
     }
-    .feature-img:hover {
-        transform: scale(1.04);
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
     }
-    .feature-block {
-        min-height: 320px;
+
+    .gradient-text {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero-shape {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 50%;
+        height: 100%;
+        background: radial-gradient(circle at 70% 30%, rgba(79, 189, 186, 0.1) 0%, transparent 70%);
+        z-index: -1;
+    }
+
+    .feature-card {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid transparent;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        border-color: rgba(79, 189, 186, 0.3);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+    }
+
+    .img-hover {
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .feature-card:hover .img-hover {
+        transform: scale(1.08);
+    }
+
+    .stat-pill {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 2rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+        text-align: center;
+        border: 1px solid #f3f4f6;
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+
+    .float-anim {
+        animation: float 4s ease-in-out infinite;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 
-<!-- Hero Header -->
-<section class="py-14 bg-white text-center">
-    <div class="max-w-4xl mx-auto px-8">
-        <span class="inline-block bg-[#4FBDBA]/10 text-[#4FBDBA] text-sm font-semibold px-6 py-2 rounded-full mb-5">
-            🐾 About CanineMate
-        </span>
-        <h1 class="text-5xl font-bold text-[#333333] mb-6 leading-tight">
-            Nepal's Smart Dog Care Platform
-        </h1>
-        <p class="text-gray-500 text-lg leading-relaxed max-w-3xl mx-auto">
-            CanineMate is Nepal's first all-in-one digital platform built exclusively for dog owners. We make it effortless to manage your dog's health records, book verified veterinarians, schedule grooming sessions, shop for premium pet products, and find loving homes for rescue dogs — all from one place. Whether you're a first-time pet parent or an experienced dog owner, CanineMate is your trusted companion every step of the way.
-        </p>
-        <div class="w-20 h-1.5 bg-[#4FBDBA] rounded-full mx-auto mt-8"></div>
+<!-- Hero Section -->
+<section class="relative overflow-hidden pt-24 pb-20 bg-white">
+    <div class="hero-shape"></div>
+    <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+        <div>
+            <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#4FBDBA]/10 text-[#4FBDBA] text-sm font-bold mb-6">
+                <span class="flex h-2 w-2 rounded-full bg-[#4FBDBA]"></span>
+                Who We Are
+            </span>
+            <h1 class="text-6xl font-black text-[#333333] leading-[1.1] mb-8">
+                The Heart of <br>
+                <span class="gradient-text">Pet Parenting</span> <br>
+                in Nepal.
+            </h1>
+            <p class="text-gray-500 text-xl leading-relaxed mb-10 max-w-lg">
+                CanineMate is Nepal's first integrated digital ecosystem designed to transform how we care for our dogs. We blend technology with empathy to offer a seamless experience for every pet parent.
+            </p>
+            <div class="flex gap-4">
+                <a href="{% url 'shop' %}" class="px-8 py-4 bg-[#4FBDBA] text-white rounded-2xl font-bold shadow-lg shadow-[#4FBDBA]/30 hover:bg-[#3da5a2] transition-all transform hover:scale-105">
+                    Start Shopping
+                </a>
+                <a href="#mission" class="px-8 py-4 bg-white text-[#333333] border-2 border-gray-100 rounded-2xl font-bold hover:border-[#4FBDBA]/30 transition-all">
+                    Our Mission
+                </a>
+            </div>
+        </div>
+        <div class="relative">
+            <div class="rounded-[3rem] overflow-hidden shadow-2xl">
+                <img src="https://images.unsplash.com/photo-1544568100-847a948585b9?auto=format&fit=crop&q=80&w=1000" class="w-full h-[600px] object-cover" alt="Happy Dog">
+            </div>
+        </div>
     </div>
 </section>
 
-<!-- Crisscross Features -->
-<section class="bg-[#FAFAF7] px-8 py-4">
-    <div class="max-w-7xl mx-auto space-y-5">
-
-        <!-- Feature 1: Image Left | Text Right -->
-        <div class="feature-block grid grid-cols-2 rounded-3xl overflow-hidden shadow-md border border-gray-100 bg-white">
-            <div class="overflow-hidden">
-                <img class="feature-img"
-                    src="https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=900"
-                    alt="Health Tracking">
+<!-- Stats Section -->
+<section class="py-12 bg-gray-50/50">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="stat-pill">
+                <div class="text-3xl font-black text-[#4FBDBA] mb-1">50+</div>
+                <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Verified Vets</p>
             </div>
-            <div class="flex flex-col justify-center px-14 py-8">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 bg-[#4FBDBA]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <svg class="w-5 h-5 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-[#333333]">Health Tracking</h2>
-                </div>
-                <p class="text-gray-500 text-base leading-relaxed">
-                    Keep your dog's entire medical history organised in one place. Log vaccinations, health visits, and set medicine reminders — so you never miss a critical care moment for your pet.
-                </p>
+            <div class="stat-pill">
+                <div class="text-3xl font-black text-[#F4A261] mb-1">200+</div>
+                <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Rescues Housed</p>
+            </div>
+            <div class="stat-pill">
+                <div class="text-3xl font-black text-[#4FBDBA] mb-1">1k+</div>
+                <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Products</p>
+            </div>
+            <div class="stat-pill">
+                <div class="text-3xl font-black text-[#F4A261] mb-1">24/7</div>
+                <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Pet Support</p>
             </div>
         </div>
-
-        <!-- Feature 2: Text Left | Image Right -->
-        <div class="feature-block grid grid-cols-2 rounded-3xl overflow-hidden shadow-md border border-gray-100 bg-white">
-            <div class="flex flex-col justify-center px-14 py-8">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 bg-[#F4A261]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <svg class="w-5 h-5 text-[#F4A261]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-[#333333]">Vet Appointments</h2>
-                </div>
-                <p class="text-gray-500 text-base leading-relaxed">
-                    Book consultations with verified veterinarians across Nepal in seconds. Pick your vet, choose a time slot, and complete payment online — no phone calls, no waiting.
-                </p>
-            </div>
-            <div class="overflow-hidden">
-                <img class="feature-img"
-                    src="https://images.unsplash.com/photo-1612531386530-97286d97c2d2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=900"
-                    alt="Vet Appointments">
-            </div>
-        </div>
-
-        <!-- Feature 3: Image Left | Text Right -->
-        <div class="feature-block grid grid-cols-2 rounded-3xl overflow-hidden shadow-md border border-gray-100 bg-white">
-            <div class="overflow-hidden">
-                <img class="feature-img"
-                    src="https://images.unsplash.com/photo-1591946614720-90a587da4a36?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=900"
-                    alt="Grooming Services">
-            </div>
-            <div class="flex flex-col justify-center px-14 py-8">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 bg-[#4FBDBA]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <svg class="w-5 h-5 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-[#333333]">Grooming Services</h2>
-                </div>
-                <p class="text-gray-500 text-base leading-relaxed">
-                    Schedule professional grooming sessions at trusted salons near you. From baths and haircuts to nail trimming — keep your dog clean, comfortable, and always looking their best.
-                </p>
-            </div>
-        </div>
-
-        <!-- Feature 4: Text Left | Image Right -->
-        <div class="feature-block grid grid-cols-2 rounded-3xl overflow-hidden shadow-md border border-gray-100 bg-white">
-            <div class="flex flex-col justify-center px-14 py-8">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 bg-[#F4A261]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <svg class="w-5 h-5 text-[#F4A261]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-[#333333]">Dog Adoption</h2>
-                </div>
-                <p class="text-gray-500 text-base leading-relaxed">
-                    Help rescue dogs find loving homes. Browse verified adoption listings, post your own dog for adoption, and connect with families ready to give a dog their forever home across Nepal.
-                </p>
-            </div>
-            <div class="overflow-hidden">
-                <img class="feature-img"
-                    src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=900"
-                    alt="Dog Adoption">
-            </div>
-        </div>
-
-        <!-- Feature 5: Image Left | Text Right -->
-        <div class="feature-block grid grid-cols-2 rounded-3xl overflow-hidden shadow-md border border-gray-100 bg-white">
-            <div class="overflow-hidden">
-                <img class="feature-img"
-                    src="https://images.unsplash.com/photo-1601758174114-e711c0cbaa69?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=900"
-                    alt="Pet Shop">
-            </div>
-            <div class="flex flex-col justify-center px-14 py-8">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 bg-[#4FBDBA]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <svg class="w-5 h-5 text-[#4FBDBA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-[#333333]">Pet Shop</h2>
-                </div>
-                <p class="text-gray-500 text-base leading-relaxed">
-                    Shop quality dog food, toys, accessories, and health supplies — all handpicked for your pet. Order online and get it delivered to your door anywhere in Nepal.
-                </p>
-            </div>
-        </div>
-
     </div>
 </section>
 
-<!-- Bottom spacing -->
-<div class="py-10 bg-[#FAFAF7]"></div>
+<!-- Our Mission -->
+<section id="mission" class="py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid md:grid-cols-2 gap-20 items-center">
+            <div class="relative order-2 md:order-1">
+                <div class="grid grid-cols-2 gap-4">
+                    <img src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=400" class="rounded-3xl h-64 w-full object-cover shadow-lg" alt="Mission 1">
+                    <img src="https://images.unsplash.com/photo-1534361960057-19889db9621e?auto=format&fit=crop&q=80&w=400" class="rounded-3xl h-64 w-full object-cover shadow-lg translate-y-8" alt="Mission 2">
+                </div>
+            </div>
+            <div class="order-1 md:order-2">
+                <h2 class="text-4xl font-bold text-[#333333] mb-8">Our Mission & Vision</h2>
+                <div class="space-y-8">
+                    <div class="flex gap-6">
+                        <div class="w-14 h-14 bg-[#4FBDBA]/10 rounded-2xl flex items-center justify-center flex-shrink-0 text-[#4FBDBA]">
+                            <i data-lucide="shield-check" class="w-7 h-7"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">Elevating Pet Care Standards</h3>
+                            <p class="text-gray-500 leading-relaxed">We believe every dog in Nepal deserves quality healthcare and nutrition. Our platform sets the gold standard for verified pet services.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-6">
+                        <div class="w-14 h-14 bg-[#F4A261]/10 rounded-2xl flex items-center justify-center flex-shrink-0 text-[#F4A261]">
+                            <i data-lucide="users" class="w-7 h-7"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">Building a Community</h3>
+                            <p class="text-gray-500 leading-relaxed">Beyond a marketplace, CanineMate is a community for animal lovers to connect, share experiences, and help strays find homes.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Grid -->
+<section class="py-24 bg-[#fafaf9]">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-black text-[#333333] mb-4">What We Offer</h2>
+            <p class="text-gray-400 font-medium tracking-wide uppercase text-sm">Nepal's Most Comprehensive Care Ecosystem</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Health -->
+            <div class="feature-card bg-white p-8 rounded-[2.5rem] relative overflow-hidden group">
+                <div class="mb-6 relative h-48 overflow-hidden rounded-2xl">
+                    <img src="https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?auto=format&fit=crop&q=80&w=600" class="w-full h-full object-cover img-hover" alt="Health Tracking">
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-[#333333]">Smart Health Tracking</h3>
+                <p class="text-gray-500 leading-relaxed text-sm">Maintain a complete digital health vault for your pet. Track every vaccination, log past clinic visits, and manage life-saving medicine reminders with automated notifications designed to keep your pet safe.</p>
+            </div>
+
+            <!-- Vet -->
+            <div class="feature-card bg-white p-8 rounded-[2.5rem] relative overflow-hidden group">
+                <div class="mb-6 relative h-48 overflow-hidden rounded-2xl">
+                    <img src="https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&q=80&w=600" class="w-full h-full object-cover img-hover" alt="Vet Consultation">
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-[#333333]">Verified Vet Consultation</h3>
+                <p class="text-gray-500 leading-relaxed text-sm">Skip the queues and uncertainty. Book appointments with recognized, verified veterinarians across Nepal. View available slots in real-time and complete secure payments instantly.</p>
+            </div>
+
+            <!-- Shop -->
+            <div class="feature-card bg-white p-8 rounded-[2.5rem] relative overflow-hidden group">
+                <div class="mb-6 relative h-48 overflow-hidden rounded-2xl">
+                    <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=600" class="w-full h-full object-cover img-hover" alt="Pet Shop">
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-[#333333]">Premium Pet Store</h3>
+                <p class="text-gray-500 leading-relaxed text-sm">Access a curated selection of high-quality dog food, grooming supplies, and toys. We partner with the best brands to ensure your dog gets safe, premium nutrition with Nepal-wide delivery.</p>
+            </div>
+
+            <!-- Adoptions -->
+            <div class="feature-card bg-white p-8 rounded-[2.5rem] relative overflow-hidden group">
+                <div class="mb-6 relative h-48 overflow-hidden rounded-2xl">
+                    <img src="https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&q=80&w=600" class="w-full h-full object-cover img-hover" alt="Dog Adoption">
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-[#333333]">Responsible Adoptions</h3>
+                <p class="text-gray-500 leading-relaxed text-sm">Find your forever friend or help a rescue dog find a home. Our platform verifies listings and facilitates direct communication between rescuers and prospective pet parents to ensure safe adoptions.</p>
+            </div>
+
+            <!-- Grooming -->
+             <div class="feature-card bg-white p-8 rounded-[2.5rem] relative overflow-hidden group">
+                <div class="mb-6 relative h-48 overflow-hidden rounded-2xl">
+                    <img src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=600" class="w-full h-full object-cover img-hover" alt="Grooming">
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-[#333333]">Professional Grooming</h3>
+                <p class="text-gray-500 leading-relaxed text-sm">Book grooming sessions at top-rated dog salons. Whether it's a routine bath, a stylish haircut, or essential hygiene services, we connect you with the best professionals in your city.</p>
+            </div>
+
+            <!-- Dog Profile -->
+            <div class="feature-card bg-white p-8 rounded-[2.5rem] relative overflow-hidden group">
+                <div class="mb-6 relative h-48 overflow-hidden rounded-2xl">
+                    <img src="https://images.unsplash.com/photo-1583512603805-3cc6b41f3edb?auto=format&fit=crop&q=80&w=600" class="w-full h-full object-cover img-hover" alt="Dog Profiles">
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-[#333333]">Personalized Dog Profile</h3>
+                <p class="text-gray-500 leading-relaxed text-sm">Create a beautiful, detailed digital profile for your dog. Store photos, manage specific health details, and keep track of all their activities in one place — giving your pet the spotlight they deserve.</p>
+            </div>
+        </div>
+    </div>
+</section>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-24 px-6">
+    <div class="max-w-7xl mx-auto bg-gradient-to-r from-[#4FBDBA] to-[#3da5a2] rounded-[3rem] p-16 text-center text-white relative overflow-hidden">
+        <div class="relative z-10">
+            <h2 class="text-5xl font-black mb-6">Join the CanineMate Family</h2>
+            <p class="text-white/80 text-xl max-w-2xl mx-auto mb-10">Sign up today and get access to Nepal's most comprehensive dog care dashboard.</p>
+            <div class="flex justify-center gap-4">
+                <a href="{% url 'signup' %}" class="px-10 py-5 bg-white text-[#4FBDBA] rounded-full font-black text-lg shadow-xl hover:bg-gray-50 transition-all">
+                    Get Started Free
+                </a>
+                <a href="{% url 'contact' %}" class="px-10 py-5 bg-[#333333] text-white rounded-full font-black text-lg shadow-xl hover:bg-black transition-all">
+                    Contact Us
+                </a>
+            </div>
+        </div>
+        <!-- Decorative blobs -->
+        <div class="absolute -top-10 -right-10 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-10 -left-10 w-64 h-64 bg-black/10 rounded-full blur-3xl"></div>
+    </div>
+</section>
 
 {% endblock %}

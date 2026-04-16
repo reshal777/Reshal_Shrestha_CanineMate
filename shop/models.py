@@ -11,7 +11,7 @@ class Product(models.Model):
     rating = models.FloatField(default=0.0)
     reviews_count = models.IntegerField(default=0)
     description = models.TextField(blank=True, null=True)
-    image = models.ImageField(upload_to='products/', blank=True, null=True)
+    image = models.ImageField(upload_to='products/', max_length=500, blank=True, null=True)
     sales = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 

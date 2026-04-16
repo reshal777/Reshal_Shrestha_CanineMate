@@ -18,8 +18,6 @@ from .email_utils import send_order_email, send_appointment_email, send_grooming
 from shop.models import Product, Order, CartItem, OrderItem
 from home.models import ContactMessage
 
-def services_view(request):
-    return render(request, "service.html")
 
 def index_view(request):
     if request.user.is_authenticated:
@@ -79,8 +77,13 @@ def adoption_listing_view(request):
     breeds = Dog.objects.filter(is_adoptable=True).values_list('breed', flat=True).distinct()
     locations = Dog.objects.filter(is_adoptable=True).values_list('location', flat=True).distinct()
     
+    from django.core.paginator import Paginator
+    paginator = Paginator(dogs, 6)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     context = {
-        'dogs': dogs,
+        'dogs': page_obj,
         'dog_count': dogs.count(),
         'breeds': breeds,
         'locations': locations,
@@ -449,12 +452,26 @@ def add_product_review(request, product_id):
 
 @login_required(login_url='signup')
 def checkout_view(request):
-    cart_items = CartItem.objects.filter(user=request.user)
-    if not cart_items.exists():
-        messages.warning(request, "Your cart is empty.")
-        return redirect('shop')
-        
-    total_amount = sum(item.total_price for item in cart_items)
+    buy_now_id = request.GET.get('buy_now_id')
+    buy_now_qty = int(request.GET.get('buy_now_qty', 1))
+    
+    if buy_now_id:
+        product = get_object_or_404(Product, id=buy_now_id)
+        # Create a pseudo item list for the template/logic
+        cart_items = [
+            type('PseudoItem', (object,), {
+                'product': product,
+                'quantity': buy_now_qty,
+                'total_price': product.price * buy_now_qty
+            })
+        ]
+        total_amount = product.price * buy_now_qty
+    else:
+        cart_items = CartItem.objects.filter(user=request.user)
+        if not cart_items.exists():
+            messages.warning(request, "Your cart is empty.")
+            return redirect('shop')
+        total_amount = sum(item.total_price for item in cart_items)
     
     if request.method == "POST":
         payment_method = request.POST.get('payment_method', 'khalti')
@@ -481,14 +498,28 @@ def checkout_view(request):
             status='Pending'
         )
         
-        # Create order items
-        for cart_item in cart_items:
+        # If it's a buy now order, set the product field as a marker
+        actual_product_id = request.POST.get('buy_now_id')
+        if actual_product_id:
+            buy_now_product = get_object_or_404(Product, id=actual_product_id)
+            buy_now_qty = int(request.POST.get('buy_now_qty', 1))
+            order.product = buy_now_product
+            order.save()
             OrderItem.objects.create(
                 order=order,
-                product=cart_item.product,
-                quantity=cart_item.quantity,
-                price=cart_item.product.price
+                product=buy_now_product,
+                quantity=buy_now_qty,
+                price=buy_now_product.price
             )
+        else:
+            # Create order items from cart
+            for cart_item in cart_items:
+                OrderItem.objects.create(
+                    order=order,
+                    product=cart_item.product,
+                    quantity=cart_item.quantity,
+                    price=cart_item.product.price
+                )
         
         # If Khalti, initiate payment
         if payment_method.lower() == 'khalti':
@@ -524,6 +555,8 @@ def checkout_view(request):
     context = {
         'cart_items': cart_items,
         'total_amount': total_amount,
+        'buy_now_id': buy_now_id,
+        'buy_now_qty': buy_now_qty,
     }
     return render(request, "checkout.html", context)
 
@@ -1257,8 +1290,9 @@ def khalti_callback_view(request):
                     product.stock -= item.quantity
                     product.save()
                 
-                # Clear Cart
-                CartItem.objects.filter(user=order.user).delete()
+                # Clear Cart only if it was a cart-based order (not Buy Now)
+                if not order.product:
+                    CartItem.objects.filter(user=order.user).delete()
                 send_order_email(order)
                 messages.success(request, "Payment successful! Your order is being processed.")
                 unreviewed_items = [item for item in order.items.all() if not ProductReview.objects.filter(product=item.product, user=request.user).exists()]
@@ -1297,7 +1331,8 @@ def khalti_callback_view(request):
                         item.product.sales += item.quantity
                         item.product.stock -= item.quantity
                         item.product.save()
-                    CartItem.objects.filter(user=obj.user).delete()
+                    if not obj.product:
+                        CartItem.objects.filter(user=obj.user).delete()
                 
                 messages.success(request, "Payment verified successfully!")
                 # Determine redirect based on object

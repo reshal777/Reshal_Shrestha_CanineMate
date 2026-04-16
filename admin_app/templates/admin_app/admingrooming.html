@@ -56,7 +56,7 @@
         <tbody class="divide-y divide-gray-100">
           {% for booking in bookings %}
           <tr class="hover:bg-gray-50 transition-colors">
-            <td class="px-6 py-4 text-sm font-bold text-gray-400">{{ forloop.counter }}</td>
+            <td class="px-6 py-4 text-sm font-bold text-gray-400">{{ bookings.start_index|add:forloop.counter0 }}</td>
             <td class="px-6 py-4">
                <div class="flex items-center gap-3">
                  <div class="flex-shrink-0">
@@ -112,6 +112,34 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Grooming Pagination -->
+    {% if bookings.has_other_pages %}
+    <div class="mt-8 flex justify-center">
+        <nav class="flex items-center gap-2">
+            {% if bookings.has_previous %}
+            <a href="?page={{ bookings.previous_page_number }}&time_range={{ request.GET.time_range }}" class="p-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 transition-all">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+            </a>
+            {% endif %}
+
+            {% for i in bookings.paginator.page_range %}
+                {% if bookings.number == i %}
+                <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-[#4FBDBA] text-white font-bold shadow-lg shadow-[#4FBDBA]/20">{{ i }}</span>
+                {% elif i > bookings.number|add:'-3' and i < bookings.number|add:'3' %}
+                <a href="?page={{ i }}&time_range={{ request.GET.time_range }}" class="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 transition-all font-medium">{{ i }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if bookings.has_next %}
+            <a href="?page={{ bookings.next_page_number }}&time_range={{ request.GET.time_range }}" class="p-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 transition-all">
+                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+            </a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+
 
     <!-- Pricing Management Section -->
     <div class="mt-8">
