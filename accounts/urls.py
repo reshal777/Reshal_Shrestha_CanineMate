@@ -9,4 +9,5 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('forgot-password/', views.forgot_password_view, name='forgot_password'),
     path('forgot-password/send/', views.forgot_password_send_view, name='forgot_password_send'),
+    path('verify-email/<str:uidb64>/<str:token>/', views.verify_email_view, name='verify_email'),
 ]

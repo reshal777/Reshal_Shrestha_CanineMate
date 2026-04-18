@@ -649,7 +649,37 @@
 
       <div class="card">
         <p class="sec-title-lg">About {{ vet.name }}</p>
-        <p class="about-text">{{ vet.about|default:"No information available." }}</p>
+        
+        <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+            <div style="background: #f0fdf4; color: #166534; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.875rem; border: 1px solid #bbf7d0;">
+                {{ vet.experience_years }}+ Years of Clinical Experience
+            </div>
+            <div style="background: #eff6ff; color: #1e40af; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.875rem; border: 1px solid #bfdbfe;">
+                Specialist in {{ vet.specialty }}
+            </div>
+        </div>
+        
+        <p class="about-text" style="font-size: 1rem;">{{ vet.about|default:"Dr. "|add:vet.name|add:" is a highly qualified veterinary professional dedicated to providing the best care for your pets." }}</p>
+        
+        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #f3f4f6;">
+            <h3 style="font-weight: 600; color: #374151; margin-bottom: 0.75rem; font-size: 1.1rem;">Key Details</h3>
+            <ul style="color: #4b5563; list-style-type: none; margin-left: 0; padding-left: 0; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.95rem;">
+                <li style="display: flex; gap: 0.5rem; align-items: center;">
+                    <svg width="16" height="16" fill="none" stroke="#4FBDBA" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <strong>Languages Spoken:</strong> {{ vet.languages|default:"English, Nepali" }}
+                </li>
+                <li style="display: flex; gap: 0.5rem; align-items: center;">
+                    <svg width="16" height="16" fill="none" stroke="#4FBDBA" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <strong>Availability:</strong> {{ vet.available_time|default:"Mon - Fri, 09:00 AM - 05:00 PM" }}
+                </li>
+                {% if vet.is_emergency_available %}
+                <li style="display: flex; gap: 0.5rem; align-items: center; color: #dc2626;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    <strong>Emergency Care:</strong> On-Call 24/7 Available
+                </li>
+                {% endif %}
+            </ul>
+        </div>
       </div>
 
       {% if vet.expertise_list %}

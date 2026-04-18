@@ -65,6 +65,7 @@
     {% include 'base/navbar.html' %}
 
     <main class="pt-20">
+        {% block global_messages %}
         {% if messages %}
         <div id="django-messages" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" style="transition: opacity 0.5s ease, transform 0.5s ease;">
             {% for message in messages %}
@@ -84,6 +85,7 @@
             }, 3000);
         </script>
         {% endif %}
+        {% endblock %}
         {% block content %}{% endblock %}
     </main>
 

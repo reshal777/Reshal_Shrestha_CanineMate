@@ -18,37 +18,27 @@ def login_view(request):
         storage.used = True  # marks them all as consumed so they won't render
 
     if request.method == "POST":
-        login_input = request.POST.get("email", "").strip() # This field will now handle both email and username
+        login_input = request.POST.get("email", "").strip() 
         password = request.POST.get("password", "")
 
         if not login_input or not password:
             messages.error(request, "Email/Username and password are required.")
             return redirect("login")
 
-        # Try to authenticate with username first (since admin uses 'admin' username)
+        # authenticate() automatically checks all backends (ModelBackend and EmailBackend)
         user = authenticate(request, username=login_input, password=password)
-        
-        # If username fails, try to authenticate with email
-        if user is None and '@' in login_input:
-            from .models import User
-            try:
-                user_obj = User.objects.get(email__iexact=login_input)
-                user = authenticate(request, username=user_obj.username, password=password)
-            except User.DoesNotExist:
-                user = None
 
         if user is not None:
             if user.is_active:
                 login(request, user)
-                # Redirect admin/staff users to the new admin dashboard
                 if user.is_staff:
                     return redirect("admin_dashboard")
                 else:
                     return redirect("dashboard")
             else:
-                messages.error(request, "Your account is inactive.")
+                messages.error(request, "Please verify your email address to activate your account.")
         else:
-            messages.error(request, "Invalid credentials.")
+            messages.error(request, "Invalid username/email or password.")
 
         return redirect("login")
 
@@ -139,17 +129,64 @@ def signup_view(request):
                 email=email,
                 username=username,
                 password=password,
-                phone=phone
+                phone=phone,
+                is_active=False
             )
-            messages.success(request, "Registration successful! You can now log in.")
             
+            # Send verification email
+            from django.contrib.auth.tokens import default_token_generator
+            from django.utils.http import urlsafe_base64_encode
+            from django.utils.encoding import force_bytes
+            from django.core.mail import send_mail
+            from django.conf import settings
+            from django.urls import reverse
+
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            verification_link = request.build_absolute_uri(reverse('verify_email', kwargs={'uidb64': uid, 'token': token}))
+
+            subject = "Verify your CanineMate Account"
+            message = f"Hi {user.username},\n\nPlease click the link below to verify your email address:\n{verification_link}\n\nThanks,\nCanineMate Team"
             
+            try:
+                from_email = settings.EMAIL_HOST_USER
+                recipient_list = [user.email]
+                send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error("Failed to send verification email: " + str(e))
+
+            messages.success(request, "Registration successful! Please check your email to verify your account before logging in.")
             return redirect("login") 
         except Exception as e:
             messages.error(request, "Something went wrong. Please try again.")
             return redirect("signup")
 
     return render(request, "signup.html")
+
+def verify_email_view(request, uidb64, token):
+    from django.utils.http import urlsafe_base64_decode
+    from django.utils.encoding import force_str
+    from django.contrib.auth.tokens import default_token_generator
+    from django.shortcuts import redirect
+    from django.contrib import messages
+    from .models import User
+
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save()
+        messages.success(request, "Your email has been successfully verified! You can now log in.")
+        return redirect('login')
+    else:
+        messages.error(request, "The verification link is invalid or has expired.")
+        return redirect('login')
 
 
 def success_view(request):

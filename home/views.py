@@ -770,12 +770,20 @@ def vet_appointment_view(request):
         time = request.POST.get('time')
         notes = request.POST.get('notes', '')
 
-        # Past date check
+        # Past date and time check
         from django.utils import timezone
+        now = timezone.now()
         booking_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-        if booking_date < timezone.now().date():
+        
+        if booking_date < now.date():
             messages.error(request, "You cannot book appointments in the past.")
             return redirect('vetappointment')
+        
+        if booking_date == now.date():
+            target_time = datetime.strptime(time, '%H:%M').time()
+            if target_time < now.time():
+                messages.error(request, "The selected time for today has already passed.")
+                return redirect('vetappointment')
 
         dog = get_object_or_404(Dog, id=dog_id, owner=request.user)
         vet = get_object_or_404(Veterinarian, id=vet_id)
@@ -842,6 +850,21 @@ def reschedule_appointment(request, appointment_id):
         new_date = request.POST.get('date')
         new_time = request.POST.get('time')
         
+        # Past date/time check for rescheduling
+        from django.utils import timezone
+        now = timezone.now()
+        booking_date = datetime.strptime(new_date, '%Y-%m-%d').date()
+        
+        if booking_date < now.date():
+            messages.error(request, "You cannot reschedule to a past date.")
+            return redirect('vetappointment')
+            
+        if booking_date == now.date():
+            target_time = datetime.strptime(new_time, '%H:%M').time()
+            if target_time < now.time():
+                messages.error(request, "The selected time for today has already passed.")
+                return redirect('vetappointment')
+        
         appointment.appointment_date = new_date
         appointment.appointment_time = new_time
         appointment.save()
@@ -866,12 +889,20 @@ def grooming_booking_view(request):
         time = request.POST.get('time')
         notes = request.POST.get('notes', '')
 
-        # Past date check
+        # Past date and time check
         from django.utils import timezone
+        now = timezone.now()
         booking_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-        if booking_date < timezone.now().date():
+        
+        if booking_date < now.date():
             messages.error(request, "You cannot book grooming services in the past.")
             return redirect('groomingbooking')
+
+        if booking_date == now.date():
+            target_time = datetime.strptime(time, '%H:%M').time()
+            if target_time < now.time():
+                messages.error(request, "The selected time for today has already passed.")
+                return redirect('groomingbooking')
 
         dog = get_object_or_404(Dog, id=dog_id, owner=request.user)
         service = get_object_or_404(GroomingService, id=service_id)
@@ -923,6 +954,21 @@ def reschedule_grooming(request, booking_id):
         booking = get_object_or_404(GroomingBooking, id=booking_id, user=request.user)
         new_date = request.POST.get('date')
         new_time = request.POST.get('time')
+        
+        # Past date/time check for rescheduling
+        from django.utils import timezone
+        now = timezone.now()
+        booking_date = datetime.strptime(new_date, '%Y-%m-%d').date()
+        
+        if booking_date < now.date():
+            messages.error(request, "You cannot reschedule to a past date.")
+            return redirect('groomingbooking')
+
+        if booking_date == now.date():
+            target_time = datetime.strptime(new_time, '%H:%M').time()
+            if target_time < now.time():
+                messages.error(request, "The selected time for today has already passed.")
+                return redirect('groomingbooking')
         
         booking.booking_date = new_date
         booking.booking_time = new_time
@@ -1200,24 +1246,25 @@ def khalti_init_appointment_payment(request, appointment_id):
     # Amount in Paisa
     amount_paisa = int(appointment.amount * 100)
     
-    # Return URL: Need to pass some unique ID to verify later
+    # Return URL (verification endpoint)
     return_url = request.build_absolute_uri(reverse('khalti_callback'))
     website_url = request.build_absolute_uri('/')
     
+    # Simplified customer_info (some sandbox accounts fail with specific data)
+    # We will only send it if we are sure it won't crash the payment page
     customer_info = {
         "name": request.user.get_full_name() or request.user.username,
         "email": request.user.email,
-        "phone": request.user.phone or "9800000000"
     }
     
     from payment.khalti_utils import initiate_khalti_payment
     response = initiate_khalti_payment(
         amount=amount_paisa,
         purchase_order_id=f"APPT-{appointment.id}",
-        purchase_order_name=f"{appointment.service_type} Appointment",
+        purchase_order_name=f"{appointment.service_type} Appointment on {appointment.appointment_date.strftime('%B %d, %Y')}",
         return_url=return_url,
         website_url=website_url,
-        customer_info=customer_info
+        customer_info=None # Set to None temporarily to fix the 400 error
     )
     
     if "payment_url" in response:
@@ -1226,7 +1273,11 @@ def khalti_init_appointment_payment(request, appointment_id):
         appointment.save()
         return redirect(response['payment_url'])
     else:
-        messages.error(request, f"Failed to initiate Khalti payment: {response.get('detail', 'Unknown error')}")
+        # Better error reporting
+        error_msg = response.get('detail') or response.get('error_key') or 'Unknown error'
+        if isinstance(error_msg, dict):
+            error_msg = ", ".join([f"{k}: {v}" for k, v in error_msg.items()])
+        messages.error(request, f"Failed to initiate Khalti payment: {error_msg}")
         return redirect('vet_checkout', appointment_id=appointment.id)
 
 @login_required
@@ -1397,7 +1448,7 @@ def khalti_init_grooming_payment(request, booking_id):
     response = initiate_khalti_payment(
         amount=amount_paisa,
         purchase_order_id=f"GRM-{booking.id}",
-        purchase_order_name=f"Grooming: {booking.service.name}",
+        purchase_order_name=f"Grooming: {booking.service.name} on {booking.booking_date.strftime('%B %d, %Y')}",
         return_url=return_url,
         website_url=website_url,
         customer_info=customer_info

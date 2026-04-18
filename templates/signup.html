@@ -4,6 +4,7 @@
 {% block title %}Sign Up - Canine Mate{% endblock %}
 
 {% block content %}
+{% block global_messages %}{% endblock %}
 <div class="min-h-[80vh] flex items-center justify-center p-8">
     <div class="max-w-md w-full">
         <a href="{% url 'index' %}" class="flex flex-col items-center justify-center mb-8 group">
@@ -18,20 +19,29 @@
             <div class="mb-8 text-center">
                 <h1 class="text-3xl font-bold text-[#333333] mb-2">Create Account</h1>
                 <p class="text-gray-600">Start managing your dog's care journey today</p>
+                {% if messages %}
+                <div class="mt-4 space-y-2">
+                    {% for message in messages %}
+                        <div class="p-3 text-sm rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </div>
 
-            <form method="POST" class="space-y-5">
+            <form method="POST" autocomplete="off" class="space-y-5">
                 {% csrf_token %}
                 <div>
                     <label class="block text-sm font-medium text-[#333333] mb-2">Username</label>
-                    <input type="text" name="username"
+                    <input type="text" name="username" autocomplete="off"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]"
                         placeholder="Full Name" required>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-[#333333] mb-2">Email Address</label>
-                    <input type="email" name="email"
+                    <input type="email" name="email" autocomplete="off"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]"
                         placeholder="your@email.com" required>
                 </div>
@@ -45,14 +55,14 @@
 
                 <div>
                     <label class="block text-sm font-medium text-[#333333] mb-2">Password</label>
-                    <input type="password" name="password"
+                    <input type="password" name="password" autocomplete="new-password"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]"
                         placeholder="Create a password (min 8 characters)" required>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-[#333333] mb-2">Confirm Password</label>
-                    <input type="password" name="password2"
+                    <input type="password" name="password2" autocomplete="new-password"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]"
                         placeholder="Confirm your password" required>
                 </div>

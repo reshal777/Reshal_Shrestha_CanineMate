@@ -21,7 +21,14 @@ def initiate_khalti_payment(amount, purchase_order_id, purchase_order_name, retu
     if customer_info:
         payload["customer_info"] = customer_info
 
+    print(f"DEBUG: Khalti URL: {url}")
+    print(f"DEBUG: Khalti Payload: {payload}")
+    
     response = requests.post(url, headers=headers, json=payload)
+    
+    print(f"DEBUG: Khalti Status: {response.status_code}")
+    print(f"DEBUG: Khalti Response: {response.text}")
+    
     return response.json()
 
 def verify_khalti_payment(pidx):

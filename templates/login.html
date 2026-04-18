@@ -4,6 +4,7 @@
 {% block title %}Login - Canine Mate{% endblock %}
 
 {% block content %}
+{% block global_messages %}{% endblock %}
 <div class="min-h-[80vh] flex items-center justify-center p-8">
     <div class="max-w-md w-full">
         <a href="{% url 'index' %}" class="flex flex-col items-center justify-center mb-8 group">
@@ -19,9 +20,18 @@
             <div class="mb-8 text-center">
                 <h1 class="text-3xl font-bold text-[#333333] mb-2" id="title">Welcome Back</h1>
                 <p class="text-gray-600" id="desc">Sign in to manage your dog care needs</p>
+                {% if messages %}
+                <div class="mt-4 space-y-2">
+                    {% for message in messages %}
+                        <div class="p-3 text-sm rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </div>
 
-            <form method="POST" class="space-y-6">
+            <form method="POST" autocomplete="off" class="space-y-6">
                 {% csrf_token %}
                 <!-- Email/Username -->
                 <div>
@@ -32,7 +42,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
-                        <input type="text" name="email"
+                        <input type="text" name="email" autocomplete="off"
                             class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA] focus:border-transparent"
                             placeholder="Email or Username" required>
                     </div>
@@ -47,7 +57,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
-                        <input type="password" name="password"
+                        <input type="password" name="password" autocomplete="new-password"
                             class="w-full pl-12 pr-12 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA] focus:border-transparent"
                             placeholder="Enter your password" required>
                         <button type="button" onclick="togglePassword()"

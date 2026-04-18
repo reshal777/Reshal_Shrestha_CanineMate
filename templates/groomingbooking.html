@@ -640,8 +640,9 @@
         <div class="card booking-card">
             <div class="booking-top">
                 <div>
-                    <p class="booking-service">{{ booking.service.name }}</p>
+                    <p class="booking-service">Type: {{ booking.service.name }}</p>
                     <p class="booking-dog">Dog: {{ booking.dog.name }}</p>
+                    <p style="font-size: 0.875rem; font-weight: 700; color: #4FBDBA; margin-top: 0.25rem;">Fee: Rs. {{ booking.amount }}</p>
                 </div>
                 <span class="badge {% if booking.status == 'Confirmed' %}badge-green{% elif booking.status == 'Pending' %}badge-orange{% else %}badge-blue{% endif %}">{{ booking.status }}</span>
             </div>
@@ -710,7 +711,7 @@
                     <label>Select Service</label>
                     <select name="service" required>
                         {% for service in services %}
-                        <option value="{{ service.id }}">{{ service.name }} ({{ service.duration }}) - Rs. {{ service.price }}</option>
+                        <option value="{{ service.id }}">{{ service.name }} ({{ service.duration }})</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -722,19 +723,25 @@
 
                 <div class="field">
                     <label>Select Time Slot</label>
-                    <div class="time-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
-                        <button type="button" class="time-slot" onclick="selectTime(this, '09:00')"
-                            style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: #fff; cursor: pointer;">09:00</button>
-                        <button type="button" class="time-slot selected" onclick="selectTime(this, '10:00')"
-                            style="padding: 0.5rem; border: 2px solid #4FBDBA; border-radius: 0.5rem; background: #fff; cursor: pointer;">10:00</button>
-                        <button type="button" class="time-slot" onclick="selectTime(this, '11:00')"
-                            style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: #fff; cursor: pointer;">11:00</button>
-                        <button type="button" class="time-slot" onclick="selectTime(this, '14:00')"
-                            style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: #fff; cursor: pointer;">14:00</button>
-                        <button type="button" class="time-slot" onclick="selectTime(this, '15:00')"
-                            style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: #fff; cursor: pointer;">15:00</button>
-                        <button type="button" class="time-slot" onclick="selectTime(this, '16:00')"
-                            style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: #fff; cursor: pointer;">16:00</button>
+                    <div class="mb-3">
+                        <span style="font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase; display: block; margin-bottom: 0.5rem;">Morning (AM)</span>
+                        <div class="time-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 1.5rem;">
+                            <button type="button" class="time-slot" onclick="selectTime(this, '09:00')" style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: #fff; cursor: pointer; color: #333;">09:00 AM</button>
+                            <button type="button" class="time-slot selected" onclick="selectTime(this, '10:00')" style="padding: 0.5rem; border: 2px solid #4FBDBA; background: #4FBDBA; color: #fff; border-radius: 0.5rem; cursor: pointer;">10:00 AM</button>
+                            <button type="button" class="time-slot" onclick="selectTime(this, '11:00')" style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: #fff; cursor: pointer; color: #333;">11:00 AM</button>
+                            <button type="button" class="time-slot" onclick="selectTime(this, '11:30')" style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: #fff; cursor: pointer; color: #333;">11:30 AM</button>
+                        </div>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase; display: block; margin-bottom: 0.5rem;">Afternoon (PM)</span>
+                        <div class="time-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
+                            <button type="button" class="time-slot" onclick="selectTime(this, '12:00')" style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: #fff; cursor: pointer; color: #333;">12:00 PM</button>
+                            <button type="button" class="time-slot" onclick="selectTime(this, '13:00')" style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: #fff; cursor: pointer; color: #333;">01:00 PM</button>
+                            <button type="button" class="time-slot" onclick="selectTime(this, '14:00')" style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: #fff; cursor: pointer; color: #333;">02:00 PM</button>
+                            <button type="button" class="time-slot" onclick="selectTime(this, '15:00')" style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: #fff; cursor: pointer; color: #333;">03:00 PM</button>
+                            <button type="button" class="time-slot" onclick="selectTime(this, '16:00')" style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: #fff; cursor: pointer; color: #333;">04:00 PM</button>
+                            <button type="button" class="time-slot" onclick="selectTime(this, '17:00')" style="padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background: #fff; cursor: pointer; color: #333;">05:00 PM</button>
+                        </div>
                     </div>
                 </div>
 
@@ -804,8 +811,13 @@
         // select correct time slot
         document.querySelectorAll('.time-slot').forEach(btn => {
             btn.style.border = "1px solid #e5e7eb";
-            if (btn.innerText === time) {
+            btn.style.background = "#fff";
+            btn.style.color = "#333";
+            // Strip out ' AM' or ' PM' when comparing with innerText
+            if (btn.innerText.substring(0, 5) === time) {
                 btn.style.border = "2px solid #4FBDBA";
+                btn.style.background = "#4FBDBA";
+                btn.style.color = "#fff";
                 document.getElementById('selected-time').value = time;
             }
         });
@@ -825,8 +837,14 @@
 
     // highlight the selected time slot
     function selectTime(btn, time) {
-        document.querySelectorAll('.time-slot').forEach(b => b.style.border = "1px solid #e5e7eb");
+        document.querySelectorAll('.time-slot').forEach(b => {
+            b.style.border = "1px solid #e5e7eb";
+            b.style.background = "#fff";
+            b.style.color = "#333";
+        });
         btn.style.border = "2px solid #4FBDBA";
+        btn.style.background = "#4FBDBA";
+        btn.style.color = "#fff";
         document.getElementById('selected-time').value = time;
     }
 </script>

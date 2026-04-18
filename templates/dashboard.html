@@ -137,8 +137,9 @@
                             </svg>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h3 class="font-semibold text-[#333333] text-[15px]">{{ appt.service_type }}</h3>
+                            <h3 class="font-semibold text-[#333333] text-[15px]">Service: {{ appt.service_type }}</h3>
                             <p class="text-sm text-gray-500 mt-0.5">Dog: {{ appt.dog.name }}</p>
+                            <p class="text-xs font-bold text-[#4FBDBA] mt-0.5">Fee: Rs. {{ appt.amount }}</p>
                             <p class="text-sm text-gray-500 mt-0.5">{{ appt.appointment_date|date:"M d, Y" }} at {{ appt.appointment_time|time:"g:i A" }}</p>
                             <p class="text-sm text-[#4FBDBA] mt-0.5">{{ appt.veterinarian.clinic.name }}</p>
                         </div>
@@ -159,6 +160,7 @@
                         <div class="flex-1 min-w-0">
                             <h3 class="font-semibold text-[#333333] text-[15px]">{{ book.service.name }}</h3>
                             <p class="text-sm text-gray-500 mt-0.5">Dog: {{ book.dog.name }}</p>
+                            <p class="text-xs font-bold text-[#4FBDBA] mt-0.5">Fee: Rs. {{ book.amount }}</p>
                             <p class="text-sm text-gray-500 mt-0.5">{{ book.booking_date|date:"M d, Y" }} at {{ book.booking_time|time:"g:i A" }}</p>
                             <p class="text-sm text-[#4FBDBA] mt-0.5">{{ book.salon.name }}</p>
                         </div>

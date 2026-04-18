@@ -466,8 +466,9 @@
     <div class="card apt-card">
       <div class="apt-top">
         <div>
-          <p class="apt-type">{{ appointment.service_type }}</p>
+          <p class="apt-type">Service: {{ appointment.service_type }}</p>
           <p class="apt-dog">Dog: {{ appointment.dog.name }}</p>
+          <p style="font-size: 0.875rem; font-weight: 700; color: #4FBDBA; margin-top: 0.25rem;">Fee: Rs. {{ appointment.amount }}</p>
         </div>
         <span class="badge {% if appointment.status == 'Confirmed' %}badge-green{% elif appointment.status == 'Pending' %}badge-orange{% else %}badge-blue{% endif %}">{{ appointment.status }}</span>
       </div>
@@ -539,6 +540,7 @@
         </div>
         <p class="vet-name">{{ vet.name }}</p>
         <p class="vet-clinic">{{ vet.clinic.name }}</p>
+        <p style="font-size: 0.8rem; color: #4FBDBA; font-weight: 500; margin-bottom: 0.25rem;">{{ vet.specialty }}</p>
         <p class="vet-location" style="margin-bottom: 0.25rem;">{{ vet.clinic.location }}</p>
         <p style="color: #4FBDBA; font-weight: 600; font-size: 0.875rem; margin-bottom: 0.75rem;">Fee: Rs. {{ vet.consultation_fee }}</p>
         <div class="vet-rating" style="margin-bottom: 0;"><span class="star">★</span><span>{{ vet.rating }}</span></div>
@@ -627,13 +629,25 @@
 
         <div class="field">
           <label>Select Time Slot</label>
-          <div class="time-grid" id="time-grid">
-            <button type="button" class="time-slot" onclick="selectTime(this, '09:00')">09:00</button>
-            <button type="button" class="time-slot selected" onclick="selectTime(this, '10:00')">10:00</button>
-            <button type="button" class="time-slot" onclick="selectTime(this, '11:00')">11:00</button>
-            <button type="button" class="time-slot" onclick="selectTime(this, '14:00')">14:00</button>
-            <button type="button" class="time-slot" onclick="selectTime(this, '15:00')">15:00</button>
-            <button type="button" class="time-slot" onclick="selectTime(this, '16:00')">16:00</button>
+          <div class="mb-3">
+            <span style="font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase; display: block; margin-bottom: 0.5rem;">Morning (AM)</span>
+            <div class="time-grid" id="time-grid-am" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 1.5rem;">
+              <button type="button" class="time-slot" onclick="selectTime(this, '09:00')">09:00 AM</button>
+              <button type="button" class="time-slot selected" onclick="selectTime(this, '10:00')">10:00 AM</button>
+              <button type="button" class="time-slot" onclick="selectTime(this, '11:00')">11:00 AM</button>
+              <button type="button" class="time-slot" onclick="selectTime(this, '11:30')">11:30 AM</button>
+            </div>
+          </div>
+          <div>
+            <span style="font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase; display: block; margin-bottom: 0.5rem;">Afternoon (PM)</span>
+            <div class="time-grid" id="time-grid-pm" style="grid-template-columns: repeat(4, 1fr);">
+              <button type="button" class="time-slot" onclick="selectTime(this, '12:00')">12:00 PM</button>
+              <button type="button" class="time-slot" onclick="selectTime(this, '13:00')">01:00 PM</button>
+              <button type="button" class="time-slot" onclick="selectTime(this, '14:00')">02:00 PM</button>
+              <button type="button" class="time-slot" onclick="selectTime(this, '15:00')">03:00 PM</button>
+              <button type="button" class="time-slot" onclick="selectTime(this, '16:00')">04:00 PM</button>
+              <button type="button" class="time-slot" onclick="selectTime(this, '17:00')">05:00 PM</button>
+            </div>
           </div>
         </div>
 
@@ -706,7 +720,7 @@
     // select correct time slot
     document.querySelectorAll('.time-slot').forEach(btn => {
       btn.classList.remove('selected');
-      if (btn.innerText === time) {
+      if (btn.innerText.substring(0, 5) === time) {
         btn.classList.add('selected');
         document.getElementById('selected-time').value = time;
       }

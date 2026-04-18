@@ -100,7 +100,7 @@
 <div class="col-span-full mt-12 flex justify-center">
     <nav class="flex items-center gap-2">
         {% if dogs.has_previous %}
-        <button onclick="setPage({{ dogs.previous_page_number }})" class="p-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-600 transition-all">
+        <button onclick="setPage('{{ dogs.previous_page_number }}')" class="p-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-600 transition-all">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
         </button>
         {% endif %}
@@ -109,12 +109,12 @@
             {% if dogs.number == i %}
             <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-[#4FBDBA] text-white font-bold shadow-lg shadow-[#4FBDBA]/20">{{ i }}</span>
             {% elif i > dogs.number|add:'-3' and i < dogs.number|add:'3' %}
-            <button onclick="setPage({{ i }})" class="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-600 transition-all font-medium">{{ i }}</button>
+            <button onclick="setPage('{{ i }}')" class="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-600 transition-all font-medium">{{ i }}</button>
             {% endif %}
         {% endfor %}
 
         {% if dogs.has_next %}
-        <button onclick="setPage({{ dogs.next_page_number }})" class="p-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-600 transition-all">
+        <button onclick="setPage('{{ dogs.next_page_number }}')" class="p-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-600 transition-all">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
         </button>
         {% endif %}
