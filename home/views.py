@@ -452,8 +452,11 @@ def add_product_review(request, product_id):
 
 @login_required(login_url='signup')
 def checkout_view(request):
-    buy_now_id = request.GET.get('buy_now_id')
-    buy_now_qty = int(request.GET.get('buy_now_qty', 1))
+    buy_now_id = request.GET.get('buy_now_id') or request.POST.get('buy_now_id')
+    try:
+        buy_now_qty = int(request.GET.get('buy_now_qty') or request.POST.get('buy_now_qty') or 1)
+    except (ValueError, TypeError):
+        buy_now_qty = 1
     
     if buy_now_id:
         product = get_object_or_404(Product, id=buy_now_id)
@@ -1057,19 +1060,46 @@ def get_user_profile_api(request):
             # Update Investment label to Expenses in the stats if it exists
             # This is already handled by template now.
             
-            # Upcoming Events
+            # Upcoming Events (Combined Vet and Grooming)
+            active_statuses = ['Pending', 'Confirmed', 'Paid']
+            
             upcoming_appts = Appointment.objects.filter(
                 Q(appointment_date__gt=today) | Q(appointment_date=today, appointment_time__gte=now_time),
                 user=user, 
-                status__in=['Confirmed', 'Pending']
+                status__in=active_statuses
             ).order_by('appointment_date', 'appointment_time')[:3]
+
+            upcoming_groomings = GroomingBooking.objects.filter(
+                Q(booking_date__gt=today) | Q(booking_date=today, booking_time__gte=now_time),
+                user=user,
+                status__in=active_statuses
+            ).order_by('booking_date', 'booking_time')[:3]
+            
+            combined_events = []
+            for a in upcoming_appts:
+                combined_events.append({
+                    'title': f"Vet: {a.service_type} - {a.dog.name}",
+                    'date': a.appointment_date,
+                    'time': a.appointment_time,
+                    'urgent': a.appointment_date == today
+                })
+            for g in upcoming_groomings:
+                combined_events.append({
+                    'title': f"Groom: {g.service.name} - {g.dog.name}",
+                    'date': g.booking_date,
+                    'time': g.booking_time,
+                    'urgent': g.booking_date == today
+                })
+            
+            # Sort combined and take top 3
+            combined_events.sort(key=lambda x: (x['date'], x['time']))
             
             events = []
-            for a in upcoming_appts:
+            for e in combined_events[:3]:
                 events.append({
-                    'title': f"{a.service_type} - {a.dog.name}",
-                    'date': a.appointment_date.strftime('%b %d, %Y'),
-                    'urgent': a.appointment_date == timezone.now().date()
+                    'title': e['title'],
+                    'date': e['date'].strftime('%b %d, %Y'),
+                    'urgent': e['urgent']
                 })
 
             # Recent Activity
@@ -1622,3 +1652,58 @@ def delete_user_account_api(request):
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
     return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
+
+@csrf_exempt
+def chatbot_api(request):
+    """API endpoint to interact with Groq AI chatbot"""
+    if request.method != "POST":
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        user_message = data.get('message')
+        
+        if not user_message:
+            return JsonResponse({'error': 'No message provided'}, status=400)
+            
+        from django.conf import settings
+        groq_api_key = getattr(settings, 'GROQ_API_KEY', None)
+        
+        if not groq_api_key:
+            return JsonResponse({'error': 'Groq API key not configured'}, status=500)
+            
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {groq_api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        # System prompt to give the AI context about CanineMate
+        system_prompt = (
+            "You are CanineMate AI, a helpful assistant for the CanineMate platform. "
+            "CanineMate is a platform for dog adoption, veterinary services, pet grooming, "
+            "and shopping for pet products in Nepal. "
+            "Be polite, helpful, and provide information related to dogs and pet care. "
+            "If asked about anything outside of pet care or CanineMate, gently guide the user back to pet-related topics."
+        )
+        
+        payload = {
+            "model": "llama-3.3-70b-versatile",
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message}
+            ],
+            "temperature": 0.7,
+            "max_tokens": 1024
+        }
+        
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+        
+        content = response.json()
+        ai_response = content['choices'][0]['message']['content']
+        
+        return JsonResponse({'response': ai_response})
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

@@ -50,4 +50,5 @@ urlpatterns = [
     path('khalti-init-grooming/<int:booking_id>/', views.khalti_init_grooming_payment, name='khalti_init_grooming'),
     path('khalti-callback/', views.khalti_callback_view, name='khalti_callback'),
     path('send-password-reset/', views.send_password_reset_view, name='send_password_reset'),
+    path('api/chatbot/', views.chatbot_api, name='chatbot_api'),
 ]

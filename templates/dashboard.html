@@ -127,7 +127,8 @@
                 <h2 class="text-xl font-semibold text-[#333333] mb-4">Upcoming Appointments</h2>
                 <div class="space-y-3">
 
-                    {% for appt in appointments %}
+                    {% for event in upcoming_events %}
+                    {% if event.is_vet %}
                     <div
                         class="flex items-start gap-4 p-4 rounded-2xl bg-[#F8FFFE] border border-gray-100 hover:border-[#4FBDBA]/30 transition-all">
                         <div class="w-12 h-12 bg-[#4FBDBA] rounded-xl flex items-center justify-center flex-shrink-0">
@@ -137,41 +138,38 @@
                             </svg>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h3 class="font-semibold text-[#333333] text-[15px]">Service: {{ appt.service_type }}</h3>
-                            <p class="text-sm text-gray-500 mt-0.5">Dog: {{ appt.dog.name }}</p>
-                            <p class="text-xs font-bold text-[#4FBDBA] mt-0.5">Fee: Rs. {{ appt.amount }}</p>
-                            <p class="text-sm text-gray-500 mt-0.5">{{ appt.appointment_date|date:"M d, Y" }} at {{ appt.appointment_time|time:"g:i A" }}</p>
-                            <p class="text-sm text-[#4FBDBA] mt-0.5">{{ appt.veterinarian.clinic.name }}</p>
+                            <h3 class="font-semibold text-[#333333] text-[15px]">Service: {{ event.service_type }}</h3>
+                            <p class="text-sm text-gray-500 mt-0.5">Dog: {{ event.dog.name }}</p>
+                            <p class="text-xs font-bold text-[#4FBDBA] mt-0.5">Fee: Rs. {{ event.amount }}</p>
+                            <p class="text-sm text-gray-500 mt-0.5">{{ event.appointment_date|date:"M d, Y" }} at {{ event.appointment_time|time:"g:i A" }}</p>
+                            <p class="text-sm text-[#4FBDBA] mt-0.5">{{ event.veterinarian.clinic.name }}</p>
                         </div>
                         <a href="{% url 'vetappointment' %}"
                             class="text-[#4FBDBA] text-sm font-semibold hover:underline flex-shrink-0 mt-1">View</a>
                     </div>
-                    {% endfor %}
-
-                    {% for book in groomings %}
+                    {% else %}
                     <div
                         class="flex items-start gap-4 p-4 rounded-2xl bg-[#F8FFFE] border border-gray-100 hover:border-[#4FBDBA]/30 transition-all">
                         <div class="w-12 h-12 bg-[#4FBDBA] rounded-xl flex items-center justify-center flex-shrink-0">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
                             </svg>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h3 class="font-semibold text-[#333333] text-[15px]">{{ book.service.name }}</h3>
-                            <p class="text-sm text-gray-500 mt-0.5">Dog: {{ book.dog.name }}</p>
-                            <p class="text-xs font-bold text-[#4FBDBA] mt-0.5">Fee: Rs. {{ book.amount }}</p>
-                            <p class="text-sm text-gray-500 mt-0.5">{{ book.booking_date|date:"M d, Y" }} at {{ book.booking_time|time:"g:i A" }}</p>
-                            <p class="text-sm text-[#4FBDBA] mt-0.5">{{ book.salon.name }}</p>
+                            <h3 class="font-semibold text-[#333333] text-[15px]">{{ event.service.name }}</h3>
+                            <p class="text-sm text-gray-500 mt-0.5">Dog: {{ event.dog.name }}</p>
+                            <p class="text-xs font-bold text-[#4FBDBA] mt-0.5">Fee: Rs. {{ event.amount }}</p>
+                            <p class="text-sm text-gray-500 mt-0.5">{{ event.booking_date|date:"M d, Y" }} at {{ event.booking_time|time:"g:i A" }}</p>
+                            <p class="text-sm text-[#4FBDBA] mt-0.5">{{ event.salon.name }}</p>
                         </div>
                         <a href="{% url 'groomingbooking' %}"
                             class="text-[#4FBDBA] text-sm font-semibold hover:underline flex-shrink-0 mt-1">View</a>
                     </div>
-                    {% endfor %}
-
-                    {% if not appointments and not groomings %}
-                    <p class="text-sm text-gray-500 py-4">No upcoming appointments booked.</p>
                     {% endif %}
+                    {% empty %}
+                    <p class="text-sm text-gray-500 py-4">No upcoming appointments booked.</p>
+                    {% endfor %}
 
                 </div>
                 <!-- View All button -->

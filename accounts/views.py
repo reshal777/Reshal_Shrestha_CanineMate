@@ -63,23 +63,50 @@ def dashboard_view(request):
     user_dogs = Dog.objects.filter(owner=request.user, is_adoption_post=False)
     now = timezone.now()
     today = now.date()
-    
     now_time = now.time()
+    
+    # Filter for active/upcoming appointments
+    # Active statuses are Pending, Paid, and Confirmed. We exclude Cancelled and Completed.
+    active_statuses = ['Pending', 'Confirmed', 'Paid']
     
     upcoming_appointments = Appointment.objects.filter(
         Q(appointment_date__gt=today) | Q(appointment_date=today, appointment_time__gte=now_time),
-        user=request.user
+        user=request.user,
+        status__in=active_statuses
     ).order_by('appointment_date', 'appointment_time')
     
     upcoming_groomings = GroomingBooking.objects.filter(
         Q(booking_date__gt=today) | Q(booking_date=today, booking_time__gte=now_time),
-        user=request.user
+        user=request.user,
+        status__in=active_statuses
     ).order_by('booking_date', 'booking_time')
+    
+    # Combine and sort to get the absolute next 3 events
+    combined_appointments = []
+    
+    for appt in upcoming_appointments:
+        appt.is_vet = True
+        appt.sort_date = appt.appointment_date
+        appt.sort_time = appt.appointment_time
+        combined_appointments.append(appt)
+        
+    for groom in upcoming_groomings:
+        groom.is_vet = False
+        groom.sort_date = groom.booking_date
+        groom.sort_time = groom.booking_time
+        combined_appointments.append(groom)
+        
+    # Sort by date and then time
+    combined_appointments.sort(key=lambda x: (x.sort_date, x.sort_time))
+    
+    # Limit to top 3
+    final_appointments = combined_appointments[:3]
     
     context = {
         'dogs': user_dogs,
-        'appointments': upcoming_appointments,
-        'groomings': upcoming_groomings,
+        'upcoming_events': final_appointments,
+        'appointments': [a for a in final_appointments if a.is_vet],
+        'groomings': [a for a in final_appointments if not a.is_vet],
     }
     
     return render(request, "dashboard.html", context)
