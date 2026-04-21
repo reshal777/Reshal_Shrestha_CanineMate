@@ -81,7 +81,6 @@
                 {% endfor %}
             </div>
             
-            <button onclick="closeRatingModal()" class="mt-8 text-gray-400 font-semibold hover:text-gray-600 transition-colors">Skip for now</button>
         </div>
     </div>
 </div>
@@ -138,7 +137,7 @@
                     // If no more items to rate, close modal after a delay
                     const remaining = document.querySelectorAll('.rate-form').length;
                     if (remaining === 0) {
-                        setTimeout(closeRatingModal, 2000);
+                        setTimeout(closeRatingModal, 8000);
                     }
                 } else {
                     alert(data.message || 'Error submitting review');

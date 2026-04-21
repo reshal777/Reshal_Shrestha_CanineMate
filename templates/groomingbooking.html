@@ -191,53 +191,48 @@
         margin-bottom: 1.5rem;
     }
 
-    .services-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-
-    @media (min-width: 640px) {
-        .services-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-
     @media (min-width: 1024px) {
         .services-grid {
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: 1fr; /* Serial Format */
         }
     }
 
     .service-item {
+        background: #fff;
+        border: 1.5px solid #f1f5f9;
+        border-radius: 1rem;
+        padding: 1.25rem 1.75rem;
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
-        padding: 1rem;
-        border: 1px solid #e5e7eb;
-        border-radius: .75rem;
-        transition: border-color .2s;
+        align-items: center;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        transition: all 0.3s ease;
     }
 
     .service-item:hover {
         border-color: #4FBDBA;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     }
 
     .service-name {
-        font-weight: 600;
-        color: #333;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1a202c;
+        margin-bottom: 0.25rem;
     }
 
     .service-duration {
-        font-size: .875rem;
-        color: #6b7280;
-        margin-top: .2rem;
+        font-size: 0.9rem;
+        color: #718096;
+        font-weight: 500;
     }
 
     .service-price {
-        font-weight: 600;
+        font-size: 1.1rem;
+        font-weight: 700;
         color: #4FBDBA;
-        flex-shrink: 0;
+        white-space: nowrap;
     }
 
     /* ---- my bookings ---- */
@@ -620,10 +615,7 @@
         <div class="services-grid">
             {% for service in services %}
             <div class="service-item">
-                <div>
-                    <p class="service-name">{{ service.name }}</p>
-                    <p class="service-duration">{{ service.duration }}</p>
-                </div>
+                <p class="service-name">{{ service.name }}</p>
                 <span class="service-price">Rs. {{ service.price }}</span>
             </div>
             {% empty %}
@@ -674,9 +666,12 @@
                     data-booking-time="{{ booking.booking_time|time:'H:i' }}"
                     onclick="openRescheduleModal(this)">Reschedule</button>
                 {% endif %}
-                <form action="{% url 'cancel_grooming' booking.id %}" method="POST" style="flex: 1; display: flex;">
+                <form action="{% url 'cancel_grooming' booking.id %}" method="POST" id="cancel-grooming-{{ booking.id }}" style="flex: 1; display: flex;">
                     {% csrf_token %}
-                    <button type="submit" class="cancel-booking-btn" style="width: 100%;">Cancel</button>
+                    <button type="button" class="cancel-booking-btn" style="width: 100%;" 
+                        onclick="showConfirmModal('Cancel Grooming?', 'Are you sure you want to cancel this grooming service? Both related grooming services for this session will be cancelled.', () => document.getElementById('cancel-grooming-{{ booking.id }}').submit())">
+                        Cancel
+                    </button>
                 </form>
             </div>
         </div>

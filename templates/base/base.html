@@ -67,22 +67,40 @@
     <main class="pt-20">
         {% block global_messages %}
         {% if messages %}
-        <div id="django-messages" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" style="transition: opacity 0.5s ease, transform 0.5s ease;">
+        <div id="toast-container" class="fixed top-24 right-4 z-[110] flex flex-col gap-3 pointer-events-none">
             {% for message in messages %}
-            <div class="p-4 rounded-md {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %} mb-4">
-                {{ message }}
+            <div class="toast-notification flex items-center gap-3 bg-white border-l-4 p-4 rounded-xl shadow-2xl transform transition-all translate-x-12 opacity-0 duration-500 pointer-events-auto
+                {% if message.tags == 'success' %}border-green-500 text-green-800{% elif message.tags == 'error' %}border-red-500 text-red-800{% else %}border-[#4FBDBA] text-gray-800{% endif %}"
+                style="min-width: 300px;">
+                <div class="flex-shrink-0">
+                    {% if message.tags == 'success' %}
+                    <i data-lucide="check-circle" class="w-6 h-6 text-green-500"></i>
+                    {% elif message.tags == 'error' %}
+                    <i data-lucide="alert-circle" class="w-6 h-6 text-red-500"></i>
+                    {% else %}
+                    <i data-lucide="info" class="w-6 h-6 text-[#4FBDBA]"></i>
+                    {% endif %}
+                </div>
+                <div class="font-semibold text-sm">{{ message }}</div>
             </div>
             {% endfor %}
         </div>
         <script>
-            setTimeout(function() {
-                const msgs = document.getElementById('django-messages');
-                if (msgs) {
-                    msgs.style.opacity = '0';
-                    msgs.style.transform = 'translateY(-8px)';
-                    setTimeout(function() { msgs.remove(); }, 500);
-                }
-            }, 3000);
+            document.addEventListener('DOMContentLoaded', () => {
+                const toasts = document.querySelectorAll('.toast-notification');
+                toasts.forEach((toast, index) => {
+                    setTimeout(() => {
+                        toast.classList.remove('translate-x-12', 'opacity-0');
+                        toast.classList.add('translate-x-0', 'opacity-100');
+                    }, index * 150);
+
+                    // Auto-hide
+                    setTimeout(() => {
+                        toast.classList.add('translate-x-12', 'opacity-0');
+                        setTimeout(() => { toast.remove(); }, 500);
+                    }, 4000 + (index * 150));
+                });
+            });
         </script>
         {% endif %}
         {% endblock %}
@@ -93,6 +111,77 @@
     {% include 'base/footer.html' %}
 
     {% include 'base/chatbot.html' %}
+    
+    <!-- Premium Confirmation Modal -->
+    <div id="custom-confirm-modal" class="fixed inset-0 z-[1000] hidden items-center justify-center p-6 bg-black/60 backdrop-blur-md">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-md shadow-[0_20px_50px_rgba(0,0,0,0.2)] transform transition-all scale-95 opacity-0 duration-300 overflow-hidden" id="modal-container">
+            <div class="p-10 text-center">
+                <div class="w-24 h-24 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-8">
+                    <i data-lucide="alert-triangle" class="w-12 h-12"></i>
+                </div>
+                <h3 class="text-3xl font-extrabold text-gray-900 mb-4" id="confirm-modal-title">Delete Account?</h3>
+                <p class="text-gray-500 text-lg leading-relaxed mb-10" id="confirm-modal-message">This action is IRREVERSIBLE. Are you sure you want to permanently delete your account?</p>
+                
+                <div class="flex gap-4">
+                    <button id="confirm-modal-cancel" class="flex-1 py-4 bg-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-200 transition-all text-lg">
+                        No, Keep it
+                    </button>
+                    <button id="confirm-modal-proceed" class="flex-1 py-4 bg-[#E12D2D] text-white rounded-2xl font-bold hover:bg-red-700 shadow-[0_8px_20px_rgba(225,45,45,0.4)] transition-all text-lg">
+                        Yes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentConfirmCallback = null;
+
+        function showConfirmModal(title, message, onConfirm) {
+            const modal = document.getElementById('custom-confirm-modal');
+            const container = document.getElementById('modal-container');
+            const titleEl = document.getElementById('confirm-modal-title');
+            const messageEl = document.getElementById('confirm-modal-message');
+            
+            titleEl.innerText = title;
+            messageEl.innerText = message;
+            currentConfirmCallback = onConfirm;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Animation
+            setTimeout(() => {
+                container.classList.remove('scale-95', 'opacity-0');
+                container.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function hideConfirmModal() {
+            const modal = document.getElementById('custom-confirm-modal');
+            const container = document.getElementById('modal-container');
+            
+            container.classList.add('scale-95', 'opacity-0');
+            container.classList.remove('scale-100', 'opacity-100');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                currentConfirmCallback = null;
+            }, 300);
+        }
+
+        document.getElementById('confirm-modal-cancel').onclick = hideConfirmModal;
+        document.getElementById('confirm-modal-proceed').onclick = () => {
+            if (currentConfirmCallback) currentConfirmCallback();
+            hideConfirmModal();
+        };
+
+        // Close on backdrop click
+        document.getElementById('custom-confirm-modal').onclick = (e) => {
+            if (e.target.id === 'custom-confirm-modal') hideConfirmModal();
+        };
+    </script>
 
     {% block extra_js %}{% endblock %}
 

@@ -208,6 +208,7 @@ ACCOUNT_EMAIL_VERIFICATION = 'none' # Set to 'mandatory' in production
 ACCOUNT_USERNAME_REQUIRED = True
 LOGIN_REDIRECT_URL = 'dashboard'
 SOCIALACCOUNT_LOGIN_ON_GET = True # Skip the intermediate login page
+SOCIALACCOUNT_ADAPTER = 'accounts.adapters.CustomSocialAccountAdapter'
 
 # Google OAuth - Construct full redirect URIs from BASE_URL
 GOOGLE_CALLBACK_PATH = '/accounts/google/login/callback/'

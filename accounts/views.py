@@ -4,6 +4,8 @@ from django.contrib.auth import authenticate, login
 from .models import User 
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
+from django.conf import settings
 
 
 def login_view(request):
@@ -157,32 +159,58 @@ def signup_view(request):
                 username=username,
                 password=password,
                 phone=phone,
-                is_active=False
+                is_active=False # Users must verify their email before logging in
             )
             
-            # Send verification email
-            from django.contrib.auth.tokens import default_token_generator
+            # Generate Verification Token
             from django.utils.http import urlsafe_base64_encode
             from django.utils.encoding import force_bytes
-            from django.core.mail import send_mail
-            from django.conf import settings
-            from django.urls import reverse
+            from django.contrib.auth.tokens import default_token_generator
 
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
-            verification_link = request.build_absolute_uri(reverse('verify_email', kwargs={'uidb64': uid, 'token': token}))
-
-            subject = "Verify your CanineMate Account"
-            message = f"Hi {user.username},\n\nPlease click the link below to verify your email address:\n{verification_link}\n\nThanks,\nCanineMate Team"
+            verification_url = request.build_absolute_uri(
+                f'/verify-email/{uid}/{token}/'
+            )
             
+            
+            # Send Welcome Email
+            # Send Verification Email (Matches Requested UI)
             try:
-                from_email = settings.EMAIL_HOST_USER
-                recipient_list = [user.email]
-                send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+                subject = 'Verify your CanineMate Account'
+                display_name = user.get_full_name() or user.username
+                
+                plain_message = (
+                    f'Hi {display_name},\n\n'
+                    f'Please click the link below to verify your email address:\n'
+                    f'{verification_url}\n\n'
+                    f'Thanks,\n'
+                    f'CanineMate Team'
+                )
+                
+                html_message = f'''
+                <html>
+                    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; padding: 20px;">
+                        <p style="margin-bottom: 20px;">Hi {display_name},</p>
+                        <p style="margin-bottom: 10px;">Please click the link below to verify your email address:</p>
+                        <p style="margin-bottom: 25px;"><a href="{verification_url}" style="color: #4FBDBA; text-decoration: underline;">{verification_url}</a></p>
+                        <p>Thanks,<br>CanineMate Team</p>
+                    </body>
+                </html>
+                '''
+                
+                send_mail(
+                    subject,
+                    plain_message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email],
+                    html_message=html_message,
+                    fail_silently=True,
+                )
             except Exception as e:
                 import logging
                 logger = logging.getLogger(__name__)
-                logger.error("Failed to send verification email: " + str(e))
+                logger.error(f"Failed to send verification email to {user.email}: {e}")
 
             messages.success(request, "Registration successful! Please check your email to verify your account before logging in.")
             return redirect("login") 

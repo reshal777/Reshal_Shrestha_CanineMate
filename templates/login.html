@@ -20,14 +20,48 @@
             <div class="mb-8 text-center">
                 <h1 class="text-3xl font-bold text-[#333333] mb-2" id="title">Welcome Back</h1>
                 <p class="text-gray-600" id="desc">Sign in to manage your dog care needs</p>
-                {% if messages %}
-                <div class="mt-4 space-y-2">
-                    {% for message in messages %}
-                        <div class="p-3 text-sm rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
+                
+                {% if request.GET.deleted == 'true' %}
+                <div id="deleted-msg-container" class="overflow-hidden transition-all duration-500 max-h-40">
+                    <div id="deleted-msg" class="mt-4 p-3 text-sm rounded-lg bg-teal-50 text-[#3da5a2] border border-[#4FBDBA]/30 flex items-center gap-2">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                        Your account has been permanently deleted.
+                    </div>
                 </div>
+                <script>
+                    setTimeout(() => {
+                        const msg = document.getElementById('deleted-msg-container');
+                        if (msg) {
+                            msg.style.maxHeight = '0px';
+                            msg.style.marginTop = '0px';
+                            msg.style.opacity = '0';
+                            setTimeout(() => msg.remove(), 500);
+                        }
+                    }, 8000);
+                </script>
+                {% endif %}
+
+                {% if messages %}
+                <div id="messages-container" class="overflow-hidden transition-all duration-500 max-h-96">
+                    <div class="mt-4 space-y-2">
+                        {% for message in messages %}
+                            <div class="p-3 text-sm rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <script>
+                    setTimeout(() => {
+                        const msgs = document.getElementById('messages-container');
+                        if (msgs) {
+                            msgs.style.maxHeight = '0px';
+                            msgs.style.marginTop = '0px';
+                            msgs.style.opacity = '0';
+                            setTimeout(() => msgs.remove(), 500);
+                        }
+                    }, 7000);
+                </script>
                 {% endif %}
             </div>
 
@@ -57,17 +91,12 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
-                        <input type="password" name="password" autocomplete="new-password"
+                        <input type="password" id="password" name="password" autocomplete="new-password"
                             class="w-full pl-12 pr-12 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA] focus:border-transparent"
                             placeholder="Enter your password" required>
-                        <button type="button" onclick="togglePassword()"
-                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4FBDBA]">
-                            <svg id="eye" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
+                        <button type="button" onclick="togglePassword('password', 'eye-icon')"
+                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4FBDBA] focus:outline-none transition-colors">
+                            <i data-lucide="eye" id="eye-icon" class="w-5 h-5"></i>
                         </button>
                     </div>
                 </div>
@@ -124,9 +153,21 @@
 
 {% block extra_js %}
 <script>
-    function togglePassword() {
-        const pwd = document.querySelector('input[name="password"]');
-        pwd.type = pwd.type === 'password' ? 'text' : 'password';
+    function togglePassword(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.setAttribute('data-lucide', 'eye-off');
+        } else {
+            input.type = 'password';
+            icon.setAttribute('data-lucide', 'eye');
+        }
+        
+        if (window.lucide) {
+            lucide.createIcons();
+        }
     }
 </script>
 {% endblock %}

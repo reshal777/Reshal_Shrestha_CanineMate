@@ -49,12 +49,6 @@
 
             <div class="flex flex-col gap-4 pt-4">
                 <div class="flex items-center gap-3">
-                    <input type="checkbox" name="is_staff" id="is_staff" {% if user_obj.is_staff %}checked{% endif %}
-                        class="w-5 h-5 text-[#4FBDBA] border-gray-300 rounded focus:ring-[#4FBDBA]">
-                    <label for="is_staff" class="text-sm font-medium text-gray-700">Staff Member (Can access admin panel)</label>
-                </div>
-                
-                <div class="flex items-center gap-3">
                     <input type="checkbox" name="is_active" id="is_active" {% if user_obj.is_active or not user_obj %}checked{% endif %}
                         class="w-5 h-5 text-[#4FBDBA] border-gray-300 rounded focus:ring-[#4FBDBA]">
                     <label for="is_active" class="text-sm font-medium text-gray-700">Active Account</label>

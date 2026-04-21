@@ -4,6 +4,7 @@ from pets.models import Dog, Vaccination, HealthRecord, Medication, Reminder, Ad
 from veterinary.models import Clinic, Veterinarian, Appointment
 from grooming.models import GroomingSalon, GroomingService, GroomingBooking
 from shop.models import Product, Order, CartItem, OrderItem, ProductReview
+from .models import ContactMessage
 from django.contrib import messages
 from django.db.models import Q
 from accounts.models import User
@@ -14,9 +15,38 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from payment.khalti_utils import initiate_khalti_payment, verify_khalti_payment
-from .email_utils import send_order_email, send_appointment_email, send_grooming_email, send_medicine_reminder_email
+from .email_utils import send_order_email, send_appointment_email, send_grooming_email, send_medicine_reminder_email, send_appointment_cancellation_email, send_grooming_cancellation_email
 from shop.models import Product, Order, CartItem, OrderItem
-from home.models import ContactMessage
+from django.utils import timezone
+from datetime import timedelta
+
+def apply_time_range_filter(queryset, date_field, request):
+    time_range = request.GET.get('time_range')
+    if not time_range:
+        return queryset
+    
+    now = timezone.now()
+    if time_range == '1w':
+        start_date = now - timedelta(days=7)
+    elif time_range == '1m':
+        start_date = now - timedelta(days=30)
+    elif time_range == '1y':
+        start_date = now - timedelta(days=365)
+    elif time_range == 'all':
+        return queryset
+    else:
+        return queryset
+
+    try:
+        model = queryset.model
+        field = model._meta.get_field(date_field.split('__')[0])
+        from django.db.models import DateField as DjDateField, DateTimeField as DjDateTimeField
+        if isinstance(field, DjDateField) and not isinstance(field, DjDateTimeField):
+            return queryset.filter(**{f"{date_field}__gte": start_date.date()})
+    except Exception:
+        pass
+        
+    return queryset.filter(**{f"{date_field}__gte": start_date})
 
 
 def index_view(request):
@@ -28,7 +58,7 @@ def index_view(request):
     vets = Veterinarian.objects.exclude(specialty__icontains='Grooming')[:4]
     if not vets.exists():
         clinic = Clinic.objects.create(name="CanineMate Pet Centre", location="Kathmandu")
-        v1 = Veterinarian.objects.create(name="Dr. Rajesh Sharma", clinic=clinic, experience_years=15, specialty="Chief Veterinarian", about="Expert in general veterinary medicine and emergency care.")
+        v1 = Veterinarian.objects.create(name="Dr. Anish Thapa", clinic=clinic, experience_years=10, specialty="Junior Veterinarian", about="Expert in general veterinary medicine.")
         v2 = Veterinarian.objects.create(name="Sita Thapa", clinic=clinic, experience_years=10, specialty="Head Groomer", about="Certified pet groomer.")
         v3 = Veterinarian.objects.create(name="Hari Gurung", clinic=clinic, experience_years=5, specialty="Adoption Coordinator", about="Passionate rescuer.")
         vets = Veterinarian.objects.all()[:4]
@@ -200,7 +230,7 @@ def adopt_dog_view(request, dog_id):
             address=address,
             reason=reason
         )
-        messages.success(request, "Dog adopted successfully")
+        messages.success(request, f"Adoption application for {dog.name} submitted successfully! Our team will review it shortly.")
         return redirect('adoption_success', request_id=adoption_request.id)
         
     return redirect('adoption')
@@ -350,8 +380,8 @@ def update_cart_quantity_view(request, item_id):
         
     cart_items = CartItem.objects.filter(user=request.user)
     subtotal = sum(i.total_price for i in cart_items)
-    delivery = 0 if subtotal >= 3000 else 150
-    total = subtotal + delivery
+    delivery = 0
+    total = subtotal
     
     return JsonResponse({
         'success': True,
@@ -540,7 +570,7 @@ def checkout_view(request):
             response = initiate_khalti_payment(
                 amount=amount_paisa,
                 purchase_order_id=f"ORD-{order.id}",
-                purchase_order_name=f"Order {order.order_id}",
+                purchase_order_name=f"Shop Order {order.order_id}",
                 return_url=return_url,
                 website_url=website_url,
                 customer_info=customer_info
@@ -580,9 +610,14 @@ def dog_profile_view(request, dog_id=None):
     else:
         dog = dogs.first()
 
-    vaccinations = dog.vaccinations.all()
-    health_records = dog.health_records.all()
-    medications = dog.medications.all()
+    if dog:
+        vaccinations = dog.vaccinations.all()
+        health_records = dog.health_records.all()
+        medications = dog.medications.all()
+    else:
+        vaccinations = []
+        health_records = []
+        medications = []
 
     context = {
         'dogs': dogs,
@@ -751,6 +786,7 @@ def add_reminder(request):
             reminder_time=time,
             start_date=start_date
         )
+        reminder.refresh_from_db()
         send_medicine_reminder_email(reminder)
         messages.success(request, f"Reminder for {name} added!")
         
@@ -762,6 +798,30 @@ def toggle_reminder(request, reminder_id):
     reminder.is_active = not reminder.is_active
     reminder.save()
     return JsonResponse({'success': True, 'is_active': reminder.is_active})
+
+@login_required
+def edit_reminder(request, reminder_id):
+    from pets.models import Reminder
+    reminder = get_object_or_404(Reminder, id=reminder_id, dog__owner=request.user)
+    if request.method == "POST":
+        reminder.dog_id = request.POST.get('dog')
+        reminder.reminder_type = request.POST.get('reminder_type')
+        reminder.name = request.POST.get('name')
+        reminder.frequency = request.POST.get('frequency')
+        reminder.reminder_time = request.POST.get('time')
+        reminder.start_date = request.POST.get('start_date')
+        reminder.save()
+        messages.success(request, f"Reminder for {reminder.name} updated!")
+    return redirect('medicinereminder')
+
+@login_required
+def delete_reminder(request, reminder_id):
+    from pets.models import Reminder
+    reminder = get_object_or_404(Reminder, id=reminder_id, dog__owner=request.user)
+    name = reminder.name
+    reminder.delete()
+    messages.success(request, f"Reminder for {name} deleted!")
+    return redirect('medicinereminder')
 
 @login_required
 def vet_appointment_view(request):
@@ -880,6 +940,13 @@ def cancel_appointment(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id, user=request.user)
     appointment.status = 'Cancelled'
     appointment.save()
+    
+    # Send cancellation email
+    try:
+        send_appointment_cancellation_email(appointment)
+    except Exception as e:
+        print(f"Error sending appointment cancellation email: {e}")
+        
     messages.success(request, "Appointment cancelled successfully!")
     return redirect('vetappointment')
 
@@ -983,9 +1050,32 @@ def reschedule_grooming(request, booking_id):
 @login_required
 def cancel_grooming(request, booking_id):
     booking = get_object_or_404(GroomingBooking, id=booking_id, user=request.user)
-    booking.status = 'Cancelled'
-    booking.save()
-    messages.success(request, "Grooming booking cancelled successfully!")
+    
+    # Cancel all related bookings for the same dog on the same day/time 
+    # (assuming they were booked together)
+    related_bookings = list(GroomingBooking.objects.filter(
+        user=request.user,
+        dog=booking.dog,
+        booking_date=booking.booking_date,
+        booking_time=booking.booking_time,
+        status__in=['Pending', 'Confirmed']
+    ))
+    
+    count = len(related_bookings)
+    for b in related_bookings:
+        b.status = 'Cancelled'
+        b.save()
+        # Send notification email
+        try:
+            send_grooming_cancellation_email(b)
+        except Exception as e:
+            print(f"Error sending cancellation email: {e}")
+            
+    if count > 1:
+        messages.success(request, f"{count} grooming services cancelled successfully!")
+    else:
+        messages.success(request, "Grooming booking cancelled successfully!")
+        
     return redirect('groomingbooking')
 @login_required
 def user_profile_view(request):
@@ -1261,6 +1351,14 @@ def update_user_profile_api(request):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 @login_required
+def delete_product_review(request, review_id):
+    review = get_object_or_404(ProductReview, id=review_id, user=request.user)
+    product_id = review.product.id
+    review.delete()
+    messages.success(request, "Review deleted successfully.")
+    return redirect('product_details', product_id=product_id)
+
+@login_required
 def vet_checkout_view(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id, user=request.user)
     if appointment.status != 'Pending':
@@ -1285,16 +1383,17 @@ def khalti_init_appointment_payment(request, appointment_id):
     customer_info = {
         "name": request.user.get_full_name() or request.user.username,
         "email": request.user.email,
+        "phone": request.user.phone or "9800000000"
     }
     
     from payment.khalti_utils import initiate_khalti_payment
     response = initiate_khalti_payment(
         amount=amount_paisa,
         purchase_order_id=f"APPT-{appointment.id}",
-        purchase_order_name=f"{appointment.service_type} Appointment on {appointment.appointment_date.strftime('%B %d, %Y')}",
+        purchase_order_name=f"Vet Appointment: {appointment.service_type}",
         return_url=return_url,
         website_url=website_url,
-        customer_info=None # Set to None temporarily to fix the 400 error
+        customer_info=customer_info
     )
     
     if "payment_url" in response:
@@ -1478,7 +1577,7 @@ def khalti_init_grooming_payment(request, booking_id):
     response = initiate_khalti_payment(
         amount=amount_paisa,
         purchase_order_id=f"GRM-{booking.id}",
-        purchase_order_name=f"Grooming: {booking.service.name} on {booking.booking_date.strftime('%B %d, %Y')}",
+        purchase_order_name=f"Grooming: {booking.service.name}",
         return_url=return_url,
         website_url=website_url,
         customer_info=customer_info
@@ -1500,10 +1599,10 @@ def pet_expenses_view(request):
     from veterinary.models import Appointment
     from django.db.models import Sum
 
-    # Fetch all paid transactions
-    orders = Order.objects.filter(user=user, paid=True).order_by('-date')
-    appointments = Appointment.objects.filter(user=user, paid=True).order_by('-appointment_date')
-    grooming = GroomingBooking.objects.filter(user=user, paid=True).order_by('-booking_date')
+    # Apply time range filters
+    orders = apply_time_range_filter(Order.objects.filter(user=user, paid=True), 'date', request).order_by('-date')
+    appointments = apply_time_range_filter(Appointment.objects.filter(user=user, paid=True), 'appointment_date', request).order_by('-appointment_date')
+    grooming = apply_time_range_filter(GroomingBooking.objects.filter(user=user, paid=True), 'booking_date', request).order_by('-booking_date')
 
     # Aggregates
     spent_orders = orders.aggregate(total=Sum('amount'))['total'] or 0
@@ -1632,23 +1731,37 @@ def delete_user_account_api(request):
         try:
             import json
             data = json.loads(request.body)
-            password = data.get('password')
+            password = data.get('password') # This will now hold the 'DELETE' confirmation string
             user = request.user
 
-            if not password:
-                return JsonResponse({'success': False, 'error': 'Password is required to delete your account.'}, status=400)
+            if password != 'DELETE':
+                return JsonResponse({'success': False, 'error': "Please type 'DELETE' exactly to confirm."}, status=400)
+            
+            # Security: Don't allow deleting staff/superusers through this simple API
+            if user.is_staff or user.is_superuser:
+                return JsonResponse({'success': False, 'error': 'Admin accounts cannot be deleted here. Please contact support.'}, status=403)
 
-            if not user.check_password(password):
-                return JsonResponse({'success': False, 'error': 'Incorrect password.'}, status=400)
+            # Store username for the response before deletion
+            username = user.username
 
-            # Log the user out before deletion
+            # We must be very careful with the order of operations here.
+            # Capture the primary key and log out the request first.
+            target_user_id = user.user_id
+            
             from django.contrib.auth import logout
             logout(request)
 
-            # Delete the user
-            user.delete()
-
-            return JsonResponse({'success': True})
+            # Perform a hard delete using the ID to ensure it happens even if the session is gone
+            from accounts.models import User
+            User.objects.filter(user_id=target_user_id).delete()
+            
+            # This deletion will cascade to all related models (dogs, appointments, social accounts, etc.)
+            
+            from django.urls import reverse
+            return JsonResponse({
+                'success': True, 
+                'redirect_url': reverse('login') + '?deleted=true'
+            })
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
     return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)

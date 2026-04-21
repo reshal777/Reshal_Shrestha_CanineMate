@@ -21,10 +21,7 @@
         <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Find Your Perfect Companion</h1>
         <p class="text-xl text-white/90 mb-8">Give a loving home to dogs in need across Nepal</p>
         <div class="flex items-center justify-center gap-4">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
+            <i data-lucide="paw-print" class="w-6 h-6 text-white"></i>
             <span id="hero-text" class="text-white font-medium">
                 {{ dog_count }} 
                 {% if current_status == 'adopted' %}
@@ -152,7 +149,15 @@
 
                 <div class="mb-8">
                     <h3 class="text-lg font-bold text-gray-900 mb-3">About</h3>
-                    <p id="modalDescription" class="text-gray-600 leading-relaxed"></p>
+                    <p id="modalDescription" class="text-gray-600 leading-relaxed mb-6"></p>
+                    
+                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                        <h4 class="text-sm font-bold text-blue-700 uppercase tracking-wide mb-1">Contact Owner</h4>
+                        <div class="flex items-center gap-2 text-blue-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            <span id="modalOwnerEmail" class="font-medium"></span>
+                        </div>
+                    </div>
                 </div>
 
                 <button id="modalAdoptBtn" class="w-full bg-[#4FBDBA] text-white py-4 rounded-2xl font-bold text-lg hover:bg-[#3da5a2] shadow-xl hover:shadow-2xl transition-all">
@@ -291,7 +296,7 @@
         document.querySelectorAll('.details-btn').forEach(btn => {
             btn.onclick = function() {
                 const d = btn.dataset;
-                openDetailsModal(d.id, d.name, d.breed, d.age, d.gender, d.location, d.description, d.image, d.vaccinated);
+                openDetailsModal(d.id, d.name, d.breed, d.age, d.gender, d.location, d.description, d.image, d.vaccinated, d.ownerEmail, d.isOwner === 'true');
             }
         });
 
@@ -307,12 +312,13 @@
     // Initial attachment
     attachEventListeners();
 
-    function openDetailsModal(id, name, breed, age, gender, location, description, imgUrl, vaccinated) {
+    function openDetailsModal(id, name, breed, age, gender, location, description, imgUrl, vaccinated, ownerEmail, isOwner) {
         document.getElementById('modalName').innerText = name;
         document.getElementById('modalBreed').innerText = breed;
         document.getElementById('modalAge').innerText = age + ' years';
         document.getElementById('modalLocation').innerText = location;
         document.getElementById('modalDescription').innerText = description;
+        document.getElementById('modalOwnerEmail').innerText = ownerEmail;
         document.getElementById('modalImg').src = imgUrl || 'https://via.placeholder.com/600x400?text=' + name;
         
         const genderEl = document.getElementById('modalGender');
@@ -325,10 +331,16 @@
         
         document.getElementById('modalVaccinated').innerText = vaccinated === 'Yes' ? 'Fully Vaccinated' : 'Partially Vaccinated';
         
-        document.getElementById('modalAdoptBtn').onclick = function() {
-            closeModals();
-            openAdoptModal(id, name);
-        };
+        const adoptBtn = document.getElementById('modalAdoptBtn');
+        if (isOwner) {
+            adoptBtn.classList.add('hidden');
+        } else {
+            adoptBtn.classList.remove('hidden');
+            adoptBtn.onclick = function() {
+                closeModals();
+                openAdoptModal(id, name);
+            };
+        }
         
         toggleModal('detailsModal');
     }

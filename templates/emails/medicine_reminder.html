@@ -23,7 +23,7 @@
             
             <div class="info-box">
                 <p><strong>Medicine/Task:</strong> <span class="reminder-name">{{ reminder.name }}</span></p>
-                <p><strong>Scheduled Time:</strong> {{ reminder.reminder_time|time:"P" }}</p>
+                <p><strong>Scheduled Time:</strong> {{ reminder.reminder_time|time:"g:i A"|default:reminder.reminder_time }}</p>
                 <p><strong>Frequency:</strong> {{ reminder.get_frequency_display|default:reminder.frequency }}</p>
             </div>
 

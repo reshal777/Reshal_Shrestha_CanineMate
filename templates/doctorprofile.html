@@ -39,33 +39,6 @@
     height: 20px;
   }
 
-  .top-actions {
-    display: flex;
-    gap: .75rem;
-  }
-
-  .icon-btn {
-    width: 36px;
-    height: 36px;
-    border: 1px solid #e5e7eb;
-    border-radius: .5rem;
-    background: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background .2s;
-  }
-
-  .icon-btn:hover {
-    background: #f9fafb;
-  }
-
-  .icon-btn svg {
-    width: 20px;
-    height: 20px;
-    color: #4b5563;
-  }
-
   /* page wrapper */
   .main-content {
     max-width: 1280px;
@@ -108,7 +81,6 @@
     flex-wrap: wrap;
   }
 
-  /* avatar circle with online dot */
   .avatar-wrap {
     position: relative;
     flex-shrink: 0;
@@ -190,12 +162,6 @@
     color: #F4A261;
   }
 
-  /* star rating */
-  .stars {
-    display: flex;
-    gap: 2px;
-  }
-
   .star-filled {
     color: #F6E27F;
     fill: #F6E27F;
@@ -213,19 +179,6 @@
     font-weight: 600;
   }
 
-  /* quick action buttons */
-  .action-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: .75rem;
-  }
-
-  @media (min-width: 640px) {
-    .action-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-
   .btn-primary {
     background: #4FBDBA;
     color: #fff;
@@ -239,193 +192,14 @@
     justify-content: center;
     gap: .5rem;
     transition: background .2s;
+    width: 100%;
   }
 
   .btn-primary:hover {
     background: #3da5a2;
   }
 
-  .btn-outline-teal {
-    border: 2px solid #4FBDBA;
-    color: #4FBDBA;
-    background: transparent;
-    padding: .75rem 1rem;
-    border-radius: .5rem;
-    font-size: .9rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: .5rem;
-    transition: background .2s, color .2s;
-  }
-
-  .btn-outline-teal:hover {
-    background: #4FBDBA;
-    color: #fff;
-  }
-
-  /* Modal Styles */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, .5);
-    z-index: 50;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-  }
-
-  .modal-overlay.open {
-    display: flex;
-  }
-
-  .modal {
-    background: #fff;
-    border-radius: 1rem;
-    max-width: 672px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-
-  .modal-header {
-    position: sticky;
-    top: 0;
-    background: #fff;
-    border-bottom: 1px solid #e5e7eb;
-    padding: 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .modal-header h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #333;
-    margin: 0;
-  }
-
-  .close-btn {
-    background: none;
-    border: none;
-    color: #9ca3af;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    transition: color .2s;
-  }
-
-  .close-btn:hover {
-    color: #4b5563;
-  }
-
-  .modal-body {
-    padding: 1.5rem;
-  }
-
-  .field {
-    margin-bottom: 1.5rem;
-  }
-
-  .field label {
-    display: block;
-    font-size: .875rem;
-    font-weight: 500;
-    color: #333;
-    margin-bottom: .5rem;
-  }
-
-  .field input,
-  .field select,
-  .field textarea {
-    width: 100%;
-    padding: .75rem 1rem;
-    border: 1px solid #e5e7eb;
-    border-radius: .5rem;
-    font-size: .95rem;
-    background: #f9fafb;
-    outline: none;
-    transition: border-color .2s;
-  }
-
-  .field input:focus,
-  .field select:focus,
-  .field textarea:focus {
-    border-color: #4FBDBA;
-    background: #fff;
-  }
-
-  .time-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: .75rem;
-  }
-
-  .time-slot {
-    padding: .5rem;
-    border: 1px solid #e5e7eb;
-    border-radius: .5rem;
-    background: #f9fafb;
-    color: #4b5563;
-    font-size: .875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all .2s;
-    text-align: center;
-    border: none;
-  }
-
-  .time-slot:hover {
-    background: #ecfbfa;
-    color: #4FBDBA;
-  }
-
-  .time-slot.selected {
-    background: #4FBDBA;
-    color: #fff;
-  }
-
-  .confirm-btn {
-    width: 100%;
-    background: #4FBDBA;
-    color: #fff;
-    border: none;
-    padding: 1rem;
-    border-radius: .75rem;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background .2s;
-    margin-top: 1rem;
-  }
-
-  .confirm-btn:hover {
-    background: #3da5a2;
-  }
-
-  .btn-outline-gray {
-    border: 2px solid #e5e7eb;
-    color: #4b5563;
-    background: transparent;
-    padding: .75rem 1rem;
-    border-radius: .5rem;
-    font-size: .9rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: .5rem;
-    transition: background .2s;
-  }
-
-  .btn-outline-gray:hover {
-    background: #f9fafb;
-  }
-
-  /* section headings */
+  /* section titles */
   .sec-title {
     font-size: 1.25rem;
     font-weight: 700;
@@ -443,23 +217,115 @@
     margin-bottom: 1rem;
   }
 
-  /* about text */
   .about-text {
     color: #4b5563;
     line-height: 1.7;
   }
 
-  /* specializations grid */
-  .spec-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: .75rem;
+  /* Sidebar styling */
+  .sidebar-card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 6rem;
   }
 
-  @media (min-width: 640px) {
-    .spec-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
+  .sidebar-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 1rem;
+  }
+
+  .contact-row {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    margin-bottom: 1rem;
+  }
+
+  .icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: .5rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ib-teal { background: rgba(79, 189, 186, .1); color: #4FBDBA; }
+  .ib-orange { background: rgba(244, 162, 97, .1); color: #F4A261; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid #f3f4f6;
+    margin: 1.25rem 0;
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .service-item {
+    background: #fff;
+    border: 1.5px solid #f1f5f9;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+  }
+
+  .service-item:hover {
+    border-color: #4FBDBA;
+    transform: translateY(-2px);
+  }
+
+  .service-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1a202c;
+  }
+
+  .service-price {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #4FBDBA;
+  }
+
+  .book-now-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: #4FBDBA;
+    color: #fff;
+    border: none;
+    padding: .85rem;
+    border-radius: .5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: background .2s;
+    cursor: pointer;
+  }
+
+  .book-now-btn:hover {
+    background: #3da5a2;
+  }
+
+  /* expertise/etc */
+  .spec-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: .75rem;
   }
 
   .spec-item {
@@ -471,101 +337,74 @@
     border-radius: .5rem;
   }
 
-  .dot-teal {
-    width: 8px;
-    height: 8px;
-    background: #4FBDBA;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
+  .dot-teal { width: 8px; height: 8px; background: #4FBDBA; border-radius: 50%; }
 
-  .dot-orange {
-    width: 8px;
-    height: 8px;
-    background: #F4A261;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  /* bullet list */
-  .bullet-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .bullet-item {
-    display: flex;
-    gap: .75rem;
-  }
-
-  .bullet-item p {
-    color: #4b5563;
-    font-size: .875rem;
-    line-height: 1.5;
-  }
-
-  /* sidebar */
-  .sidebar-card {
-    background: #fff;
-    border-radius: 1rem;
-    padding: 1.5rem;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  }
-
-  @media (min-width: 1024px) {
-    .sidebar-card {
-      position: sticky;
-      top: 6rem;
-    }
-  }
-
-  .contact-row {
-    display: flex;
-    align-items: flex-start;
-    gap: .75rem;
-    margin-bottom: 1rem;
-  }
-
-  .icon-box {
-    width: 40px;
-    height: 40px;
-    border-radius: .5rem;
-    flex-shrink: 0;
-    display: flex;
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .5);
+    z-index: 100;
     align-items: center;
     justify-content: center;
+    padding: 1rem;
   }
 
-  .ib-teal {
-    background: rgba(79, 189, 186, .1);
-    color: #4FBDBA;
-  }
+  .modal-overlay.open { display: flex; }
 
-  .ib-orange {
-    background: rgba(244, 162, 97, .1);
-    color: #F4A261;
-  }
-
-  .divider {
-    border: none;
-    border-top: 1px solid #f3f4f6;
-    margin: 1.25rem 0;
-  }
-
-  .book-now-btn {
-    display: block;
+  .modal {
+    background: #fff;
+    border-radius: 1rem;
+    max-width: 600px;
     width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background: #fff;
+  }
+
+  .modal-body { padding: 1.5rem; }
+
+  .field { margin-bottom: 1.25rem; }
+  .field label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; color: #374151; }
+  .field select, .field input, .field textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    outline: none;
+  }
+
+  .time-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .time-slot {
+    padding: 0.6rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
     text-align: center;
+    cursor: pointer;
+    font-size: 0.85rem;
+    background: #f9fafb;
+  }
+
+  .time-slot.selected {
     background: #4FBDBA;
     color: #fff;
-    border: none;
-    padding: .75rem;
-    border-radius: .5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    margin-top: 1.5rem;
-    transition: background .2s;
+    border-color: #4FBDBA;
   }
 </style>
 {% endblock %}
@@ -574,10 +413,8 @@
 <div class="top-bar">
   <div class="top-bar-inner">
     <a href="{% url 'vetappointment' %}" class="back-link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round">
-        <path d="m12 19-7-7 7-7" />
-        <path d="M19 12H5" />
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m12 19-7-7 7-7" /><path d="M19 12H5" />
       </svg>
       Back to Pet Care Center
     </a>
@@ -586,7 +423,7 @@
 
 <div class="main-content">
   <div class="layout">
-    <!-- left: doctor info -->
+    <!-- Main Content -->
     <div class="content-col">
       <div class="card">
         <div class="profile-top">
@@ -600,241 +437,162 @@
             </div>
             <div class="online-dot"></div>
           </div>
-
           <div class="profile-info">
             <h1 class="doc-name">{{ vet.name }}</h1>
-            <p class="doc-specialty" style="color: #4FBDBA; font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem;">Specialization: {{ vet.specialty }}</p>
-            <div class="meta-item" style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-              <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-              </svg>
-              <span>Available: {{ vet.available_time }}</span>
-            </div>
+            <p class="doc-specialty">Specialization: {{ vet.specialty }}</p>
             <div class="profile-meta">
               <div class="meta-item">
-                <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <polygon
-                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                </svg>
+                <svg class="star-filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
                 <strong>{{ vet.rating }}</strong>
               </div>
               <div class="meta-item">
-                <svg class="meta-orange" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-                </svg>
-                {{ vet.experience_years }} years Experience
+                <svg class="meta-orange" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>
+                {{ vet.experience_years }}+ Years
               </div>
               <div class="meta-item">
-                <svg class="meta-teal" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                {{ vet.clinic.name }}, {{ vet.clinic.location }}
+                <svg class="meta-teal" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                {{ vet.clinic.name }}
               </div>
             </div>
-
             {% if vet.is_emergency_available %}
-            <span class="emergency-badge">Emergency Services Available</span>
+            <span class="emergency-badge">Emergency Care Available</span>
             {% endif %}
           </div>
         </div>
-
-        <div class="action-grid" style="grid-template-columns: 1fr;">
-          <button onclick="openModal()" class="btn-primary">Book Appointment</button>
-        </div>
+        <button onclick="openModal()" class="btn-primary">Book Appointment</button>
       </div>
 
       <div class="card">
         <p class="sec-title-lg">About {{ vet.name }}</p>
-        
-        <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
-            <div style="background: #f0fdf4; color: #166534; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.875rem; border: 1px solid #bbf7d0;">
-                {{ vet.experience_years }}+ Years of Clinical Experience
-            </div>
-            <div style="background: #eff6ff; color: #1e40af; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.875rem; border: 1px solid #bfdbfe;">
-                Specialist in {{ vet.specialty }}
-            </div>
-        </div>
-        
-        <p class="about-text" style="font-size: 1rem;">{{ vet.about|default:"Dr. "|add:vet.name|add:" is a highly qualified veterinary professional dedicated to providing the best care for your pets." }}</p>
+        <p class="about-text">{{ vet.about|default:"Dr. "|add:vet.name|add:" is a highly qualified veterinary professional dedicated to providing the best care for your pets." }}</p>
         
         <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #f3f4f6;">
-            <h3 style="font-weight: 600; color: #374151; margin-bottom: 0.75rem; font-size: 1.1rem;">Key Details</h3>
-            <ul style="color: #4b5563; list-style-type: none; margin-left: 0; padding-left: 0; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.95rem;">
+            <h3 class="sec-title">Key Details</h3>
+            <ul style="list-style: none; padding: 0; color: #4b5563; font-size: 0.95rem; display: grid; gap: 0.75rem;">
                 <li style="display: flex; gap: 0.5rem; align-items: center;">
-                    <svg width="16" height="16" fill="none" stroke="#4FBDBA" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                    <strong>Languages Spoken:</strong> {{ vet.languages|default:"English, Nepali" }}
+                    <svg width="18" height="18" fill="none" stroke="#4FBDBA" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <strong>Availability:</strong> Mon - Fri, 09:00 AM - 05:00 PM
                 </li>
                 <li style="display: flex; gap: 0.5rem; align-items: center;">
-                    <svg width="16" height="16" fill="none" stroke="#4FBDBA" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    <strong>Availability:</strong> {{ vet.available_time|default:"Mon - Fri, 09:00 AM - 05:00 PM" }}
-                </li>
-                {% if vet.is_emergency_available %}
-                <li style="display: flex; gap: 0.5rem; align-items: center; color: #dc2626;">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                    <strong>Emergency Care:</strong> On-Call 24/7 Available
-                </li>
-                {% endif %}
+                  <svg width="18" height="18" fill="none" stroke="#4FBDBA" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  <strong>Languages:</strong> {{ vet.languages|default:"English, Nepali" }}
+              </li>
             </ul>
         </div>
       </div>
 
       {% if vet.expertise_list %}
       <div class="card">
-        <h2 class="sec-title">Areas of Expertise</h2>
+        <h2 class="sec-title">Expertise</h2>
         <div class="spec-grid">
           {% for item in vet.expertise_list %}
-          <div class="spec-item">
-            <div class="dot-teal"></div><span>{{ item }}</span>
-          </div>
+          <div class="spec-item"><div class="dot-teal"></div><span>{{ item }}</span></div>
           {% endfor %}
         </div>
       </div>
       {% endif %}
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {% if vet.education_list %}
-        <div class="card">
-          <h2 class="sec-title">Education</h2>
-          <div class="bullet-list">
-            {% for item in vet.education_list %}
-            <div class="bullet-item">
-              <div class="dot-orange"></div>
-              <p>{{ item }}</p>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-        {% endif %}
-
-        {% if vet.achievement_list %}
-        <div class="card">
-          <h2 class="sec-title">Achievements</h2>
-          <div class="bullet-list">
-            {% for item in vet.achievement_list %}
-            <div class="bullet-item">
-              <div class="dot-teal"></div>
-              <p>{{ item }}</p>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-        {% endif %}
-      </div>
     </div>
 
-    <!-- right sidebar -->
-    <div>
+    <!-- Sidebar -->
+    <div class="sidebar-col">
       <div class="sidebar-card">
         <p class="sidebar-title">Contact Information</p>
         <div class="contact-row">
-          <div class="icon-box ib-teal">
-            <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-              <circle cx="12" cy="10" r="3" />
-            </svg>
-          </div>
-          <div>
-            <p class="text-xs font-semibold text-gray-500">Clinic Address</p>
-            <p class="text-sm">{{ vet.clinic.location }}</p>
-          </div>
+            <div class="icon-box ib-teal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg></div>
+            <div>
+              <p class="text-xs font-semibold text-gray-500">Clinic Address</p>
+              <p class="text-sm font-medium">{{ vet.clinic.location }}</p>
+            </div>
         </div>
         {% if vet.contact_phone %}
         <div class="contact-row">
-          <div class="icon-box ib-orange">
-            <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path
-                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.38 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.083.84.236 1.67.46 2.48a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l.77-.77a2 2 0 0 1 2.11-.45c.81.224 1.64.377 2.48.46A2 2 0 0 1 22 16.92z" />
-            </svg>
-          </div>
-          <div>
-            <p class="text-xs font-semibold text-gray-500">Phone</p>
-            <p class="text-sm">{{ vet.contact_phone }}</p>
-          </div>
-        </div>
-        {% endif %}
-        {% if vet.contact_email %}
-        <div class="contact-row">
-          <div class="icon-box ib-teal">
-            <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-              <polyline points="22,6 12,13 2,6" />
-            </svg>
-          </div>
-          <div>
-            <p class="text-xs font-semibold text-gray-500">Email</p>
-            <p class="text-sm">{{ vet.contact_email }}</p>
-          </div>
+            <div class="icon-box ib-orange"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.38 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.083.84.236 1.67.46 2.48a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l.77-.77a2 2 0 0 1 2.11-.45c.81.224 1.64.377 2.48.46A2 2 0 0 1 22 16.92z" /></svg></div>
+            <div>
+              <p class="text-xs font-semibold text-gray-500">Phone Number</p>
+              <p class="text-sm font-medium">{{ vet.contact_phone }}</p>
+            </div>
         </div>
         {% endif %}
 
         <hr class="divider">
-        <div class="flex justify-between items-center mb-2">
-          <span class="text-sm text-gray-600">Consultation Fee</span>
-          <span class="font-bold text-[#4FBDBA]">Rs. {{ vet.consultation_fee }}</span>
+
+        <p class="sidebar-title">Available Services</p>
+        <div class="services-grid">
+            <div class="service-item">
+                <span class="service-name">Regular Checkup</span>
+                <span class="service-price">Rs. {{ vet.regular_checkup_fee }}</span>
+            </div>
+            <div class="service-item">
+                <span class="service-name">Vaccination</span>
+                <span class="service-price">Rs. {{ vet.vaccination_fee }}</span>
+            </div>
+            <div class="service-item">
+                <span class="service-name">Consultation</span>
+                <span class="service-price">Rs. {{ vet.consultation_fee }}</span>
+            </div>
+            <div class="service-item">
+                <span class="service-name">Follow-up</span>
+                <span class="service-price">Rs. {{ vet.followup_fee }}</span>
+            </div>
+            {% if vet.is_emergency_available %}
+            <div class="service-item" style="border-color: #fee2e2; background: #fffafb;">
+                <span class="service-name">Emergency Care</span>
+                <span class="service-price" style="color: #dc2626;">Rs. {{ vet.emergency_fee }}</span>
+            </div>
+            {% endif %}
         </div>
-        <p class="text-sm text-gray-600">Languages: <span class="font-medium text-gray-900">{{ vet.languages }}</span>
-        </p>
 
         <hr class="divider">
-        <button onclick="openModal()" class="book-now-btn">Book Appointment Now</button>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="font-size: 0.85rem; color: #6b7280;">Consultation Fee</span>
+            <span style="font-weight: 700; color: #4FBDBA;">Rs. {{ vet.consultation_fee }}</span>
+        </div>
+        <button onclick="openModal()" class="book-now-btn">Book Now</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- booking modal -->
+<!-- Modal -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <div class="modal-header">
-      <h2 id="modal-title">Book Appointment</h2>
-      <button class="close-btn" onclick="closeModal()">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
+      <h2 style="margin:0; font-size: 1.25rem;">Book Appointment</h2>
+      <button onclick="closeModal()" style="background:none; border:none; font-size: 1.5rem; cursor:pointer; color:#9ca3af;">&times;</button>
     </div>
     <div class="modal-body">
-      <form action="{% url 'vetappointment' %}" method="POST" id="booking-form">
+      <form action="{% url 'vetappointment' %}" method="POST">
         {% csrf_token %}
         <input type="hidden" name="vet" value="{{ vet.id }}">
         <input type="hidden" name="time" id="selected-time" required>
 
-        <div class="field" id="dog-selection-field">
-          <label>Select Your Dog</label>
+        <div class="field">
+          <label>Select Dog</label>
           <select name="dog" required>
-            <option value="">Choose a dog</option>
             {% for dog in dogs %}
-            <option value="{{ dog.id }}">{{ dog.name }} ({{ dog.breed }})</option>
+            <option value="{{ dog.id }}">{{ dog.name }}</option>
             {% endfor %}
           </select>
         </div>
 
-        <div class="field" id="type-selection-field">
+        <div class="field">
           <label>Appointment Type</label>
           <select name="service_type" required>
-            <option value="Consultation">Regular Consultation</option>
+            <option value="Regular Checkup">Regular Checkup</option>
             <option value="Vaccination">Vaccination</option>
-            <option value="Surgery">Surgery / Special Procedure</option>
-            <option value="Checkup">General Checkup</option>
+            <option value="Emergency">Emergency</option>
+            <option value="Follow-up">Follow-up</option>
+            <option value="Consultation">Consultation</option>
           </select>
         </div>
 
         <div class="field">
           <label>Select Date</label>
-          <input type="date" name="date" id="appointment-date" required>
+          <input type="date" name="date" id="apt-date" required>
         </div>
 
         <div class="field">
-          <label>Available Time Slots</label>
+          <label>Available Slots</label>
           <div class="time-grid">
             <button type="button" class="time-slot" onclick="selectTime(this, '09:00')">09:00 AM</button>
             <button type="button" class="time-slot" onclick="selectTime(this, '10:00')">10:00 AM</button>
@@ -842,19 +600,10 @@
             <button type="button" class="time-slot" onclick="selectTime(this, '13:00')">01:00 PM</button>
             <button type="button" class="time-slot" onclick="selectTime(this, '14:00')">02:00 PM</button>
             <button type="button" class="time-slot" onclick="selectTime(this, '15:00')">03:00 PM</button>
-            <button type="button" class="time-slot" onclick="selectTime(this, '16:00')">04:00 PM</button>
-            <button type="button" class="time-slot" onclick="selectTime(this, '17:00')">05:00 PM</button>
           </div>
         </div>
 
-        <div class="field" id="notes-selection-field">
-          <label>Notes (Optional)</label>
-          <textarea name="notes" rows="3" placeholder="Tell us about the reason for visit..."></textarea>
-        </div>
-
-        <button type="submit" class="confirm-btn">
-          <span id="confirm-btn-text">Confirm Booking</span>
-        </button>
+        <button type="submit" class="btn-primary" style="padding: 1rem;">Confirm Appointment</button>
       </form>
     </div>
   </div>
@@ -863,26 +612,9 @@
 
 {% block extra_js %}
 <script>
-  function openModal() {
-    document.getElementById('modal').classList.add('open');
-    // default date to today
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('appointment-date').value = today;
-  }
-
-  function closeModal() {
-    document.getElementById('modal').classList.remove('open');
-  }
-
-  function selectTime(btn, time) {
-    document.querySelectorAll('.time-slot').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    document.getElementById('selected-time').value = time;
-  }
-
-  // close when clicking backdrop
-  document.getElementById('modal').addEventListener('click', function (e) {
-    if (e.target === this) closeModal();
-  });
+  function openModal() { document.getElementById('modal').classList.add('open'); document.getElementById('apt-date').value = new Date().toISOString().split('T')[0]; }
+  function closeModal() { document.getElementById('modal').classList.remove('open'); }
+  function selectTime(btn, time) { document.querySelectorAll('.time-slot').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); document.getElementById('selected-time').value = time; }
+  window.onclick = function(e) { if (e.target == document.getElementById('modal')) closeModal(); }
 </script>
 {% endblock %}

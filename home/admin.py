@@ -1,4 +1,9 @@
 from django.contrib import admin
+from .models import ContactMessage
 
-# Models have been moved to specialized apps (pets, shop, veterinary, grooming, chat).
-# Please check those apps' admin.py for registration.
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'subject', 'is_resolved', 'created_at')
+    list_filter = ('is_resolved', 'created_at')
+    search_fields = ('name', 'email', 'message')
+    ordering = ('-created_at',)

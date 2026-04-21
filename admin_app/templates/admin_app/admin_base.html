@@ -162,34 +162,7 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-4">
-          <!-- Notification Bell -->
-          <div class="relative">
-            <button id="notif-bell" class="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600 relative">
-              <i data-lucide="bell" class="w-6 h-6"></i>
-              <span id="notif-dot" class="hidden absolute top-2 right-2 w-3 h-3 bg-secondary rounded-full border-2 border-white notif-pulse"></span>
-            </button>
-            
-            <!-- Notification Dropdown -->
-            <div id="admin-notif-dropdown" class="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
-              <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                <h3 class="font-bold text-dark text-sm">Notifications</h3>
-                <span id="notif-count" class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">0 New</span>
-              </div>
-              <div id="notif-items" class="max-h-80 overflow-y-auto py-2">
-                <!-- Items populated by JS -->
-                <div id="no-notif" class="p-8 text-center text-gray-400 italic text-sm">
-                  <i data-lucide="bell-off" class="w-8 h-8 mx-auto mb-2 opacity-20"></i>
-                  No new notifications
-                </div>
-              </div>
-            </div>
-          </div>
 
-          <div class="w-8 h-8 bg-gradient-to-br from-[#4FBDBA] to-[#3da5a2] rounded-full flex items-center justify-center shadow-sm">
-            <i data-lucide="user" class="w-5 h-5 text-white"></i>
-          </div>
-        </div>
       </div>
     </header>
 
@@ -206,6 +179,28 @@
       {% endfor %}
     {% endif %}
   </div>
+</div>
+
+<!-- Premium Confirmation Modal -->
+<div id="custom-confirm-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl transform transition-all scale-95 opacity-0 duration-300" id="modal-container">
+        <div class="p-8 text-center">
+            <div class="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i data-lucide="alert-triangle" class="w-10 h-10"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-3" id="confirm-modal-title">Confirm Action</h3>
+            <p class="text-gray-500 mb-8" id="confirm-modal-message">Are you sure you want to proceed with this action?</p>
+            
+            <div class="flex gap-4">
+                <button id="confirm-modal-cancel" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold hover:bg-gray-200 transition-all">
+                    Cancel
+                </button>
+                <button id="confirm-modal-proceed" class="flex-1 py-4 bg-red-600 text-white rounded-2xl font-bold hover:bg-red-700 shadow-lg shadow-red-200 transition-all">
+                    Yes, Delete
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -246,55 +241,6 @@
     lucide.createIcons();
   });
 
-  // Notification logic
-  const notifBell = document.getElementById('notif-bell');
-  const notifDot = document.getElementById('notif-dot');
-  const notifDropdown = document.getElementById('admin-notif-dropdown');
-  const notifItems = document.getElementById('notif-items');
-  const notifCount = document.getElementById('notif-count');
-  const noNotif = document.getElementById('no-notif');
-
-  // Read messages from the hidden wrapper to avoid IDE lint errors with template tags in JS
-  const messageElements = document.querySelectorAll('.admin-django-message');
-  
-  if (messageElements.length > 0) {
-    notifDot.classList.remove('hidden');
-    noNotif.classList.add('hidden');
-    notifCount.innerText = `${messageElements.length} New`;
-    
-    messageElements.forEach(el => {
-      const text = el.innerText;
-      const tags = el.getAttribute('data-tags') || 'info';
-      
-      const div = document.createElement('div');
-      div.className = 'px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0 flex gap-3 items-start';
-      
-      const icon = tags === 'success' ? 'check-circle' : 'alert-circle';
-      const color = tags === 'success' ? 'text-green-500' : 'text-red-500';
-      
-      div.innerHTML = `
-        <i data-lucide="${icon}" class="w-5 h-5 ${color} shrink-0 mt-0.5"></i>
-        <div>
-          <p class="text-sm font-medium text-dark">${text}</p>
-          <p class="text-[10px] text-gray-400 mt-0.5">Just now</p>
-        </div>
-      `;
-      notifItems.prepend(div);
-    });
-    lucide.createIcons();
-  }
-
-  notifBell.addEventListener('click', (e) => {
-    e.stopPropagation();
-    notifDropdown.classList.toggle('show');
-    notifDot.classList.add('hidden'); // Hide dot after viewing
-  });
-
-  document.addEventListener('click', () => {
-    notifDropdown.classList.remove('show');
-  });
-
-  notifDropdown.addEventListener('click', (e) => e.stopPropagation());
 
   // Global time range filter — auto-submit on change
   const timeSelect = document.getElementById('global-time-range-select');
@@ -303,6 +249,77 @@
       this.closest('form').submit();
     });
   }
+
+  // Modal Display Logic
+  let currentConfirmCallback = null;
+
+  function showConfirmModal(title, message, onConfirm) {
+      const modal = document.getElementById('custom-confirm-modal');
+      const container = document.getElementById('modal-container');
+      const titleEl = document.getElementById('confirm-modal-title');
+      const messageEl = document.getElementById('confirm-modal-message');
+      
+      titleEl.innerText = title;
+      messageEl.innerText = message;
+      currentConfirmCallback = onConfirm;
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      
+      // Animation
+      setTimeout(() => {
+          container.classList.remove('scale-95', 'opacity-0');
+          container.classList.add('scale-100', 'opacity-100');
+      }, 10);
+  }
+
+  function hideConfirmModal() {
+      const modal = document.getElementById('custom-confirm-modal');
+      const container = document.getElementById('modal-container');
+      
+      container.classList.add('scale-95', 'opacity-0');
+      container.classList.remove('scale-100', 'opacity-100');
+      
+      setTimeout(() => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+          currentConfirmCallback = null;
+      }, 300);
+  }
+
+  document.getElementById('confirm-modal-cancel').onclick = hideConfirmModal;
+  document.getElementById('confirm-modal-proceed').onclick = () => {
+      if (currentConfirmCallback) currentConfirmCallback();
+      hideConfirmModal();
+  };
+
+  // Close on backdrop click
+  document.getElementById('custom-confirm-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'custom-confirm-modal') hideConfirmModal();
+  });
+
+  // Upgrade standard confirm() delete popups securely
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('form').forEach(form => {
+      const onsubmitAttr = form.getAttribute('onsubmit');
+      if (onsubmitAttr && onsubmitAttr.includes('confirm(')) {
+        // Extract the message from confirm('Message')
+        const match = onsubmitAttr.match(/confirm\(['"](.+?)['"]\)/);
+        const msg = match ? match[1] : "Are you sure you want to delete this?";
+        
+        // Remove the native onsubmit browser popup
+        form.removeAttribute('onsubmit');
+        
+        // Attach Modal logic
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          showConfirmModal('Delete Record?', msg, () => {
+            form.submit();
+          });
+        });
+      }
+    });
+  });
 </script>
 {% block extra_js %}{% endblock %}
 </body>

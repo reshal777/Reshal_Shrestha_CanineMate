@@ -80,6 +80,8 @@
                         <th class="px-6 py-5 text-xs uppercase font-bold text-gray-400">Dog</th>
                         <th class="px-6 py-5 text-xs uppercase font-bold text-gray-400">Applicant</th>
                         <th class="px-6 py-5 text-xs uppercase font-bold text-gray-400">Contact</th>
+                        <th class="px-6 py-5 text-xs uppercase font-bold text-gray-400">Address</th>
+                        <th class="px-6 py-5 text-xs uppercase font-bold text-gray-400">Message</th>
                         <th class="px-6 py-5 text-xs uppercase font-bold text-gray-400">Status</th>
                         <th class="px-6 py-5 text-xs uppercase font-bold text-gray-400 text-right">Actions</th>
                     </tr>
@@ -100,6 +102,12 @@
                             <p class="text-[10px] text-gray-400">@{{ req.user.username }}</p>
                         </td>
                         <td class="px-6 py-5 text-sm font-medium text-gray-600">{{ req.phone }}</td>
+                        <td class="px-6 py-5 text-xs text-gray-500 max-w-[150px] truncate" title="{{ req.address }}">{{ req.address }}</td>
+                        <td class="px-6 py-5">
+                            <div class="max-w-[200px] text-xs text-gray-500 bg-gray-50 p-2 rounded-lg line-clamp-2" title="{{ req.reason }}">
+                                {{ req.reason }}
+                            </div>
+                        </td>
                         <td class="px-6 py-5">
                             <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider 
                                 {% if req.status == 'Approved' %}bg-green-100 text-green-700
@@ -128,7 +136,7 @@
                         </td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="5" class="px-6 py-20 text-center text-gray-400">No requests found.</td></tr>
+                    <tr><td colspan="7" class="px-6 py-20 text-center text-gray-400">No requests found.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

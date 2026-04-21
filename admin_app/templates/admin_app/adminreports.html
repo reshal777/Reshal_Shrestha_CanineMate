@@ -195,11 +195,13 @@
       <div class="card-header">
         <div>
           <h2>Monthly Revenue Trend</h2>
-          <p>Last 3 months performance</p>
+          <p>Historical earnings over the last 6 months</p>
         </div>
-        <i data-lucide="bar-chart-3"></i>
+        <i data-lucide="line-chart"></i>
       </div>
-      <div id="monthlyRevenue"></div>
+      <div class="h-80">
+        <canvas id="monthlyRevChart"></canvas>
+      </div>
     </div>
 
     <!-- Sales by Category + Top Customers -->
@@ -208,11 +210,13 @@
         <div class="card-header">
           <div>
             <h2>Sales by Category</h2>
-            <p>Revenue distribution</p>
+            <p>Revenue distribution by service</p>
           </div>
           <i data-lucide="pie-chart"></i>
         </div>
-        <div id="salesByCategory"></div>
+        <div class="h-80 flex items-center justify-center">
+            <canvas id="catSalesChart"></canvas>
+        </div>
       </div>
 
       <div class="card">
@@ -229,6 +233,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const summaryStats = JSON.parse('{{ summary_stats_json|escapejs }}');
     const statsContainer = document.getElementById('summaryStats');
@@ -250,51 +255,54 @@
     });
 
     const monthlyRevenue = JSON.parse('{{ monthly_revenue_json|escapejs }}');
-    const revContainer = document.getElementById('monthlyRevenue');
-    monthlyRevenue.forEach(d => {
-      // Find max revenue dynamically to set proportion
-      const maxRev = Math.max(...monthlyRevenue.map(o => o.revenue)) || 500000;
-      const pct = maxRev > 0 ? ((d.revenue / maxRev) * 100).toFixed(1) : 0;
-      revContainer.innerHTML += `
-        <div class="rev-row">
-          <div class="rev-meta">
-            <div class="rev-left">
-              <span class="rev-month">${d.month}</span>
-              <span class="rev-orders text-xs text-gray-500">${d.orders} orders</span>
-            </div>
-            <span class="rev-amount">NPR ${d.revenue.toLocaleString()}</span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill" style="width:${pct}%"></div>
-          </div>
-        </div>`;
-    });
-
     const salesByCategory = JSON.parse('{{ category_sales_json|escapejs }}');
-    const catContainer = document.getElementById('salesByCategory');
-    salesByCategory.forEach(item => {
-      catContainer.innerHTML += `
-        <div class="cat-item">
-          <div class="cat-top">
-            <span class="cat-name">${item.category}</span>
-            <span class="cat-orders text-xs text-gray-500">${item.orders} orders</span>
-          </div>
-          <div class="cat-mid">
-            <span class="cat-rev">NPR ${item.revenue.toLocaleString()}</span>
-            <span class="cat-pct font-bold text-gray-700">${item.percentage}%</span>
-          </div>
-          <div class="cat-bar-track">
-            <div class="cat-bar-fill" style="width:${item.percentage}%"></div>
-          </div>
-        </div>`;
-    });
-
     const topCustomers = JSON.parse('{{ top_customers_json|escapejs }}');
 
+    // ── Monthly Revenue Chart ─────────────────────
+    new Chart(document.getElementById('monthlyRevChart'), {
+      type: 'line',
+      data: {
+        labels: monthlyRevenue.map(d => d.month),
+        datasets: [{
+          label: 'Revenue',
+          data: monthlyRevenue.map(d => d.revenue),
+          borderColor: '#4FBDBA',
+          backgroundColor: 'rgba(79, 189, 186, 0.1)',
+          fill: true, tension: 0.4, pointRadius: 5, pointBackgroundColor: '#4FBDBA'
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+      }
+    });
+
+    // ── Category Sales Chart ──────────────────────
+    new Chart(document.getElementById('catSalesChart'), {
+      type: 'doughnut',
+      data: {
+        labels: salesByCategory.map(c => c.category),
+        datasets: [{
+          data: salesByCategory.map(c => c.revenue),
+          backgroundColor: ['#4FBDBA', '#3b82f6', '#F4A261'],
+          borderWidth: 0, hoverOffset: 12
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { weight: '600' } } }
+        },
+        cutout: '70%'
+      }
+    });
+
+    // ── Top Customers List ────────────────────────
     const custContainer = document.getElementById('topCustomers');
     topCustomers.forEach(c => {
       custContainer.innerHTML += `
-        <div class="cust-item flex items-center justify-between p-4 border border-gray-100 rounded-xl mb-3 hover:bg-gray-50">
+        <div class="cust-item flex items-center justify-between p-4 border border-gray-100 rounded-xl mb-3 hover:bg-gray-50 flex-wrap">
           <div class="flex items-center gap-3">
             ${c.profile_picture ? 
               `<img src="${c.profile_picture}" class="w-10 h-10 rounded-full object-cover border border-gray-100 shadow-sm" alt="${c.name}">` :

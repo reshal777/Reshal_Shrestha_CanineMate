@@ -166,8 +166,11 @@
     transition: background .2s;
   }
 
-  .cancel-btn:hover {
-    background: #fef2f2;
+  .service-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #4FBDBA;
+    white-space: nowrap;
   }
 
   /* --- available vets grid --- */
@@ -512,16 +515,20 @@
           onclick="openRescheduleModal(this)">Reschedule</button>
         {% endif %}
         
-        <form action="{% url 'cancel_appointment' appointment.id %}" method="POST" style="flex: 1; display: flex;">
+        <form action="{% url 'cancel_appointment' appointment.id %}" method="POST" id="cancel-appointment-{{ appointment.id }}" style="flex: 1; display: flex;">
           {% csrf_token %}
-          <button type="submit" class="cancel-btn" style="width: 100%;">Cancel</button>
+          <button type="button" class="cancel-btn" style="width: 100%;" 
+            onclick="showConfirmModal('Cancel Appointment?', 'Are you sure you want to cancel this appointment?', () => document.getElementById('cancel-appointment-{{ appointment.id }}').submit())">
+            Cancel
+          </button>
         </form>
       </div>
     </div>
-    {% empty %}
-    <p style="color: #6b7280; font-size: 1rem;">No upcoming confirmed appointments.</p>
     {% endfor %}
   </div>
+
+  <!-- available medical services -->
+  <!-- Removed global pricing section as requested: services now shown per doctor -->
 
   <!-- available vets -->
   <h2 class="section-title">Available Veterinarians</h2>

@@ -2,6 +2,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from django.utils import timezone
 import logging
 
 logger = logging.getLogger(__name__)
@@ -256,3 +257,55 @@ def send_grooming_reminder_email(booking):
         )
     except Exception as e:
         logger.error(f"Failed to send grooming reminder email for GRM-{booking.id}: {str(e)}")
+
+def send_adoption_approval_email_to_poster(adoption_request):
+    """Send an email to the original poster when their dog's adoption request is approved."""
+    try:
+        dog = adoption_request.dog
+        poster = dog.owner  # The user who posted the dog
+        adopter = adoption_request.user  # The user who is adopting the dog
+        
+        subject = f'Your Dog {dog.name} has been Adopted! | CanineMate 🐾'
+        
+        html_message = f'''
+        <html>
+            <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+                <div style="background: linear-gradient(135deg, #4FBDBA 0%, #3da5a2 100%); padding: 30px; text-align: center; color: white;">
+                    <h1 style="margin: 0; font-size: 24px;">Adoption Approved! 🐾</h1>
+                </div>
+                <div style="padding: 30px; background: #ffffff;">
+                    <h2 style="color: #333; margin-top: 0;">Hi {poster.username},</h2>
+                    <p>Exciting news! The adoption request for <strong>{dog.name}</strong> has been <strong>approved</strong> by the CanineMate admin.</p>
+                    
+                    <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4FBDBA;">
+                        <p style="margin: 0; font-weight: bold; color: #475569;">Adoption Details:</p>
+                        <p style="margin: 10px 0 0 0;"><strong>Dog:</strong> {dog.name} ({dog.breed})</p>
+                        <p style="margin: 5px 0 0 0;"><strong>Adopter:</strong> {adopter.get_full_name() or adopter.username}</p>
+                        <p style="margin: 5px 0 0 0;"><strong>Adopter Email:</strong> {adopter.email}</p>
+                    </div>
+                    
+                    <p>The adopter will be in touch with you shortly to coordinate the next steps. Thank you for using CanineMate to find a loving home for {dog.name}!</p>
+                    
+                    <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 25px 0;">
+                    
+                    <p style="font-size: 0.9em; color: #64748b;">Warm regards,<br><strong>The CanineMate Team</strong></p>
+                </div>
+                <div style="background: #f1f5f9; padding: 15px; text-align: center; font-size: 0.8em; color: #94a3b8;">
+                    &copy; {timezone.now().year} CanineMate. All rights reserved.
+                </div>
+            </body>
+        </html>
+        '''
+        plain_message = strip_tags(html_message)
+        
+        send_mail(
+            subject,
+            plain_message,
+            settings.DEFAULT_FROM_EMAIL,
+            [poster.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+        logger.info(f"Adoption approval email sent to poster {poster.email} for dog {dog.name}")
+    except Exception as e:
+        logger.error(f"Failed to send adoption approval email to poster: {str(e)}")

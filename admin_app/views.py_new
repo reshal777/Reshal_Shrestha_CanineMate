@@ -1,0 +1,78 @@
+@admin_required
+def admin_reports_view(request):
+    from datetime import datetime, timedelta
+    from django.db.models import Sum, Count, Q
+    from django.utils import timezone
+    import json
+    
+    # 1. Total Revenue (same logic as dashboard)
+    order_revenue_total = apply_time_range_filter(Order.objects.filter(paid=True), 'date', request).aggregate(Sum('amount'))['amount__sum'] or 0
+    vet_revenue_total = apply_time_range_filter(Appointment.objects.filter(paid=True), 'appointment_date', request).aggregate(Sum('amount'))['amount__sum'] or 0
+    grooming_revenue_total = apply_time_range_filter(GroomingBooking.objects.filter(paid=True), 'booking_date', request).aggregate(Sum('amount'))['amount__sum'] or 0
+    total_net_revenue = order_revenue_total + vet_revenue_total + grooming_revenue_total
+
+    # Summary Stats
+    product_count = apply_time_range_filter(Product.objects.all(), 'created_at', request).count()
+    user_count = apply_time_range_filter(User.objects.all(), 'date_joined', request).count()
+    order_count = apply_time_range_filter(Order.objects.all(), 'date', request).count()
+
+    summary_stats = [
+      { 'label': 'Total Revenue', 'value': f'NPR {total_net_revenue:,.0f}', 'change': '+0%', 'trend': 'up', 'bg': 'linear-gradient(135deg,#22c55e,#16a34a)', 'icon': 'indian-rupee' },
+      { 'label': 'Total Users', 'value': f'{user_count}', 'change': '+0%', 'trend': 'up', 'bg': 'linear-gradient(135deg,#4FBDBA,#3da5a2)', 'icon': 'users' },
+      { 'label': 'Store Orders', 'value': f'{order_count}', 'change': '+0%', 'trend': 'up', 'bg': 'linear-gradient(135deg,#F4A261,#e89451)', 'icon': 'shopping-bag' },
+      { 'label': 'Total Products', 'value': f'{product_count}', 'change': '+0%', 'trend': 'up', 'bg': 'linear-gradient(135deg,#3b82f6,#2563eb)', 'icon': 'package' }
+    ]
+
+    # 2. Top Customers
+    customers_qs = apply_time_range_filter(User.objects.all(), 'date_joined', request)
+    customers = customers_qs.annotate(
+        total_spent=Sum('product_orders__amount', filter=Q(product_orders__paid=True)),
+        order_count=Count('product_orders', filter=Q(product_orders__paid=True))
+    ).order_by('-total_spent')[:5]
+
+    top_customers_list = []
+    for c in customers:
+        if c.total_spent and c.total_spent > 0:
+            top_customers_list.append({
+                'name': f"{c.first_name} {c.last_name}" if c.first_name else c.username,
+                'profile_picture': c.profile_picture.url if c.profile_picture else None,
+                'email': c.email,
+                'orders': c.order_count,
+                'spent': float(c.total_spent)
+            })
+
+    # 3. Monthly Revenue Trend (Last 6 months)
+    today = timezone.now().date()
+    monthly_revenue = []
+    for i in range(5, -1, -1):
+        first_day = (today.replace(day=1) - timedelta(days=i*30)).replace(day=1)
+        next_month_first_day = (first_day + timedelta(days=32)).replace(day=1)
+        
+        month_label = first_day.strftime('%b')
+        
+        ord_rev = Order.objects.filter(paid=True, date__date__gte=first_day, date__date__lt=next_month_first_day).aggregate(Sum('amount'))['amount__sum'] or 0
+        vt_rev = Appointment.objects.filter(paid=True, appointment_date__gte=first_day, appointment_date__lt=next_month_first_day).aggregate(Sum('amount'))['amount__sum'] or 0
+        gr_rev = GroomingBooking.objects.filter(paid=True, booking_date__gte=first_day, booking_date__lt=next_month_first_day).aggregate(Sum('amount'))['amount__sum'] or 0
+        
+        monthly_revenue.append({
+            'month': month_label,
+            'revenue': float(ord_rev + vt_rev + gr_rev),
+            'orders': Order.objects.filter(paid=True, date__date__gte=first_day, date__date__lt=next_month_first_day).count()
+        })
+
+    # 4. Sales by Category
+    category_sales = [
+        {'category': 'Shop Products', 'revenue': float(order_revenue_total), 'orders': Order.objects.filter(paid=True).count(), 'percentage': round(order_revenue_total/total_net_revenue*100, 1) if total_net_revenue > 0 else 0},
+        {'category': 'Vet Services', 'revenue': float(vet_revenue_total), 'orders': Appointment.objects.filter(status='Completed').count(), 'percentage': round(vet_revenue_total/total_net_revenue*100, 1) if total_net_revenue > 0 else 0},
+        {'category': 'Grooming', 'revenue': float(grooming_revenue_total), 'orders': GroomingBooking.objects.filter(status='Completed').count(), 'percentage': round(grooming_revenue_total/total_net_revenue*100, 1) if total_net_revenue > 0 else 0},
+    ]
+
+    return render(request, 'admin_app/adminreports.html', {
+        'summary_stats_json': json.dumps(summary_stats),
+        'top_customers_json': json.dumps(top_customers_list),
+        'monthly_revenue_json': json.dumps(monthly_revenue),
+        'category_sales_json': json.dumps(category_sales),
+        'total_revenue': total_net_revenue
+    })
+
+@admin_required

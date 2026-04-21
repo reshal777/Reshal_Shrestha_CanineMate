@@ -69,12 +69,23 @@
                     Transaction History
                 </h3>
                 
-                <!-- Filter Tabs -->
-                <div class="flex bg-gray-50 p-1 rounded-2xl border border-gray-100 overflow-x-auto max-w-full">
-                    <button onclick="filterTransactions('all')" class="expense-tab active px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap" id="tab-all">All</button>
-                    <button onclick="filterTransactions('shop')" class="expense-tab px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap" id="tab-shop">Orders</button>
-                    <button onclick="filterTransactions('vet')" class="expense-tab px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap" id="tab-vet">Vet</button>
-                    <button onclick="filterTransactions('groom')" class="expense-tab px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap" id="tab-groom">Grooming</button>
+                <!-- Time Filter & Category Tabs -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <!-- Global Time Range Filter -->
+                    <select name="time_range" onchange="const url = new URL(window.location); url.searchParams.set('time_range', this.value); window.location.href = url.href;" 
+                        class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-xs font-bold text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA] transition-all cursor-pointer">
+                        <option value="all" {% if not request.GET.time_range or request.GET.time_range == 'all' %}selected{% endif %}>Lifetime Spending</option>
+                        <option value="1w" {% if request.GET.time_range == '1w' %}selected{% endif %}>Last 7 Days</option>
+                        <option value="1m" {% if request.GET.time_range == '1m' %}selected{% endif %}>Last 30 Days</option>
+                        <option value="1y" {% if request.GET.time_range == '1y' %}selected{% endif %}>Last Year</option>
+                    </select>
+
+                    <div class="flex bg-gray-50 p-1 rounded-2xl border border-gray-100 overflow-x-auto max-w-full">
+                        <button onclick="filterTransactions('all')" class="expense-tab active px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap" id="tab-all">All</button>
+                        <button onclick="filterTransactions('shop')" class="expense-tab px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap" id="tab-shop">Orders</button>
+                        <button onclick="filterTransactions('vet')" class="expense-tab px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap" id="tab-vet">Vet</button>
+                        <button onclick="filterTransactions('groom')" class="expense-tab px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap" id="tab-groom">Grooming</button>
+                    </div>
                 </div>
             </div>
 

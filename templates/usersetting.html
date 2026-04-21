@@ -158,10 +158,6 @@
           <i data-lucide="shield-check" style="width:20px;height:20px;"></i>
           Security
         </button>
-        <button class="nav-btn" onclick="switchTab('danger',this)">
-          <i data-lucide="alert-triangle" style="width:20px;height:20px;"></i>
-          Danger Zone
-        </button>
       </nav>
     </div>
   </aside>
@@ -297,29 +293,6 @@
       </div>
     </div>
 
-    <!-- ════ DANGER ZONE ════ -->
-    <div id="tab-danger" class="tab-panel">
-      <!-- Danger Zone -->
-      <div class="card" style="border: 2px solid #fee2e2;">
-        <div class="card-head">
-          <div class="card-icon red" style="background: #fee2e2;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          </div>
-          <div>
-            <div class="card-title" style="color: #dc2626;">Danger Zone</div>
-            <div class="card-sub">Irreversible account actions</div>
-          </div>
-        </div>
-        <div class="sec-row" style="border-color: #fecaca; background: #fffaf0;">
-          <div class="sec-row-left">
-            <div>
-              <div class="sec-title">Delete Account</div>
-              <div class="sec-sub">Permanently delete your account and all associated data.</div>
-            </div>
-          </div>
-          <button type="button" class="btn-sm-red" onclick="openModal('delModal')">Delete Account</button>
-        </div>
-      </div>
     </div>    </main>
   </div>
 
@@ -367,39 +340,7 @@
   </div>
 </div>
 
-<!-- ── Delete Account Modal ── -->
-<div class="modal-overlay" id="delModal">
-  <div class="modal-box">
-    <div class="modal-head">
-      <span class="modal-title red">Delete Account</span>
-      <button class="modal-close" onclick="closeModal('delModal');clearDelModal()">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div id="delError" class="modal-error"></div>
-    <div style="text-align:center;margin-bottom:1.5rem;">
-      <div class="del-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-      </div>
-      <p style="color:#374151;margin-bottom:.5rem;font-weight:600;">Are you absolutely sure?</p>
-      <p style="font-size:.875rem;color:#6b7280;margin-bottom:1.5rem;">This action cannot be undone. All your data including dog profiles, appointments, and orders will be permanently deleted.</p>
-      
-      <div style="text-align:left;">
-        <label class="field-label">Confirm with Password *</label>
-        <div class="pass-wrap">
-          <input type="password" id="del-password" placeholder="Enter your current password">
-          <button type="button" class="pass-toggle" onclick="togglePw('del-password')">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-        </div>
-      </div>
-    </div>
-    <div class="modal-btn-row">
-      <button class="btn-full-red" id="delBtn" onclick="deleteAccount()">Yes, Delete Account</button>
-      <button class="btn-full-outline" onclick="closeModal('delModal');clearDelModal()">Cancel</button>
-    </div>
-  </div>
-</div>
+
 
 <!-- ── Toast notification ── -->
 <div id="toast" style="position:fixed;bottom:2rem;right:2rem;background:#333;color:#fff;padding:.875rem 1.5rem;border-radius:.75rem;font-size:.9rem;font-weight:500;opacity:0;transition:opacity .3s;z-index:300;pointer-events:none;">
@@ -582,59 +523,6 @@
     document.getElementById('theme-dark').classList.toggle('selected',  t === 'dark');
   }
 
-  // ── Delete Account ─────────────────────────────
-  function clearDelModal() {
-    document.getElementById('del-password').value = '';
-    const errEl = document.getElementById('delError');
-    errEl.style.display = 'none';
-    errEl.textContent   = '';
-  }
 
-  function deleteAccount() {
-    const password = document.getElementById('del-password').value;
-    const errEl    = document.getElementById('delError');
-    const btn      = document.getElementById('delBtn');
-
-    errEl.style.display = 'none';
-
-    if (!password) {
-      errEl.textContent = 'Please enter your password to confirm.';
-      errEl.style.display = 'block';
-      return;
-    }
-
-    if (!confirm('This action is IRREVERSIBLE. Are you sure you want to permanently delete your account?')) {
-      return;
-    }
-
-    btn.disabled    = true;
-    btn.textContent = 'Deleting Account...';
-
-    fetch('{% url "delete_user_account_api" %}', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': '{{ csrf_token }}'
-      },
-      body: JSON.stringify({ password: password })
-    })
-    .then(r => r.json())
-    .then(res => {
-      if (res.success) {
-        window.location.href = '/login/?deleted=true';
-      } else {
-        btn.disabled    = false;
-        btn.textContent = 'Yes, Delete Account';
-        errEl.textContent = res.error || 'Failed to delete account.';
-        errEl.style.display = 'block';
-      }
-    })
-    .catch(() => {
-      btn.disabled    = false;
-      btn.textContent = 'Yes, Delete Account';
-      errEl.textContent = 'Network error. Please try again.';
-      errEl.style.display = 'block';
-    });
-  }
 </script>
 {% endblock %}

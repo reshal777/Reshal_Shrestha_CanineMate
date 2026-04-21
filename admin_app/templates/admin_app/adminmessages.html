@@ -33,9 +33,15 @@
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-100">
-        {% for msg in messages %}
+        {% for msg in messages_list %}
         <tr class="hover:bg-gray-50 transition-colors">
-          <td class="py-4 px-6 align-top text-sm font-bold text-gray-400">{{ messages.start_index|add:forloop.counter0 }}</td>
+          <td class="py-4 px-6 align-top text-sm font-bold text-gray-400">
+             {% if messages_list.start_index %}
+                {{ messages_list.start_index|add:forloop.counter0 }}
+             {% else %}
+                {{ forloop.counter }}
+             {% endif %}
+          </td>
           <td class="py-4 px-6 align-top">
             <span class="text-sm font-medium text-gray-900">{{ msg.created_at|date:"M d, Y" }}</span>
             <div class="text-xs text-gray-500">{{ msg.created_at|time:"H:i A" }}</div>
@@ -89,25 +95,25 @@
 </div>
 
 <!-- Messages Pagination -->
-{% if messages.has_other_pages %}
+{% if messages_list.has_other_pages %}
 <div class="mt-8 flex justify-center">
     <nav class="flex items-center gap-2">
-        {% if messages.has_previous %}
-        <a href="?page={{ messages.previous_page_number }}&time_range={{ request.GET.time_range }}" class="p-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 transition-all">
+        {% if messages_list.has_previous %}
+        <a href="?page={{ messages_list.previous_page_number }}&time_range={{ request.GET.time_range }}" class="p-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 transition-all">
             <i data-lucide="chevron-left" class="w-5 h-5"></i>
         </a>
         {% endif %}
 
-        {% for i in messages.paginator.page_range %}
-            {% if messages.number == i %}
+        {% for i in messages_list.paginator.page_range %}
+            {% if messages_list.number == i %}
             <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-[#4FBDBA] text-white font-bold shadow-lg shadow-[#4FBDBA]/20">{{ i }}</span>
-            {% elif i > messages.number|add:'-3' and i < messages.number|add:'3' %}
+            {% elif i > messages_list.number|add:'-3' and i < messages_list.number|add:'3' %}
             <a href="?page={{ i }}&time_range={{ request.GET.time_range }}" class="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 transition-all font-medium">{{ i }}</a>
             {% endif %}
         {% endfor %}
 
-        {% if messages.has_next %}
-        <a href="?page={{ messages.next_page_number }}&time_range={{ request.GET.time_range }}" class="p-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 transition-all">
+        {% if messages_list.has_next %}
+        <a href="?page={{ messages_list.next_page_number }}&time_range={{ request.GET.time_range }}" class="p-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 transition-all">
             <i data-lucide="chevron-right" class="w-5 h-5"></i>
         </a>
         {% endif %}

@@ -19,14 +19,47 @@
             <div class="mb-8 text-center">
                 <h1 class="text-3xl font-bold text-[#333333] mb-2">Create Account</h1>
                 <p class="text-gray-600">Start managing your dog's care journey today</p>
-                {% if messages %}
-                <div class="mt-4 space-y-2">
-                    {% for message in messages %}
-                        <div class="p-3 text-sm rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
+                
+                {% if request.GET.deleted == 'true' %}
+                <div id="deleted-msg-container" class="overflow-hidden transition-all duration-500 max-h-40">
+                    <div id="deleted-msg" class="mt-4 p-3 text-sm rounded-lg bg-teal-50 text-[#3da5a2] border border-[#4FBDBA]/30 flex items-center gap-2">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                        Your account has been permanently deleted.
+                    </div>
                 </div>
+                <script>
+                    setTimeout(() => {
+                        const msg = document.getElementById('deleted-msg-container');
+                        if (msg) {
+                            msg.style.maxHeight = '0px';
+                            msg.style.marginTop = '0px';
+                            msg.style.opacity = '0';
+                            setTimeout(() => msg.remove(), 500);
+                        }
+                    }, 8000);
+                </script>
+                {% endif %}
+                {% if messages %}
+                <div id="messages-container" class="overflow-hidden transition-all duration-500 max-h-96">
+                    <div class="mt-4 space-y-2">
+                        {% for message in messages %}
+                            <div class="p-3 text-sm rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <script>
+                    setTimeout(() => {
+                        const msgs = document.getElementById('messages-container');
+                        if (msgs) {
+                            msgs.style.maxHeight = '0px';
+                            msgs.style.marginTop = '0px';
+                            msgs.style.opacity = '0';
+                            setTimeout(() => msgs.remove(), 500);
+                        }
+                    }, 7000);
+                </script>
                 {% endif %}
             </div>
 
@@ -55,16 +88,26 @@
 
                 <div>
                     <label class="block text-sm font-medium text-[#333333] mb-2">Password</label>
-                    <input type="password" name="password" autocomplete="new-password"
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]"
-                        placeholder="Create a password (min 8 characters)" required>
+                    <div class="relative">
+                        <input type="password" id="password" name="password" autocomplete="new-password"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]"
+                            placeholder="Create a password (min 8 characters)" required>
+                        <button type="button" onclick="togglePassword('password', 'eye-icon')" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4FBDBA] focus:outline-none transition-colors">
+                            <i data-lucide="eye" id="eye-icon" class="w-5 h-5"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-[#333333] mb-2">Confirm Password</label>
-                    <input type="password" name="password2" autocomplete="new-password"
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]"
-                        placeholder="Confirm your password" required>
+                    <div class="relative">
+                        <input type="password" id="password2" name="password2" autocomplete="new-password"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]"
+                            placeholder="Confirm your password" required>
+                        <button type="button" onclick="togglePassword('password2', 'eye-icon2')" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4FBDBA] focus:outline-none transition-colors">
+                            <i data-lucide="eye" id="eye-icon2" class="w-5 h-5"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <label class="flex items-start gap-2 cursor-pointer">
@@ -138,6 +181,23 @@
         const modal = document.getElementById('termsModal');
         modal.classList.add('opacity-0', 'pointer-events-none');
         document.body.style.overflow = 'auto';
+    }
+
+    function togglePassword(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.setAttribute('data-lucide', 'eye-off');
+        } else {
+            input.type = 'password';
+            icon.setAttribute('data-lucide', 'eye');
+        }
+        
+        if (window.lucide) {
+            lucide.createIcons();
+        }
     }
 
     // Initialize Lucide icons if modal content is added dynamically or just ensuring they run

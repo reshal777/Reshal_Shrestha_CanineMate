@@ -366,8 +366,7 @@
 
         // calculate totals
         const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        const delivery = subtotal >= 3000 ? 0 : 150;
-        const total = subtotal + delivery;
+        const total = subtotal;
 
         // build cart item cards
         const itemsHTML = cartItems.map(item => `
@@ -381,9 +380,9 @@
               <h3 class="item-name">${item.name}</h3>
             </div>
             <!-- remove item -->
-            <a href="/home/remove-from-cart/${item.id}/" class="delete-btn">
+            <button type="button" class="delete-btn" onclick="showConfirmModal('Remove Item?', 'Are you sure you want to remove this item from your cart?', () => window.location.href='/home/remove-from-cart/${item.id}/')">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-            </a>
+            </button>
           </div>
           <div class="item-bottom">
             <!-- qty controls -->
@@ -407,10 +406,6 @@
     </div>
   `).join('');
 
-        // free delivery tip shown only if under 3000
-        const deliveryTip = subtotal < 3000
-            ? `<p class="delivery-tip" id="delivery-tip">Add Rs. ${Math.max(0, 3000 - subtotal)} more to get free delivery!</p>`
-            : '';
 
         app.innerHTML = `
     <div class="cart-grid">
@@ -435,10 +430,7 @@
             </div>
             <div class="summary-row">
               <span>Delivery Fee</span>
-              <span id="delivery">Rs. ${Math.round(delivery)}</span>
-            </div>
-            <div class="delivery-tip" id="delivery-tip" style="display: ${delivery === 0 ? 'none' : 'block'}">
-              Free delivery for orders above Rs. 3,000!
+              <span style="color: #16a34a; font-weight: 500;">Free</span>
             </div>
             <div class="summary-divider"></div>
             <div class="total-row">
@@ -446,7 +438,7 @@
               <span class="total-amount" id="total">Rs. ${Math.round(total)}</span>
             </div>
           </div>
-          <button class="checkout-btn" onclick="window.location.href='{% url 'checkout' %}'">Proceed to Checkout</button>
+          <button class="checkout-btn" style="margin-top: 1.5rem;" onclick="window.location.href='{% url 'checkout' %}'">Proceed to Checkout</button>
           <!-- trust badges -->
           <div class="trust-list">
             <div class="trust-item"><span class="trust-check">✓</span><span>Secure Checkout</span></div>

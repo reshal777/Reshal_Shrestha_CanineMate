@@ -68,6 +68,34 @@
           <p class="text-sm text-gray-500">Adoption Requests</p>
         </div>
       </div>
+      
+      <!-- Growth Analytics -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div class="bg-white rounded-2xl p-8 shadow-lg">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="text-2xl font-bold text-dark">Revenue Trend</h2>
+              <p class="text-sm text-gray-500 mt-1">Earnings over the last 7 days</p>
+            </div>
+            <i data-lucide="trending-up" class="w-8 h-8 text-green-500"></i>
+          </div>
+          <div class="h-64">
+            <canvas id="revenueChart"></canvas>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl p-8 shadow-lg">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="text-2xl font-bold text-dark">User Signups</h2>
+              <p class="text-sm text-gray-500 mt-1">New users over the last 7 days</p>
+            </div>
+            <i data-lucide="user-plus" class="w-8 h-8 text-blue-500"></i>
+          </div>
+          <div class="h-64">
+            <canvas id="signupChart"></canvas>
+          </div>
+        </div>
+      </div>
 
       <!-- Revenue Breakdown -->
       <div class="bg-white rounded-2xl p-8 shadow-lg mb-8">
@@ -192,6 +220,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   // ── Data ──────────────────────────────────────
   const recentUsers = JSON.parse('{{ recent_users_json|escapejs }}');
@@ -281,5 +310,56 @@
     document.getElementById('vet-progress').style.width   = '{{ vet_pct|floatformat:1 }}%';
     document.getElementById('groom-progress').style.width = '{{ grooming_pct|floatformat:1 }}%';
   }, 100);
+
+  // ── Charts ────────────────────────────────────
+  const chartLabels = JSON.parse('{{ chart_labels_json|escapejs }}');
+  const revenueData = JSON.parse('{{ revenue_trend_json|escapejs }}');
+  const signupData = JSON.parse('{{ signup_trend_json|escapejs }}');
+
+  const chartConfig = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false }
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { display: false } },
+      x: { grid: { display: false } }
+    }
+  };
+
+  // Revenue Chart
+  new Chart(document.getElementById('revenueChart'), {
+    type: 'line',
+    data: {
+      labels: chartLabels,
+      datasets: [{
+        label: 'Revenue',
+        data: revenueData,
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: '#10b981'
+      }]
+    },
+    options: chartConfig
+  });
+
+  // Signup Chart
+  new Chart(document.getElementById('signupChart'), {
+    type: 'bar',
+    data: {
+      labels: chartLabels,
+      datasets: [{
+        label: 'Signups',
+        data: signupData,
+        backgroundColor: '#3b82f6',
+        borderRadius: 8,
+      }]
+    },
+    options: chartConfig
+  });
 </script>
 {% endblock %}
